@@ -267,7 +267,7 @@ function SidebarTrigger({
       data-slot='sidebar-trigger'
       variant='ghost'
       size='icon-sm'
-      className={cn('pl-sm', className)}
+      className={cn('hover:text-sidebar-accent-foreground', className)}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
@@ -340,7 +340,10 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot='sidebar-header'
       data-sidebar='header'
-      className={cn('flex flex-col gap-2 p-2 [--radius:0] opacity-100 transition-[opacity] duration-0 delay-200 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:delay-0', className)}
+      className={cn(
+        'flex flex-col gap-2 p-2 [--radius:0] opacity-100 transition-[opacity] duration-0 delay-200 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:delay-0',
+        className
+      )}
       {...props}
     />
   );
@@ -351,7 +354,10 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot='sidebar-footer'
       data-sidebar='footer'
-      className={cn('flex flex-col gap-2 p-2 opacity-100 transition-[opacity] duration-0 delay-200 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:delay-0', className)}
+      className={cn(
+        'flex flex-col gap-2 p-2 opacity-100 transition-[opacity] duration-0 delay-200 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:delay-0',
+        className
+      )}
       {...props}
     />
   );
@@ -377,7 +383,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<'div'>) {
       data-slot='sidebar-content'
       data-sidebar='content'
       className={cn(
-        'no-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-auto [--radius:0] group-data-[collapsible=icon]:overflow-hidden opacity-100 transition-[opacity] duration-0 delay-200 group-data-[state=collapsed]:opacity-0 group-data-[state=collapsed]:delay-0',
+        'no-scrollbar flex min-h-0 flex-1 flex-col gap-2 overflow-auto [--radius:0] group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=offcanvas]:group-data-[state=collapsed]:opacity-0',
         className
       )}
       {...props}
@@ -390,7 +396,24 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot='sidebar-group'
       data-sidebar='group'
-      className={cn('relative flex w-full min-w-0 flex-col p-2', className)}
+      className={cn(
+        'relative flex w-full min-w-0 flex-col list-none px-md py-md',
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
+function SidebarDivider({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot='sidebar-divider'
+      data-sidebar='group-divider'
+      className={cn(
+        'relative flex w-full min-w-0 h-[1px] bg-sidebar-foreground px-md my-md',
+        className
+      )}
       {...props}
     />
   );
@@ -455,7 +478,10 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<'ul'>) {
     <ul
       data-slot='sidebar-menu'
       data-sidebar='menu'
-      className={cn('flex w-full min-w-0 flex-col gap-0.5', className)}
+      className={cn(
+        'flex w-full min-w-0 list-none flex-col gap-0.5',
+        className
+      )}
       {...props}
     />
   );
@@ -466,14 +492,14 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<'li'>) {
     <li
       data-slot='sidebar-menu-item'
       data-sidebar='menu-item'
-      className={cn('group/menu-item relative', className)}
+      className={cn('group/menu-item relative hover:pointer', className)}
       {...props}
     />
   );
 }
 
 const sidebarMenuButtonVariants = cva(
-  'peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-none px-3 py-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate',
+  'peer/menu-button group/menu-button flex w-full cursor-pointer items-center gap-2 overflow-hidden rounded-none px-3 py-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:hover:bg-transparent! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate',
   {
     variants: {
       variant: {
@@ -631,7 +657,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<'ul'>) {
       data-slot='sidebar-menu-sub'
       data-sidebar='menu-sub'
       className={cn(
-        'mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5 group-data-[collapsible=icon]:hidden',
+        'mx-3.5 flex min-w-0 list-none translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5 group-data-[collapsible=icon]:hidden',
         className
       )}
       {...props}
@@ -686,6 +712,7 @@ export {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarDivider,
   SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,

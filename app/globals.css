@@ -31,7 +31,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
 
-  --color-destructive: var(--destructive);
+  --color-destructive: var(--error);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
@@ -60,6 +60,12 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -107,13 +113,6 @@
   --warning: #c97b2a;
   --error: #a61c2e;
 
-  --muted: oklch(0.97 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --border: oklch(0.923 0.003 48.717);
-  --input: oklch(0.923 0.003 48.717);
-  --ring: oklch(0.708 0.165 37.305);
-  --destructive: oklch(0.577 0.245 27.325);
-
   --sidebar: #7b1c2e;
   --sidebar-foreground: #f5ecd7;
   --sidebar-primary: #7b1c2e;
@@ -124,32 +123,26 @@
   --sidebar-ring: #c9922a;
 
   /* SPACING */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
 
   /* RADIUS */
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: oklch(0.147 0.004 49.3);
-  --foreground: oklch(0.985 0.001 106.423);
+  --background: #1f0e10;
+  --foreground: #f9f7f1;
 
-  --card: oklch(0.216 0.006 56.043);
-  --card-foreground: oklch(0.985 0.001 106.423);
-  --popover: oklch(0.216 0.006 56.043);
-  --popover-foreground: oklch(0.985 0.001 106.423);
+  --card: #2b1316;
+  --card-foreground: #f9f7f1;
+  --popover: #2b1316;
+  --popover-foreground: #f9f7f1;
 
-  --primary-foreground: oklch(0.986 0.002 67.8);
+  --primary: #c4364e;
   --primary: #c4364e;
   --primary-light: #d95670;
   --primary-dark: #7b1c2e;
@@ -175,14 +168,7 @@
   --warning: #e8a84b;
   --error: #d94f63;
 
-  --muted: oklch(0.268 0.007 34.298);
-  --muted-foreground: oklch(0.704 0.022 46.456);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.554 0.135 66.442);
-  --destructive: oklch(0.704 0.191 22.216);
-
-  --sidebar: #0f0508;
+  --sidebar: #3d1020;
   --sidebar-foreground: #f5ecd7;
   --sidebar-primary: #c4364e;
   --sidebar-primary-foreground: #f5ecd7;

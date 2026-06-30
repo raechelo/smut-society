@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Fleur_De_Leah, Libre_Baskerville } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
+import { Providers } from '@/components/app/providers';
 
 const fleurDeLeah = Fleur_De_Leah({
   variable: '--font-display',
@@ -28,6 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang='en'
+      suppressHydrationWarning
       className={cn(
         'h-full',
         'antialiased',
@@ -36,7 +38,9 @@ export default function RootLayout({
         'font-sans'
       )}
     >
-      <body className='min-h-full flex flex-col'>{children}</body>
+      <body className='min-h-full flex flex-col'>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

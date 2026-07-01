@@ -40,7 +40,7 @@ function Switch({
       )}
       <SwitchPrimitive.Thumb
         data-slot='switch-thumb'
-        className='pointer-events-none relative z-10 flex items-center justify-center rounded-full bg-background border border-sidebar ring-0 transition-transform group-data-[size=default]/switch:size-4.5 group-data-[size=sm]/switch:size-2.5 data-checked:translate-x-[calc(100%+2px)] dark:data-checked:bg-primary-foreground data-unchecked:translate-x-0.25 dark:data-unchecked:bg-foreground [&_svg]:size-2.5'
+        className='pointer-events-none relative z-10 flex items-center justify-center rounded-full bg-ink ring-0 transition-transform group-data-[size=default]/switch:size-4.5 group-data-[size=sm]/switch:size-2.5 data-checked:translate-x-[calc(100%+2px)] dark:data-checked:bg-ink data-unchecked:translate-x-0.25 dark:data-unchecked:bg-ink [&_svg]:size-2.5'
       >
         {thumbIcon}
       </SwitchPrimitive.Thumb>

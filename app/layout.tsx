@@ -1,12 +1,20 @@
 import type { Metadata } from 'next';
-import { Fleur_De_Leah, Libre_Baskerville } from 'next/font/google';
+import { Fleur_De_Leah, Libre_Baskerville, Noto_Sans } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Providers } from '@/components/app/providers';
+import { Sidebar } from '@/components/app/sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 const fleurDeLeah = Fleur_De_Leah({
   variable: '--font-display',
   weight: '400',
+  subsets: ['latin'],
+});
+
+const notoSans = Noto_Sans({
+  variable: '--font-noto-sans',
+  weight: ['400', '500', '600'],
   subsets: ['latin'],
 });
 
@@ -35,11 +43,17 @@ export default function RootLayout({
         'antialiased',
         fleurDeLeah.variable,
         libreBaskerville.variable,
-        'font-sans'
+        notoSans.variable,
+        'font-serif'
       )}
     >
       <body className='min-h-full flex flex-col'>
-        <Providers>{children}</Providers>
+        <Providers>
+          <SidebarProvider>
+            <Sidebar />
+            <main className='flex-1 min-h-[100vh] p-lg'>{children}</main>
+          </SidebarProvider>
+        </Providers>
       </body>
     </html>
   );

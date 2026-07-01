@@ -8,7 +8,6 @@ import {
   LibraryBig,
   MessageCircle,
 } from 'lucide-react';
-import { Button } from '../ui/button';
 import {
   Sidebar as RawSidebar,
   SidebarHeader,
@@ -17,12 +16,8 @@ import {
   SidebarFooter,
   SidebarTrigger,
   useSidebar,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarGroupAction,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuAction,
   SidebarDivider,
 } from '../ui/sidebar';
 import Typography from '../ui/typography';
@@ -43,7 +38,7 @@ export const Sidebar = () => {
           <SidebarHeader className='p-4'>
             <Typography
               variant='h1'
-              classNames='font-sidebar-foreground text-[68px]/[.9] pl-12 -indent-12'
+              classNames='font-sidebar-foreground text-[68px]/[.9] pl-12 -indent-12 !mb-0'
             >
               Smut Society
             </Typography>
@@ -51,7 +46,7 @@ export const Sidebar = () => {
           <SidebarContent>
             <SidebarGroup>
               <SidebarDivider />
-              <Link href='/home'>
+              <Link href='/book'>
                 <SidebarMenuItem>
                   <SidebarMenuButton>
                     <Book />
@@ -92,7 +87,7 @@ export const Sidebar = () => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </Link>
-              <Link href='/games'>
+              <Link href='/challenges'>
                 <SidebarMenuItem>
                   <SidebarMenuButton>
                     <ChessQueen />
@@ -108,7 +103,7 @@ export const Sidebar = () => {
       {!open && (
         <SidebarContent>
           <SidebarGroup>
-            <Link href='/home'>
+            <Link href='/book'>
               <SidebarMenuButton>
                 <Book />
               </SidebarMenuButton>
@@ -118,7 +113,7 @@ export const Sidebar = () => {
                 <CalendarDays />
               </SidebarMenuButton>
             </Link>
-            <Link href='reviews'>
+            <Link href='/reviews'>
               <SidebarMenuButton>
                 <MessageCircle />
               </SidebarMenuButton>
@@ -130,12 +125,12 @@ export const Sidebar = () => {
                 <LibraryBig />
               </SidebarMenuButton>
             </Link>
-            <Link href='past-reads'>
+            <Link href='/past-reads'>
               <SidebarMenuButton>
                 <BookCheck />
               </SidebarMenuButton>
             </Link>
-            <Link href='games'>
+            <Link href='/challenges'>
               <SidebarMenuButton>
                 <ChessQueen />
               </SidebarMenuButton>

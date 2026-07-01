@@ -1,5 +1,7 @@
 import React from 'react';
 
-export const ReviewPage = () => {
+const ReviewPage = () => {
   return <div>ReviewPage</div>;
 };
+
+export default ReviewPage;

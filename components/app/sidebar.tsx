@@ -5,7 +5,9 @@ import {
   BookCheck,
   CalendarDays,
   ChessQueen,
+  CircleUser,
   LibraryBig,
+  LogOut,
   MessageCircle,
 } from 'lucide-react';
 import {
@@ -23,9 +25,11 @@ import {
 import Typography from '../ui/typography';
 import { ThemeToggler } from './theme-toggler';
 import Link from 'next/link';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 export const Sidebar = () => {
   const { open } = useSidebar();
+  const { data: session } = useSession();
 
   return (
     <RawSidebar>
@@ -96,6 +100,29 @@ export const Sidebar = () => {
                 </SidebarMenuItem>
               </Link>
             </SidebarGroup>
+            <SidebarGroup className='mt-auto'>
+              <SidebarMenuItem>
+                {session ? (
+                  <SidebarMenuButton onClick={() => signOut()}>
+                    {session.user?.image ? (
+                      <img
+                        src={session.user.image}
+                        alt={session.user.name ?? 'User avatar'}
+                        className='size-5 rounded-full object-cover'
+                      />
+                    ) : (
+                      <CircleUser />
+                    )}
+                    Log out
+                  </SidebarMenuButton>
+                ) : (
+                  <SidebarMenuButton onClick={() => signIn('google')}>
+                    <CircleUser />
+                    Log in
+                  </SidebarMenuButton>
+                )}
+              </SidebarMenuItem>
+            </SidebarGroup>
           </SidebarContent>
           <SidebarFooter></SidebarFooter>
         </>
@@ -135,6 +162,25 @@ export const Sidebar = () => {
                 <ChessQueen />
               </SidebarMenuButton>
             </Link>
+          </SidebarGroup>
+          <SidebarGroup className='mt-auto'>
+            {session ? (
+              <SidebarMenuButton onClick={() => signOut()}>
+                {session.user?.image ? (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name ?? 'User avatar'}
+                    className='size-5 rounded-full object-cover'
+                  />
+                ) : (
+                  <LogOut />
+                )}
+              </SidebarMenuButton>
+            ) : (
+              <SidebarMenuButton onClick={() => signIn('google')}>
+                <CircleUser />
+              </SidebarMenuButton>
+            )}
           </SidebarGroup>
         </SidebarContent>
       )}

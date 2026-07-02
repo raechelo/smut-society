@@ -51,12 +51,12 @@ export default function RootLayout({
         <Providers>
           <SidebarProvider>
             <Sidebar />
-            <main className='relative flex-1 min-h-0 h-[calc(100vh_-_48px)] p-xl overflow-hidden'>
+            <main className='relative flex-1 min-h-0 h-full p-xl overflow-hidden'>
               <img
-                src='/antique_florals.png'
+                src='/big-corner.png'
                 alt=''
                 role='presentation'
-                className='pointer-events-none absolute top-[-10] right-[34px] w-72 rotate-[270deg] w-[180px] -scale-x-100 select-none opacity-20 mix-blend-multiply dark:mix-blend-screen dark:invert'
+                className='pointer-events-none absolute top-[10] right-[10px] w-[250px] rotate-[180deg] -scale-x-100 select-none opacity-20 mix-blend-multiply dark:mix-blend-screen corner-filter'
               />
               {children}
             </main>

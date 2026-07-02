@@ -9,6 +9,7 @@ import {
   Calendar,
   Drama,
   NotebookText,
+  Star,
 } from 'lucide-react';
 
 const DetailsItem = ({
@@ -17,7 +18,7 @@ const DetailsItem = ({
   IconComponent,
 }: {
   label: string;
-  value: string;
+  value: string | ReactElement;
   IconComponent: ReactElement;
 }) => (
   <div className='flex my-xs'>
@@ -25,7 +26,11 @@ const DetailsItem = ({
       {IconComponent}
       <Typography classNames='capitalize'>{label}</Typography>
     </div>
-    <Typography classNames='flex-1 capitalize'>{value}</Typography>
+    {typeof value === 'string' ? (
+      <Typography classNames='flex-1 capitalize'>{value}</Typography>
+    ) : (
+      value
+    )}
   </div>
 );
 
@@ -33,7 +38,7 @@ export const Details = () => {
   return (
     <Card
       cornerDecoration='top'
-      className='flex-2'
+      className='w-[40%] h-full'
     >
       <CardHeader>
         <Typography variant='h2'>Details</Typography>
@@ -61,12 +66,17 @@ export const Details = () => {
         />
         <Divider variant='short' />
 
-        <div className='mx-auto'>
-          <Rating
-            rate={4.5}
-            showScore
-          />
-        </div>
+        <DetailsItem
+          label='published'
+          value={
+            <Rating
+              rate={4.5}
+              showScore
+            />
+          }
+          IconComponent={<Star />}
+        />
+
         <Divider variant='short' />
 
         <DetailsItem

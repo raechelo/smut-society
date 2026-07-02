@@ -168,7 +168,7 @@ function Sidebar({
       <div
         data-slot='sidebar'
         className={cn(
-          'flex w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground',
+          'flex w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground p-md',
           className
         )}
         {...props}
@@ -233,7 +233,7 @@ function Sidebar({
         data-slot='sidebar-container'
         data-side={side}
         className={cn(
-          'fixed top-[16px] z-10 hidden rounded-md mx-sm h-[calc(100vh_-_32px)] w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex',
+          'fixed top-[16px] z-10 hidden rounded-md p-sm h-[calc(100vh_-_32px)] w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex',
           // Adjust the padding for floating and inset variants.
           variant === 'floating' || variant === 'inset'
             ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
@@ -245,7 +245,7 @@ function Sidebar({
         <div
           data-sidebar='sidebar'
           data-slot='sidebar-inner'
-          className='relative isolate flex size-full flex-col overflow-hidden rounded-md border-2 border-transparent [background:linear-gradient(var(--sidebar),var(--sidebar))_padding-box,linear-gradient(to_bottom_right,#35111a,var(--sidebar)_45%,#8a6a30)_border-box] shadow-[6px_6px_28px_rgba(80,34,24,0.5)] group-data-[variant=floating]:rounded-md group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border'
+          className='relative isolate flex size-full flex-col overflow-hidden rounded-md border-2 border-transparent [background:linear-gradient(var(--sidebar),var(--sidebar))_padding-box,linear-gradient(to_bottom_right,var(--sidebar-gradient-start),var(--sidebar)_45%,var(--sidebar-gradient-end))_border-box] shadow-[6px_6px_28px_rgba(80,34,24,0.5)] dark:shadow-[6px_6px_28px_rgba(191,197,211,0.22)] group-data-[variant=floating]:rounded-md group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border'
         >
           {children}
         </div>
@@ -473,7 +473,11 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<'ul'>) {
   );
 }
 
-function SidebarMenuItem({ className, children, ...props }: React.ComponentProps<'li'>) {
+function SidebarMenuItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<'li'>) {
   return (
     <li
       data-slot='sidebar-menu-item'
@@ -485,7 +489,7 @@ function SidebarMenuItem({ className, children, ...props }: React.ComponentProps
       {...props}
     >
       {children}
-      <Sparkle className='mr-2 size-3 shrink-0 opacity-0 transition-opacity peer-hover/menu-button:opacity-100 peer-hover/menu-button:text-sidebar-accent-foreground peer-data-active/menu-button:opacity-100 peer-data-active/menu-button:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden' />
+      <Sparkle className='mr-2 size-3 shrink-0 opacity-0 transition-opacity peer-hover/menu-button:opacity-100 peer-hover/menu-button:text-sidebar-accent-foreground peer-hover/menu-button:[&_path]:fill-sidebar-accent-foreground peer-data-active/menu-button:opacity-100 peer-data-active/menu-button:text-sidebar-accent-foreground peer-data-active/menu-button:[&_path]:fill-sidebar-accent-foreground group-data-[collapsible=icon]:hidden' />
     </li>
   );
 }

@@ -64,9 +64,9 @@ function Card({
       data-size={size}
       onClick={onClick}
       className={cn(
-        'group/card relative isolate flex flex-col overflow-hidden rounded-md border border-card-border bg-parchment bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(90,42,30,0.13)_100%)] p-md text-sm shadow-[0_4px_20px_rgba(80,34,24,0.25)] transition-shadow has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-none *:[img:last-child]:rounded-none dark:bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.3)_100%)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.45)]',
+        'group/card relative isolate flex flex-col overflow-hidden rounded-md border border-card-border bg-parchment bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(90,42,30,0.13)_100%)] p-md text-sm shadow-[0_4px_20px_rgba(80,34,24,0.25)] transition-shadow has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-none *:[img:last-child]:rounded-none dark:bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(134,119,169,0.1)_100%)] dark:shadow-[0_4px_20px_rgba(191,197,211,0.13)]',
         onClick &&
-          'cursor-pointer hover:shadow-[0_6px_28px_rgba(80,34,24,0.33)] dark:hover:shadow-[0_6px_28px_rgba(0,0,0,0.55)]',
+          'cursor-pointer hover:shadow-[0_6px_28px_rgba(80,34,24,0.33)] dark:hover:shadow-[0_6px_28px_rgba(191,197,211,0.2)]',
         className
       )}
       {...props}

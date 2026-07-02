@@ -22,12 +22,6 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
 
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -76,8 +70,6 @@
   --radius-xl: 24px;
   --radius-full: calc(infinity * 1px);
 
-  /* Heading scale — h1 (text-5xl) anchors at 62px; steps scale proportionally.
-     Body sizes (text-base / text-sm = 14px) are intentionally left at default. */
   --text-lg: 23px;
   --text-lg--line-height: 1.2;
   --text-xl: 26px;
@@ -105,12 +97,12 @@
   --popover-foreground: oklch(0.147 0.004 49.3);
 
   --primary: #7b1c2e;
-  --primary-light: #a63248;
+  /* --primary-light: #a63248; */
   --primary-dark: #4a0e1a;
 
   --secondary: #2e1a47;
   --secondary-light: #4a2d6b;
-  --secondary-dark: #1a0d2e;
+  /* --secondary-dark: #1a0d2e; */
   --secondary-foreground: oklch(0.214 0.009 43.1);
 
   --accent: #c9922a;
@@ -119,8 +111,8 @@
   --accent-foreground: oklch(0.147 0.004 49.3);
 
   --wine: #5c1a2e;
-  --wine-light: #7d2d42;
-  --wine-dark: #3a0f1c;
+  /* --wine-light: #7d2d42;
+  --wine-dark: #3a0f1c; */
 
   --parchment: #f4e8d3;
   --ink: #1c0f0f;
@@ -131,69 +123,79 @@
 
   --sidebar: #431721;
   --sidebar-foreground: #f5ecd7;
+  --sidebar-gradient-start: #35111a;
+  --sidebar-gradient-end: #8a6a30;
   --sidebar-primary: #431721;
   --sidebar-primary-foreground: #f5ecd7;
   --sidebar-accent: #2e0f1a;
   --sidebar-accent-foreground: #e8b84b;
   --sidebar-border: #c9a882;
   --sidebar-ring: #c9922a;
-  --sidebar-width: 250px;
-
-  /* SPACING */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
+  --sidebar-width: 300px;
 }
 
 .dark {
-  --background: #1f0e10;
-  --foreground: #f9f7f1;
+  --background: #0b1018;
+  --foreground: #d9dee8;
 
-  --card: #2b1316;
-  --card-foreground: #f9f7f1;
-  --card-border: #3a2620;
-  --popover: #2b1316;
-  --popover-foreground: #f9f7f1;
+  /* CARD */
+  --card: #131a24;
+  --card-foreground: #d9dee8;
+  --card-border: #1b2431;
+  --popover: #131a24;
+  --popover-foreground: #d9dee8;
 
-  --primary: #c4364e;
-  --primary: #c4364e;
-  --primary-light: #d95670;
-  --primary-dark: #7b1c2e;
+  --primary: #8677a9;
+  --primary-dark: #6b5b8e;
 
-  --secondary: #6b3fa0;
-  --secondary-light: #8b5cc4;
-  --secondary-dark: #2e1a47;
-  --secondary-foreground: oklch(0.985 0.001 106.423);
+  --secondary: #7189b8;
+  --secondary-light: #bfc5d3;
+  --secondary-foreground: #d9dee8;
 
-  --accent: #e8b84b;
-  --accent-light: #f5d07a;
-  --accent-dark: #c9922a;
-  --accent-foreground: oklch(0.985 0.001 106.423);
+  --accent: #8677a9;
+  --accent-light: #bfc5d3;
+  --accent-dark: #6b5b8e;
+  --accent-foreground: #0b1018;
 
-  --wine: #7d2d42;
-  --wine-light: #a63d58;
-  --wine-dark: #4a0e1a;
+  --wine: #6b5b8e;
 
-  --parchment: #1c0f0f;
-  --ink: #f5ecd7;
+  --parchment: #131a24;
+  --ink: #d9dee8;
 
-  --success: #6aaf7e;
-  --warning: #e8a84b;
-  --error: #d94f63;
+  --success: #4a7c59;
+  --warning: #c97b2a;
+  --error: #a61c2e;
 
-  --sidebar: #3d1020;
-  --sidebar-foreground: #f5ecd7;
-  --sidebar-primary: #c4364e;
-  --sidebar-primary-foreground: #f5ecd7;
-  --sidebar-accent: #1a0a0f;
-  --sidebar-accent-foreground: #f5d07a;
-  --sidebar-border: #2e0f1a;
-  --sidebar-ring: #e8b84b;
+  --sidebar: #101a28;
+  --sidebar-foreground: #d9dee8;
+  --sidebar-gradient-start: #8677a9;
+  --sidebar-gradient-end: #bfc5d3;
+  --sidebar-primary: #101a28;
+  --sidebar-primary-foreground: #d9dee8;
+  --sidebar-accent: #1b2431;
+  --sidebar-accent-foreground: #bfc5d3;
+  --sidebar-border: #3d5572;
+  --sidebar-ring: #8677a9;
+  --sidebar-width: 300px;
 }
 
 @layer base {
+  .divider-filter {
+    filter: sepia(1) saturate(2) hue-rotate(355deg) brightness(0.45);
+  }
+  .dark .divider-filter {
+    filter: sepia(1) saturate(0.4) hue-rotate(195deg) brightness(0.72);
+  }
+  .dark .divider-filter-fancy {
+    filter: sepia(1) saturate(0.35) hue-rotate(195deg) brightness(0.85);
+  }
+  .corner-filter {
+    filter: sepia(1) saturate(4) hue-rotate(350deg) brightness(0.65);
+  }
+  .dark .corner-filter {
+    filter: invert(1) sepia(0.5) hue-rotate(200deg) saturate(0.7) brightness(1.5);
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
@@ -206,6 +208,13 @@
     );
     background-repeat: no-repeat;
     background-attachment: fixed;
+  }
+  .dark body {
+    background-image: radial-gradient(
+      ellipse 90% 90% at center,
+      transparent 35%,
+      rgba(134, 119, 169, 0.22) 100%
+    );
   }
   html {
     @apply font-sans;

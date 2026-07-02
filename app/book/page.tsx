@@ -1,15 +1,18 @@
 import { PageLayout } from '@/components/app/page-layout';
 import { Details } from './components/details';
-import { Purchase } from './components/purchase';
+import { Hero } from './components/hero';
+import { Extras } from './components/extra';
 
 const BookPage = () => {
   return (
     <PageLayout title='Current Book'>
-      <div className='size-full flex flex-row gap-md'>
-        <div className='w-[60%]'>img will go here</div>
-        <div className='w-[40%] h-full flex flex-col gap-sm p-md'>
+      <div className='size-full flex flex-col gap-md'>
+        <div className='flex gap-md h-[64%]'>
+          <Hero />
           <Details />
-          <Purchase />
+        </div>
+        <div className='flex flex-row gap-md h-[35%] w-full'>
+          <Extras />
         </div>
       </div>
     </PageLayout>

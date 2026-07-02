@@ -1,7 +1,7 @@
-import React from 'react';
+import { PageLayout } from '@/components/app/page-layout';
 
 const Events = () => {
-  return <div>Events</div>;
+  return <PageLayout title='Events'>Events</PageLayout>;
 };
 
 export default Events;

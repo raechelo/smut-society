@@ -1,133 +1,84 @@
 import * as React from 'react';
-import { cva } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 
-type CardColor = 'primary' | 'secondary' | 'wine' | 'success' | 'error';
-type CardVariant = 'outlined' | 'filled' | 'painted';
+type CornerPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
-const cardVariants = cva(
-  'group/card flex flex-col rounded-md overflow-hidden text-sm shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-shadow p-md has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-none *:[img:last-child]:rounded-none',
-  {
-    variants: {
-      variant: {
-        outlined: 'bg-transparent ring-1',
-        filled: 'ring-1',
-        painted: '',
-      },
-      color: {
-        primary: '',
-        secondary: '',
-        wine: '',
-        success: '',
-        error: '',
-      },
-    },
-    compoundVariants: [
-      // outlined — colored border, transparent bg, default text
-      { variant: 'outlined', color: 'primary', className: 'ring-primary' },
-      { variant: 'outlined', color: 'secondary', className: 'ring-secondary' },
-      { variant: 'outlined', color: 'wine', className: 'ring-wine' },
-      { variant: 'outlined', color: 'success', className: 'ring-success' },
-      { variant: 'outlined', color: 'error', className: 'ring-error' },
-      // filled — colored border + bg, light text
-      {
-        variant: 'filled',
-        color: 'primary',
-        className: 'ring-primary bg-primary/55 text-primary-foreground',
-      },
-      {
-        variant: 'filled',
-        color: 'secondary',
-        className: 'ring-secondary bg-secondary text-primary-foreground',
-      },
-      {
-        variant: 'filled',
-        color: 'wine',
-        className: 'ring-wine bg-wine text-primary-foreground',
-      },
-      {
-        variant: 'filled',
-        color: 'success',
-        className: 'ring-success bg-success text-primary-foreground',
-      },
-      {
-        variant: 'filled',
-        color: 'error',
-        className: 'ring-error bg-error text-primary-foreground',
-      },
-      // painted — no border, colored bg, light text
-      {
-        variant: 'painted',
-        color: 'primary',
-        className: 'bg-primary text-primary-foreground',
-      },
-      {
-        variant: 'painted',
-        color: 'secondary',
-        className: 'bg-secondary text-primary-foreground',
-      },
-      {
-        variant: 'painted',
-        color: 'wine',
-        className: 'bg-wine text-primary-foreground',
-      },
-      {
-        variant: 'painted',
-        color: 'success',
-        className: 'bg-success text-primary-foreground',
-      },
-      {
-        variant: 'painted',
-        color: 'error',
-        className: 'bg-error text-primary-foreground',
-      },
-    ],
-    defaultVariants: {
-      variant: 'outlined',
-      color: 'primary',
-    },
-  }
-);
+type CornerDecoration = CornerPosition | 'top' | 'bottom' | 'all';
 
-// Ring color classes for painted hover (outlined/filled already have ring-color set)
-const hoverRingColor: Record<CardColor, string> = {
-  primary: 'hover:ring-primary',
-  secondary: 'hover:ring-secondary',
-  wine: 'hover:ring-wine',
-  success: 'hover:ring-success',
-  error: 'hover:ring-error',
+// Each corner is positioned in place and mirrored from the image's native
+// (bottom-left) orientation so the flourish always hugs the correct corner.
+const cornerClasses: Record<CornerPosition, string> = {
+  'bottom-left': 'bottom-0 left-0',
+  'bottom-right': 'bottom-0 right-0 -scale-x-100',
+  'top-left': 'top-0 left-0 -scale-y-100',
+  'top-right': 'top-0 right-0 rotate-180',
 };
+
+// Expands a decoration value into the corner positions it renders.
+const cornerGroups: Record<CornerDecoration, CornerPosition[]> = {
+  'top-left': ['top-left'],
+  'top-right': ['top-right'],
+  'bottom-left': ['bottom-left'],
+  'bottom-right': ['bottom-right'],
+  top: ['top-left', 'top-right'],
+  bottom: ['bottom-left', 'bottom-right'],
+  all: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+};
+
+function CardCorner({ position }: { position: CornerPosition }) {
+  return (
+    <span
+      aria-hidden='true'
+      className={cn(
+        'pointer-events-none absolute -z-10 block',
+        cornerClasses[position]
+      )}
+    >
+      <img
+        src='/card-corner.png'
+        alt=''
+        className='size-16 object-contain opacity-80 dark:invert'
+      />
+    </span>
+  );
+}
 
 function Card({
   className,
   size = 'default',
-  variant = 'outlined',
-  color = 'primary',
+  cornerDecoration,
   onClick,
+  children,
   ...props
 }: React.ComponentProps<'div'> & {
   size?: 'default' | 'sm';
-  variant?: CardVariant;
-  color?: CardColor;
+  cornerDecoration?: CornerDecoration;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }) {
+  const corners = cornerDecoration ? cornerGroups[cornerDecoration] : [];
+
   return (
     <div
       data-slot='card'
       data-size={size}
       onClick={onClick}
       className={cn(
-        cardVariants({ variant, color }),
+        'group/card relative isolate flex flex-col overflow-hidden rounded-md border border-card-border bg-parchment bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(90,42,30,0.13)_100%)] p-md text-sm shadow-[0_4px_20px_rgba(80,34,24,0.25)] transition-shadow has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-none *:[img:last-child]:rounded-none dark:bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.3)_100%)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.45)]',
         onClick &&
-          cn(
-            'cursor-pointer hover:ring-2',
-            variant === 'painted' && hoverRingColor[color]
-          ),
+          'cursor-pointer hover:shadow-[0_6px_28px_rgba(80,34,24,0.33)] dark:hover:shadow-[0_6px_28px_rgba(0,0,0,0.55)]',
         className
       )}
       {...props}
-    />
+    >
+      {children}
+      {corners.map((position) => (
+        <CardCorner
+          key={position}
+          position={position}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -136,7 +87,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot='card-header'
       className={cn(
-        'group/card-header @container/card-header grid auto-rows-min items-start gap-1.5 rounded-none has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]',
+        'group/card-header @container/card-header grid auto-rows-min text-center gap-1.5 rounded-none has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]',
         className
       )}
       {...props}

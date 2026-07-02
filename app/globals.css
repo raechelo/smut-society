@@ -51,6 +51,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-card-border: var(--card-border);
 
   --color-wine: var(--wine);
   --color-wine-light: var(--wine-light);
@@ -74,6 +75,21 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-full: calc(infinity * 1px);
+
+  /* Heading scale — h1 (text-5xl) anchors at 62px; steps scale proportionally.
+     Body sizes (text-base / text-sm = 14px) are intentionally left at default. */
+  --text-lg: 23px;
+  --text-lg--line-height: 1.2;
+  --text-xl: 26px;
+  --text-xl--line-height: 1.2;
+  --text-2xl: 31px;
+  --text-2xl--line-height: 1.15;
+  --text-3xl: 39px;
+  --text-3xl--line-height: 1.1;
+  --text-4xl: 46px;
+  --text-4xl--line-height: 1.1;
+  --text-5xl: 62px;
+  --text-5xl--line-height: 1.1;
 }
 
 :root {
@@ -84,6 +100,7 @@
   /* CARD */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.147 0.004 49.3);
+  --card-border: #5a2a1e;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.147 0.004 49.3);
 
@@ -105,7 +122,7 @@
   --wine-light: #7d2d42;
   --wine-dark: #3a0f1c;
 
-  --parchment: #f5ecd7;
+  --parchment: #f4e8d3;
   --ink: #1c0f0f;
 
   --success: #4a7c59;
@@ -136,6 +153,7 @@
 
   --card: #2b1316;
   --card-foreground: #f9f7f1;
+  --card-border: #3a2620;
   --popover: #2b1316;
   --popover-foreground: #f9f7f1;
 
@@ -181,6 +199,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: radial-gradient(
+      ellipse 90% 90% at center,
+      transparent 35%,
+      rgba(46, 26, 16, 0.32) 100%
+    );
+    background-repeat: no-repeat;
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;

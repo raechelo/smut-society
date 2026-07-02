@@ -1,32 +1,18 @@
-import { Details } from '@/components/app/details';
-import { Card } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import Typography from '@/components/ui/typography';
+import { PageLayout } from '@/components/app/page-layout';
+import { Details } from './components/details';
+import { Purchase } from './components/purchase';
 
 const BookPage = () => {
   return (
-    <div className='size-full'>
-      <Typography
-        variant='h1'
-        classNames='text-primary'
-      >
-        Current Book
-      </Typography>
-      <Separator className='bg-wine m-sm h-[2px]' />
-
+    <PageLayout title='Current Book'>
       <div className='size-full flex flex-row gap-md'>
-        <div className='w-[65%]'>img will go here</div>
-        <div className='w-[35%] h-full flex flex-col gap-sm p-md'>
+        <div className='w-[60%]'>img will go here</div>
+        <div className='w-[40%] h-full flex flex-col gap-sm p-md'>
           <Details />
-          <Card
-            variant='filled'
-            className='flex-1'
-          >
-            Buy This Book
-          </Card>
+          <Purchase />
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

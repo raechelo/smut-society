@@ -1,7 +1,7 @@
-import React from 'react';
+import { PageLayout } from '@/components/app/page-layout';
 
 const Reviews = () => {
-  return <div>Reviews</div>;
+  return <PageLayout title='Reviews'>Reviews</PageLayout>;
 };
 
 export default Reviews;

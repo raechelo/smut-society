@@ -1,7 +1,7 @@
-import React from 'react';
+import { PageLayout } from '@/components/app/page-layout';
 
 const PastReads = () => {
-  return <div>PastReads</div>;
+  return <PageLayout title='Past Reads'>PastReads</PageLayout>;
 };
 
 export default PastReads;

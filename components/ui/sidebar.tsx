@@ -22,7 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { PanelLeftIcon } from 'lucide-react';
+import { PanelLeftIcon, Sparkle } from 'lucide-react';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -233,7 +233,7 @@ function Sidebar({
         data-slot='sidebar-container'
         data-side={side}
         className={cn(
-          'fixed inset-y-0 z-10 hidden rounded-md mx-sm my-md h-[calc(100%_-_32px)] w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex',
+          'fixed top-[16px] z-10 hidden rounded-md mx-sm h-[calc(100vh_-_32px)] w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex',
           // Adjust the padding for floating and inset variants.
           variant === 'floating' || variant === 'inset'
             ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
@@ -245,7 +245,7 @@ function Sidebar({
         <div
           data-sidebar='sidebar'
           data-slot='sidebar-inner'
-          className='flex size-full flex-col bg-sidebar shadow-[4px_0_16px_rgba(0,0,0,0.2)] rounded-md group-data-[variant=floating]:rounded-md group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border'
+          className='relative isolate flex size-full flex-col overflow-hidden rounded-md border-2 border-transparent [background:linear-gradient(var(--sidebar),var(--sidebar))_padding-box,linear-gradient(to_bottom_right,#35111a,var(--sidebar)_45%,#8a6a30)_border-box] shadow-[6px_6px_28px_rgba(80,34,24,0.5)] group-data-[variant=floating]:rounded-md group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border'
         >
           {children}
         </div>
@@ -405,20 +405,6 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function SidebarDivider({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
-    <div
-      data-slot='sidebar-divider'
-      data-sidebar='group-divider'
-      className={cn(
-        'relative flex w-full min-w-0 h-[1px] bg-sidebar-foreground px-md my-md',
-        className
-      )}
-      {...props}
-    />
-  );
-}
-
 function SidebarGroupLabel({
   className,
   asChild = false,
@@ -487,17 +473,20 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<'ul'>) {
   );
 }
 
-function SidebarMenuItem({ className, ...props }: React.ComponentProps<'li'>) {
+function SidebarMenuItem({ className, children, ...props }: React.ComponentProps<'li'>) {
   return (
     <li
       data-slot='sidebar-menu-item'
       data-sidebar='menu-item'
       className={cn(
-        'group/menu-item relative hover:pointer rounded-md',
+        'group/menu-item relative hover:pointer rounded-md flex justify-between items-center has-[button:hover]:bg-sidebar-accent has-[button[data-active]]:bg-sidebar-accent',
         className
       )}
       {...props}
-    />
+    >
+      {children}
+      <Sparkle className='mr-2 size-3 shrink-0 opacity-0 transition-opacity peer-hover/menu-button:opacity-100 peer-hover/menu-button:text-sidebar-accent-foreground peer-data-active/menu-button:opacity-100 peer-data-active/menu-button:text-sidebar-accent-foreground group-data-[collapsible=icon]:hidden' />
+    </li>
   );
 }
 
@@ -544,7 +533,7 @@ function SidebarMenuButton({
       data-slot='sidebar-menu-button'
       data-sidebar='menu-button'
       data-size={size}
-      data-active={isActive}
+      data-active={isActive || undefined}
       className={cn(
         'rounded-md',
         sidebarMenuButtonVariants({ variant, size }),
@@ -704,7 +693,7 @@ function SidebarMenuSubButton({
       data-slot='sidebar-menu-sub-button'
       data-sidebar='menu-sub-button'
       data-size={size}
-      data-active={isActive}
+      data-active={isActive || undefined}
       className={cn(
         'flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-3 text-sidebar-foreground ring-sidebar-ring outline-hidden group-data-[collapsible=icon]:hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-sm data-[size=sm]:text-xs data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-3.5 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground',
         className
@@ -719,7 +708,6 @@ export {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarDivider,
   SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,

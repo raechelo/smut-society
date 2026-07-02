@@ -1,7 +1,7 @@
-import React from 'react';
+import { PageLayout } from '@/components/app/page-layout';
 
 const Challenges = () => {
-  return <div>Challenges</div>;
+  return <PageLayout title='Challenges'>Challenges</PageLayout>;
 };
 
 export default Challenges;

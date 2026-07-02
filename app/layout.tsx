@@ -47,11 +47,19 @@ export default function RootLayout({
         'font-serif'
       )}
     >
-      <body className='min-h-full flex flex-col'>
+      <body className='h-screen overflow-hidden flex flex-col'>
         <Providers>
           <SidebarProvider>
             <Sidebar />
-            <main className='flex-1 min-h-[100vh] p-lg'>{children}</main>
+            <main className='relative flex-1 min-h-0 h-[calc(100vh_-_48px)] p-xl overflow-hidden'>
+              <img
+                src='/antique_florals.png'
+                alt=''
+                role='presentation'
+                className='pointer-events-none absolute top-[-10] right-[34px] w-72 rotate-[270deg] w-[180px] -scale-x-100 select-none opacity-20 mix-blend-multiply dark:mix-blend-screen dark:invert'
+              />
+              {children}
+            </main>
           </SidebarProvider>
         </Providers>
       </body>

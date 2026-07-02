@@ -1,9 +1,9 @@
-import React from 'react';
+import { PageLayout } from '@/components/app/page-layout';
 
 // submit new book for book club
 
 const Library = () => {
-  return <div>Library</div>;
+  return <PageLayout title='Library'>Library</PageLayout>;
 };
 
 export default Library;

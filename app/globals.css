@@ -53,6 +53,16 @@
   --color-parchment: var(--parchment);
   --color-ink: var(--ink);
 
+  --color-rust: var(--rust);
+  --color-rust-light: var(--rust-light);
+  --color-rust-dark: var(--rust-dark);
+  --color-sienna: var(--sienna);
+  --color-sienna-light: var(--sienna-light);
+  --color-sienna-dark: var(--sienna-dark);
+  --color-sapphire: var(--sapphire);
+  --color-sapphire-light: var(--sapphire-light);
+  --color-sapphire-dark: var(--sapphire-dark);
+
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
@@ -70,6 +80,8 @@
   --radius-xl: 24px;
   --radius-full: calc(infinity * 1px);
 
+  --text-md: 20px;
+  --text-md--line-height: 1.1;
   --text-lg: 23px;
   --text-lg--line-height: 1.2;
   --text-xl: 26px;
@@ -97,12 +109,11 @@
   --popover-foreground: oklch(0.147 0.004 49.3);
 
   --primary: #7b1c2e;
-  /* --primary-light: #a63248; */
+  --primary-foreground: #f5ecd7;
   --primary-dark: #4a0e1a;
 
   --secondary: #2e1a47;
   --secondary-light: #4a2d6b;
-  /* --secondary-dark: #1a0d2e; */
   --secondary-foreground: oklch(0.214 0.009 43.1);
 
   --accent: #c9922a;
@@ -111,11 +122,19 @@
   --accent-foreground: oklch(0.147 0.004 49.3);
 
   --wine: #5c1a2e;
-  /* --wine-light: #7d2d42;
-  --wine-dark: #3a0f1c; */
 
   --parchment: #f4e8d3;
   --ink: #1c0f0f;
+
+  --rust: #c05228;
+  --rust-light: #d97040;
+  --rust-dark: #8c3a18;
+  --sienna: #8b5e3c;
+  --sienna-light: #b0855f;
+  --sienna-dark: #5c3820;
+  --sapphire: #2a5fa8;
+  --sapphire-light: #4a7fcc;
+  --sapphire-dark: #1a3d7e;
 
   --success: #4a7c59;
   --warning: #c97b2a;
@@ -146,6 +165,7 @@
   --popover-foreground: #d9dee8;
 
   --primary: #8677a9;
+  --primary-foreground: #0b1018;
   --primary-dark: #6b5b8e;
 
   --secondary: #7189b8;
@@ -161,6 +181,16 @@
 
   --parchment: #131a24;
   --ink: #d9dee8;
+
+  --sapphire: #4a8fd4;
+  --sapphire-light: #6aaff0;
+  --sapphire-dark: #2a6fb4;
+  --rust: #c86438;
+  --rust-light: #e0845c;
+  --rust-dark: #9a4825;
+  --sienna: #a07050;
+  --sienna-light: #c09078;
+  --sienna-dark: #785038;
 
   --success: #4a7c59;
   --warning: #c97b2a;
@@ -193,7 +223,8 @@
     filter: sepia(1) saturate(4) hue-rotate(350deg) brightness(0.65);
   }
   .dark .corner-filter {
-    filter: invert(1) sepia(0.5) hue-rotate(200deg) saturate(0.7) brightness(1.5);
+    filter: invert(1) sepia(0.5) hue-rotate(200deg) saturate(0.7)
+      brightness(1.5);
   }
 
   * {

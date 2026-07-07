@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/card';
 import { Chip } from '@/components/app/chip';
 import type { GoogleBook } from '@/lib/types/books';
+import { BookCardActions } from './book-card-actions';
 
 const PLACEHOLDER_BG = 'bg-muted flex items-center justify-center';
 
@@ -19,6 +20,7 @@ export function BookCard({ book }: { book: GoogleBook }) {
 
   return (
     <Card className='h-full'>
+      <BookCardActions book={book} />
       <div className='aspect-[2/3] w-full overflow-hidden rounded-t-md'>
         {thumbnail ? (
           <img

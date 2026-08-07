@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 type CornerPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
-type CornerDecoration = CornerPosition | 'top' | 'bottom' | 'all';
+type CornerDecoration = CornerPosition | 'top' | 'bottom' | 'all' | 'diagonal' | 'anti-diagonal';
 
 // Each corner is positioned in place and mirrored from the image's native
 // (bottom-left) orientation so the flourish always hugs the correct corner.
@@ -24,6 +24,8 @@ const cornerGroups: Record<CornerDecoration, CornerPosition[]> = {
   top: ['top-left', 'top-right'],
   bottom: ['bottom-left', 'bottom-right'],
   all: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+  diagonal: ['top-left', 'bottom-right'],
+  'anti-diagonal': ['top-right', 'bottom-left'],
 };
 
 function CardCorner({ position }: { position: CornerPosition }) {

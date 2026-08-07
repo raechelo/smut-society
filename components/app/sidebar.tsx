@@ -9,6 +9,7 @@ import {
   LibraryBig,
   LogOut,
   MessageCircle,
+  MessageCircleQuestionMark,
 } from 'lucide-react';
 import {
   Sidebar as RawSidebar,
@@ -103,6 +104,14 @@ export const Sidebar = () => {
               <SidebarMenuButton isActive={activePath.includes('challenges')}>
                 <ChessQueen />
                 Challenges
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </Link>
+          <Link href='/quizzes'>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={activePath.includes('past-reads')}>
+                <MessageCircleQuestionMark />
+                Quizzes
               </SidebarMenuButton>
             </SidebarMenuItem>
           </Link>

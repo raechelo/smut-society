@@ -1,65 +1,139 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardFooter } from '@/components/ui/card';
 import { Chip } from '@/components/app/chip';
 import type { GoogleBook } from '@/lib/types/books';
-import { BookCardActions } from './book-card-actions';
+import { BookmarkButton } from './bookmark-button';
+import { BookCoverImage } from './book-cover-image';
 
-const PLACEHOLDER_BG = 'bg-muted flex items-center justify-center';
+function detectSeries(title: string): boolean {
+  return (
+    /#\d+/.test(title) ||
+    /\bbook\s+\d+\b/i.test(title) ||
+    /\bvol(ume)?\.?\s*\d+\b/i.test(title) ||
+    /\bpart\s+\d+\b/i.test(title) ||
+    /\(\w[^)]*#\d+\)/.test(title)
+  );
+}
 
-export function BookCard({ book }: { book: GoogleBook }) {
-  const { title, authors, description, imageLinks, categories } =
+type InfoChip = {
+  label: string;
+  variant: 'outline' | 'filled' | 'painted';
+  colors:
+    | 'primary'
+    | 'secondary'
+    | 'wine'
+    | 'ink'
+    | 'sapphire'
+    | 'sienna'
+    | 'rust';
+};
+
+function getInfoChips(book: GoogleBook): InfoChip[] {
+  const { title, pageCount, averageRating, ratingsCount, categories } =
     book.volumeInfo;
+  const chips: InfoChip[] = [];
+
+  if (categories?.[0]) {
+    chips.push({
+      label: categories[0],
+      variant: 'painted',
+      colors: 'sapphire',
+    });
+  }
+
+  if (detectSeries(title)) {
+    chips.push({ label: 'In a Series', variant: 'filled', colors: 'primary' });
+  }
+
+  if (pageCount) {
+    chips.push({
+      label: `${pageCount} pg`,
+      variant: 'outline',
+      colors: 'secondary',
+    });
+  }
+
+  if (averageRating) {
+    const label = ratingsCount
+      ? `★ ${averageRating} (${ratingsCount.toLocaleString()})`
+      : `★ ${averageRating}`;
+    chips.push({ label, variant: 'painted', colors: 'sienna' });
+  }
+
+  return chips;
+}
+
+const PLACEHOLDER =
+  'flex h-full w-full items-center justify-center bg-muted p-sm text-center text-xs text-muted-foreground';
+
+type BookCardProps = {
+  book: GoogleBook;
+  isFavorited?: boolean;
+  onFavoriteChange?: (bookId: string, favorited: boolean) => void;
+};
+
+export function BookCard({
+  book,
+  isFavorited = false,
+  onFavoriteChange,
+}: BookCardProps) {
+  const { title, authors, imageLinks, industryIdentifiers } = book.volumeInfo;
   const thumbnail = imageLinks?.thumbnail?.replace('http://', 'https://');
   const author = authors?.join(', ');
-  const category = categories?.[0];
+  const isbn =
+    industryIdentifiers?.find((i) => i.type === 'ISBN_13')?.identifier ??
+    industryIdentifiers?.find((i) => i.type === 'ISBN_10')?.identifier;
+  const chips = getInfoChips(book);
 
   return (
-    <Card className='h-full'>
-      <BookCardActions book={book} />
-      <div className='aspect-[2/3] w-full overflow-hidden rounded-t-md'>
-        {thumbnail ? (
-          <img
-            src={thumbnail}
+    <Card className='h-full p-0' cornerDecoration='diagonal'>
+      <BookmarkButton
+        bookId={book.id}
+        isFavorited={isFavorited}
+        onFavoriteChange={onFavoriteChange}
+      />
+
+      {/* Cover (left) + Details (right) */}
+      <div className='flex min-h-[160px] flex-1 gap-sm p-sm'>
+        {/* Cover — 30%. Placeholder is the base layer; the cover image overlays
+            it when one resolves, so a card is never an empty box. */}
+        <div className='relative w-[30%] shrink-0 overflow-hidden rounded-[16px] border border-ink'>
+          <div className={PLACEHOLDER}>{title}</div>
+          <BookCoverImage
+            title={title}
+            author={author}
+            isbn={isbn}
+            fallback={thumbnail}
             alt={title}
-            className='h-full w-full object-cover'
+            className='absolute inset-0 h-full w-full object-cover'
           />
-        ) : (
-          <div
-            className={`h-full w-full ${PLACEHOLDER_BG} p-md text-center text-xs text-muted-foreground`}
-          >
+        </div>
+
+        {/* Details — remaining 70% */}
+        <div className='flex flex-1 flex-col gap-sm py-sm pr-sm'>
+          <p className='line-clamp-3 text-sm font-semibold leading-snug'>
             {title}
-          </div>
-        )}
-      </div>
-      <CardHeader>
-        <CardTitle className='!text-sm line-clamp-2 leading-snug'>
-          {title}
-        </CardTitle>
-        {author && (
-          <CardDescription className='line-clamp-1'>{author}</CardDescription>
-        )}
-      </CardHeader>
-      {(description || category) && (
-        <CardContent className='flex flex-col gap-sm'>
-          {description && (
-            <p className='line-clamp-3 text-xs leading-relaxed text-muted-foreground'>
-              {description}
+          </p>
+          {author && (
+            <p className='line-clamp-2 text-xs italic text-muted-foreground'>
+              {author}
             </p>
           )}
-          {category && (
+        </div>
+      </div>
+
+      {/* Footer — info chips */}
+      {chips.length > 0 && (
+        <CardFooter className='flex-wrap gap-xs border-t border-border/30 pt-md pb-sm py-xs'>
+          {chips.map((chip, i) => (
             <Chip
-              label={category}
+              key={i}
+              label={chip.label}
               size='small'
-              variant='outline'
-              colors='secondary'
+              variant={chip.variant}
+              colors={chip.colors}
             />
-          )}
-        </CardContent>
+          ))}
+        </CardFooter>
       )}
     </Card>
   );

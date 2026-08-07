@@ -148,7 +148,7 @@ export const Filter = ({
       <div className='flex-1'>
         <Input
           type='text'
-          placeholder='Search books...'
+          placeholder='Book title...'
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />

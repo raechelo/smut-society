@@ -38,6 +38,18 @@ export async function toggleFavorite(bookId: string) {
   return { favorited: true };
 }
 
+export async function getUserFavoriteIds(): Promise<string[]> {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const rows = await db
+    .select({ bookId: favorites.bookId })
+    .from(favorites)
+    .where(eq(favorites.userId, session.user.id));
+
+  return rows.map((r) => r.bookId);
+}
+
 export async function getUserClubs() {
   const session = await auth();
   if (!session?.user?.id) return [];

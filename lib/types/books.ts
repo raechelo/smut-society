@@ -27,9 +27,9 @@ export const GENRES = [
 ] as const;
 
 export const LENGTH_OPTIONS: { label: string; value: LengthFilter }[] = [
-  { label: '<200 pages', value: 'short' },
-  { label: '200–400 pages', value: 'medium' },
-  { label: '400+ pages', value: 'long' },
+  { label: 'Short', value: 'short' },
+  { label: 'Medium', value: 'medium' },
+  { label: 'Long', value: 'long' },
 ];
 
 export function matchesLength(
@@ -57,13 +57,18 @@ const RELEVANT_CATEGORY_KEYWORDS = [
   'literary',
   'comic',
   'graphic novel',
+  'dragons',
+  'mythical',
+  'creatures',
 ];
 
 export function isRelevantBook(book: GoogleBook): boolean {
   const cats = book.volumeInfo.categories;
   if (!cats?.length) return true;
   const lower = cats.map((c) => c.toLowerCase());
-  return lower.some((c) => RELEVANT_CATEGORY_KEYWORDS.some((kw) => c.includes(kw)));
+  return lower.some((c) =>
+    RELEVANT_CATEGORY_KEYWORDS.some((kw) => c.includes(kw))
+  );
 }
 
 export type GoogleBook = {
@@ -76,6 +81,10 @@ export type GoogleBook = {
       thumbnail?: string;
       smallThumbnail?: string;
     };
+    industryIdentifiers?: Array<{
+      type: 'ISBN_10' | 'ISBN_13' | 'OTHER';
+      identifier: string;
+    }>;
     categories?: string[];
     publishedDate?: string;
     pageCount?: number;

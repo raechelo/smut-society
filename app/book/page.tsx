@@ -22,7 +22,6 @@ const BookPage = () => {
 export default BookPage;
 
 // NEXT STEPS:
-// set up database with Neon
 // allow user to create + save polls
 // display poll results & allow users to vote
 // allow user to vote on next book to read

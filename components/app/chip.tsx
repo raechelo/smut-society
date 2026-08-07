@@ -15,6 +15,11 @@ const chipVariants = cva(
         primary: '',
         secondary: '',
         wine: '',
+        ink: '',
+        accent: '',
+        sapphire: '',
+        sienna: '',
+        rust: '',
       },
       size: {
         default: 'px-3 py-1 text-sm',
@@ -31,6 +36,21 @@ const chipVariants = cva(
       { variant: 'painted', colors: 'primary', class: 'bg-primary/15 border-primary text-primary' },
       { variant: 'painted', colors: 'secondary', class: 'bg-secondary/15 border-secondary text-secondary' },
       { variant: 'painted', colors: 'wine', class: 'bg-wine/15 border-wine text-wine' },
+      { variant: 'outline', colors: 'ink', class: 'border-ink text-ink' },
+      { variant: 'filled', colors: 'ink', class: 'bg-ink text-parchment' },
+      { variant: 'painted', colors: 'ink', class: 'bg-ink/10 border-ink text-ink' },
+      { variant: 'outline', colors: 'accent', class: 'border-accent text-accent' },
+      { variant: 'filled', colors: 'accent', class: 'bg-accent text-ink' },
+      { variant: 'painted', colors: 'accent', class: 'bg-accent/15 border-accent text-accent' },
+      { variant: 'outline', colors: 'sapphire', class: 'border-sapphire text-sapphire' },
+      { variant: 'filled', colors: 'sapphire', class: 'bg-sapphire text-parchment' },
+      { variant: 'painted', colors: 'sapphire', class: 'bg-sapphire/15 border-sapphire text-sapphire' },
+      { variant: 'outline', colors: 'sienna', class: 'border-sienna text-sienna' },
+      { variant: 'filled', colors: 'sienna', class: 'bg-sienna text-parchment' },
+      { variant: 'painted', colors: 'sienna', class: 'bg-sienna/15 border-sienna text-sienna' },
+      { variant: 'outline', colors: 'rust', class: 'border-rust text-rust' },
+      { variant: 'filled', colors: 'rust', class: 'bg-rust text-parchment' },
+      { variant: 'painted', colors: 'rust', class: 'bg-rust/15 border-rust text-rust' },
     ],
     defaultVariants: {
       variant: 'outline',
@@ -43,7 +63,7 @@ const chipVariants = cva(
 export interface ChipProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof chipVariants> {
-  label: string;
+  label: string | number;
 }
 
 export const Chip = ({ variant, colors, size, label, className, ...props }: ChipProps) => {

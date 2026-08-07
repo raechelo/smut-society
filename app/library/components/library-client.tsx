@@ -10,14 +10,25 @@ import {
 import { Filter } from './filter';
 import { BookCard } from './book-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getUserFavoriteIds } from '@/lib/actions/books';
 
-function BookGrid({ books }: { books: GoogleBook[] }) {
+function BookGrid({
+  books,
+  favoritedIds,
+  onFavoriteChange,
+}: {
+  books: GoogleBook[];
+  favoritedIds: Set<string>;
+  onFavoriteChange: (bookId: string, favorited: boolean) => void;
+}) {
   return (
-    <div className='grid grid-cols-2 gap-md sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'>
+    <div className='grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3'>
       {books.map((book) => (
         <BookCard
           key={book.id}
           book={book}
+          isFavorited={favoritedIds.has(book.id)}
+          onFavoriteChange={onFavoriteChange}
         />
       ))}
     </div>
@@ -26,7 +37,7 @@ function BookGrid({ books }: { books: GoogleBook[] }) {
 
 function BookGridSkeleton() {
   return (
-    <div className='grid grid-cols-2 gap-md sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'>
+    <div className='grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3'>
       {Array.from({ length: 10 }).map((_, i) => (
         <div
           key={i}
@@ -41,15 +52,39 @@ function BookGridSkeleton() {
   );
 }
 
-const DEFAULT_SUBJECTS = 'subject:fiction|subject:romance|subject:erotica';
+const DEFAULT_SUBJECTS = 'subject:(fiction OR romance OR erotica)';
+
+// Google Books widens a subject search with `subject:(a OR b)`, NOT
+// `subject:a|subject:b` — the `|` form silently returns zero results. Genre
+// values can be multi-word (e.g. "dark romance"), so quote each one.
+function subjectClause(genres: string[]): string {
+  const terms = genres.map((g) => `"${g}"`).join(' OR ');
+  return `subject:(${terms})`;
+}
+
+// Scope typed text to the title field. A plain Google Books query ranks by
+// full-text relevance across the whole book, so short partial titles ("a touch
+// of") match inside dictionaries and magazines and bury the real books. Quoting
+// keeps the words together so an as-you-type prefix matches the start of a title
+// (e.g. `intitle:"a touch of"` → "A Touch of Darkness").
+function titleClause(input: string): string {
+  return `intitle:"${input.replace(/"/g, '')}"`;
+}
 
 function buildQuery(input: string, genres: string[]): string {
   const base = input.trim();
   if (!base && !genres.length) return '';
-  const subjectClause = genres.length
-    ? genres.map((g) => `subject:${g}`).join('|')
-    : DEFAULT_SUBJECTS;
-  return base ? `${base} ${subjectClause}` : subjectClause;
+
+  const titlePart = base ? titleClause(base) : '';
+
+  // No explicit genre filter: bias toward on-theme subjects only when browsing
+  // (empty search box). Appending subjects to a typed title would just narrow a
+  // specific search that already works on its own.
+  if (!genres.length) return titlePart || DEFAULT_SUBJECTS;
+
+  // Explicit genre filter selected — honor it, optionally alongside typed text.
+  const clause = subjectClause(genres);
+  return titlePart ? `${titlePart} ${clause}` : clause;
 }
 
 export function LibraryClient() {
@@ -59,6 +94,20 @@ export function LibraryClient() {
   const [rawBooks, setRawBooks] = useState<GoogleBook[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    getUserFavoriteIds().then((ids) => setFavoritedIds(new Set(ids)));
+  }, []);
+
+  const handleFavoriteChange = (bookId: string, favorited: boolean) => {
+    setFavoritedIds((prev) => {
+      const next = new Set(prev);
+      if (favorited) next.add(bookId);
+      else next.delete(bookId);
+      return next;
+    });
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedInput(inputValue.trim()), 400);
@@ -121,7 +170,7 @@ export function LibraryClient() {
         ) : error ? (
           <p className='mt-xl text-center text-sm text-destructive'>{error}</p>
         ) : books.length > 0 ? (
-          <BookGrid books={books} />
+          <BookGrid books={books} favoritedIds={favoritedIds} onFavoriteChange={handleFavoriteChange} />
         ) : hasQuery ? (
           <p className='mt-xl text-center text-sm text-muted-foreground'>
             No books found

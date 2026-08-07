@@ -67,6 +67,11 @@
   --color-warning: var(--warning);
   --color-error: var(--error);
 
+  /* NB: these named spacing tokens power p-md, gap-md, etc., but their names
+     (xs, sm, md, lg, xl) also claim Tailwind's width-scale keys — so e.g.
+     max-w-md is 16px, NOT a 28rem container width, and defining --container-
+     tokens cannot override it. Use arbitrary widths like max-w-[28rem] instead
+     of the named max-w or w utilities anywhere in this project. */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;

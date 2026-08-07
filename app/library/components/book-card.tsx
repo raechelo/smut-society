@@ -3,6 +3,7 @@ import { Chip } from '@/components/app/chip';
 import type { GoogleBook } from '@/lib/types/books';
 import { BookmarkButton } from './bookmark-button';
 import { BookCoverImage } from './book-cover-image';
+import { BookDescription } from './book-description';
 
 function detectSeries(title: string): boolean {
   return (
@@ -85,7 +86,10 @@ export function BookCard({
   const chips = getInfoChips(book);
 
   return (
-    <Card className='h-full p-0' cornerDecoration='diagonal'>
+    <Card
+      className='h-full p-0'
+      cornerDecoration='diagonal'
+    >
       <BookmarkButton
         bookId={book.id}
         isFavorited={isFavorited}
@@ -93,10 +97,8 @@ export function BookCard({
       />
 
       {/* Cover (left) + Details (right) */}
-      <div className='flex min-h-[160px] flex-1 gap-sm p-sm'>
-        {/* Cover — 30%. Placeholder is the base layer; the cover image overlays
-            it when one resolves, so a card is never an empty box. */}
-        <div className='relative w-[30%] shrink-0 overflow-hidden rounded-[16px] border border-ink'>
+      <div className='flex min-h-[200px] flex-1 gap-sm p-sm'>
+        <div className='relative w-[35%] shrink-0 overflow-hidden rounded-[8px] border border-ink'>
           <div className={PLACEHOLDER}>{title}</div>
           <BookCoverImage
             title={title}
@@ -108,7 +110,7 @@ export function BookCard({
           />
         </div>
 
-        {/* Details — remaining 70% */}
+        {/* Details — remaining 65% */}
         <div className='flex flex-1 flex-col gap-sm py-sm pr-sm'>
           <p className='line-clamp-3 text-sm font-semibold leading-snug'>
             {title}
@@ -118,6 +120,7 @@ export function BookCard({
               {author}
             </p>
           )}
+          <BookDescription book={book} />
         </div>
       </div>
 

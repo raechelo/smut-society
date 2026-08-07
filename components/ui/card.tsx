@@ -4,7 +4,13 @@ import { cn } from '@/lib/utils';
 
 type CornerPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
-type CornerDecoration = CornerPosition | 'top' | 'bottom' | 'all' | 'diagonal' | 'anti-diagonal';
+export type CornerDecoration =
+  | CornerPosition
+  | 'top'
+  | 'bottom'
+  | 'all'
+  | 'diagonal'
+  | 'anti-diagonal';
 
 // Each corner is positioned in place and mirrored from the image's native
 // (bottom-left) orientation so the flourish always hugs the correct corner.
@@ -46,6 +52,19 @@ function CardCorner({ position }: { position: CornerPosition }) {
   );
 }
 
+// The card's corner flourishes, reusable on any positioned + isolated surface
+// (e.g. the dialog). Render inside an element with `relative`/`fixed` and
+// `isolate`; `overflow-hidden` clips the flourish to the surface's corners.
+function CardCorners({ decoration }: { decoration: CornerDecoration }) {
+  return (
+    <>
+      {cornerGroups[decoration].map((position) => (
+        <CardCorner key={position} position={position} />
+      ))}
+    </>
+  );
+}
+
 function Card({
   className,
   size = 'default',
@@ -58,8 +77,6 @@ function Card({
   cornerDecoration?: CornerDecoration;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }) {
-  const corners = cornerDecoration ? cornerGroups[cornerDecoration] : [];
-
   return (
     <div
       data-slot='card'
@@ -74,12 +91,7 @@ function Card({
       {...props}
     >
       {children}
-      {corners.map((position) => (
-        <CardCorner
-          key={position}
-          position={position}
-        />
-      ))}
+      {cornerDecoration && <CardCorners decoration={cornerDecoration} />}
     </div>
   );
 }
@@ -155,6 +167,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
 
 export {
   Card,
+  CardCorners,
   CardHeader,
   CardFooter,
   CardTitle,

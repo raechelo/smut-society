@@ -1,4 +1,4 @@
-import { isRelevantBook } from '@/lib/types/books';
+import { isEnglishBook, isRelevantBook, type GoogleBook } from '@/lib/types/books';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -9,6 +9,9 @@ export async function GET(request: Request) {
     return Response.json({ items: [] });
   }
 
+  // NB: no langRestrict=en — it's unreliable and can drop a query to zero
+  // results (e.g. "twisted love" returns 0 with it, 17 English editions
+  // without). English filtering is done per-volume below (see isEnglishBook).
   const params = new URLSearchParams({
     q,
     maxResults: '20',
@@ -32,5 +35,9 @@ export async function GET(request: Request) {
     );
   }
 
-  return Response.json({ items: (data.items ?? []).filter(isRelevantBook) });
+  return Response.json({
+    items: (data.items ?? []).filter(
+      (book: GoogleBook) => isRelevantBook(book) && isEnglishBook(book)
+    ),
+  });
 }

@@ -71,6 +71,15 @@ export function isRelevantBook(book: GoogleBook): boolean {
   );
 }
 
+// Google returns foreign-language editions (a German edition has a German
+// title AND description), and langRestrict doesn't reliably exclude them. Each
+// card is one edition, so keep only English volumes — allowing `en`/`en-US`
+// and volumes with no language set (rare, don't drop otherwise-good results).
+export function isEnglishBook(book: GoogleBook): boolean {
+  const lang = book.volumeInfo.language;
+  return !lang || lang.toLowerCase().startsWith('en');
+}
+
 export type GoogleBook = {
   id: string;
   volumeInfo: {
@@ -90,5 +99,6 @@ export type GoogleBook = {
     pageCount?: number;
     averageRating?: number;
     ratingsCount?: number;
+    language?: string;
   };
 };

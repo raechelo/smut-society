@@ -9,6 +9,7 @@ import {
 } from '@/lib/types/books';
 import { Filter } from './filter';
 import { BookCard } from './book-card';
+import { Discover } from './discover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getUserFavoriteIds } from '@/lib/actions/books';
 
@@ -52,23 +53,25 @@ function BookGridSkeleton() {
   );
 }
 
-const DEFAULT_SUBJECTS = 'subject:(fiction OR romance OR erotica)';
+const DEFAULT_SUBJECTS = 'subject:(fiction OR romance OR erotica OR fantasy)';
 
-// Google Books widens a subject search with `subject:(a OR b)`, NOT
-// `subject:a|subject:b` — the `|` form silently returns zero results. Genre
-// values can be multi-word (e.g. "dark romance"), so quote each one.
 function subjectClause(genres: string[]): string {
   const terms = genres.map((g) => `"${g}"`).join(' OR ');
   return `subject:(${terms})`;
 }
 
-// Scope typed text to the title field. A plain Google Books query ranks by
-// full-text relevance across the whole book, so short partial titles ("a touch
-// of") match inside dictionaries and magazines and bury the real books. Quoting
-// keeps the words together so an as-you-type prefix matches the start of a title
-// (e.g. `intitle:"a touch of"` → "A Touch of Darkness").
+// Google Books does no prefix matching, so a fully-quoted title phrase can't
+// match until every word is complete (`intitle:"a touch of dark"` misses "A
+// Touch of Darkness" — "dark" ≠ the token "darkness"). Instead, quote the
+// completed words as a title phrase and leave the last, still-being-typed word
+// loose: `intitle:"a touch of" dark` — the loose term matches "Darkness" and
+// ranks the intended book first while you type.
 function titleClause(input: string): string {
-  return `intitle:"${input.replace(/"/g, '')}"`;
+  const words = input.replace(/"/g, '').trim().split(/\s+/).filter(Boolean);
+  if (words.length <= 1) return `intitle:${words[0] ?? ''}`;
+  const phrase = words.slice(0, -1).join(' ');
+  const last = words[words.length - 1];
+  return `intitle:"${phrase}" ${last}`;
 }
 
 function buildQuery(input: string, genres: string[]): string {
@@ -77,12 +80,8 @@ function buildQuery(input: string, genres: string[]): string {
 
   const titlePart = base ? titleClause(base) : '';
 
-  // No explicit genre filter: bias toward on-theme subjects only when browsing
-  // (empty search box). Appending subjects to a typed title would just narrow a
-  // specific search that already works on its own.
   if (!genres.length) return titlePart || DEFAULT_SUBJECTS;
 
-  // Explicit genre filter selected — honor it, optionally alongside typed text.
   const clause = subjectClause(genres);
   return titlePart ? `${titlePart} ${clause}` : clause;
 }
@@ -170,15 +169,20 @@ export function LibraryClient() {
         ) : error ? (
           <p className='mt-xl text-center text-sm text-destructive'>{error}</p>
         ) : books.length > 0 ? (
-          <BookGrid books={books} favoritedIds={favoritedIds} onFavoriteChange={handleFavoriteChange} />
+          <BookGrid
+            books={books}
+            favoritedIds={favoritedIds}
+            onFavoriteChange={handleFavoriteChange}
+          />
         ) : hasQuery ? (
           <p className='mt-xl text-center text-sm text-muted-foreground'>
             No books found
           </p>
         ) : (
-          <p className='mt-xl text-center text-sm text-muted-foreground'>
-            Search for a book to get started
-          </p>
+          <Discover
+            favoritedIds={favoritedIds}
+            onFavoriteChange={handleFavoriteChange}
+          />
         )}
       </div>
     </div>

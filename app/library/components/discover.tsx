@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { GoogleBook } from '@/lib/types/books';
 import { BookCard } from './book-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import Typography from '@/components/ui/typography';
 
 // Curated browse shelves shown before the user searches. Each shelf is one
 // Google Books subject query, run through the same /api/books/search route
@@ -16,11 +17,11 @@ type Shelf = {
 };
 
 const SHELVES: Shelf[] = [
-  { label: 'Romance', query: 'subject:romance' },
   { label: 'Fantasy Romance', query: 'subject:fantasy subject:romance' },
   { label: 'Dark Romance', query: 'subject:"dark romance"' },
   { label: 'Greek Mythology', query: 'subject:"greek mythology"' },
   { label: 'Paranormal & Vampires', query: 'subject:romance vampire' },
+  { label: 'Romance', query: 'subject:romance' },
 ];
 
 const SHELF_LIMIT = 12;
@@ -60,13 +61,14 @@ function ShelfRow({
 
   return (
     <section className='flex flex-col gap-sm'>
-      <h2 className='font-heading text-lg font-semibold tracking-wide'>
-        {shelf.label}
-      </h2>
+      <Typography variant='h2'>{shelf.label}</Typography>
       <div className='flex gap-md overflow-x-auto pb-xs'>
         {(books ?? Array.from({ length: 4 }).map(() => null)).map((book, i) =>
           book ? (
-            <div key={book.id} className='w-[320px] shrink-0'>
+            <div
+              key={book.id}
+              className='w-[320px] shrink-0'
+            >
               <BookCard
                 book={book}
                 isFavorited={favoritedIds.has(book.id)}
@@ -74,7 +76,10 @@ function ShelfRow({
               />
             </div>
           ) : (
-            <div key={i} className='w-[320px] shrink-0'>
+            <div
+              key={i}
+              className='w-[320px] shrink-0'
+            >
               <Skeleton className='h-[200px] w-full rounded-md' />
             </div>
           )

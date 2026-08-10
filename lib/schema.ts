@@ -83,6 +83,9 @@ export const clubs = pgTable('clubs', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   description: text('description'),
+  // Public clubs appear in Explore and can be joined by anyone. The DB default
+  // only backfills existing rows; the create form requires an explicit choice.
+  isPublic: boolean('is_public').notNull().default(false),
   createdBy: text('created_by')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),

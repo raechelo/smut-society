@@ -10,6 +10,7 @@ import {
   LogOut,
   MessageCircle,
   MessageCircleQuestionMark,
+  UsersRound,
 } from 'lucide-react';
 import {
   Sidebar as RawSidebar,
@@ -99,6 +100,14 @@ export const Sidebar = () => {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </Link>
+          <Link href='/bookclubs'>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={activePath.includes('bookclubs')}>
+                <UsersRound />
+                Bookclubs
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </Link>
           <Link href='/challenges'>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={activePath.includes('challenges')}>
@@ -109,7 +118,7 @@ export const Sidebar = () => {
           </Link>
           <Link href='/quizzes'>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={activePath.includes('past-reads')}>
+              <SidebarMenuButton isActive={activePath.includes('quizzes')}>
                 <MessageCircleQuestionMark />
                 Quizzes
               </SidebarMenuButton>

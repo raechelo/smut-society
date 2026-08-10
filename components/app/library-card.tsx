@@ -58,6 +58,7 @@ export const LibraryCard = ({
 
   return (
     <Card
+      shadow
       className='border-accent-light h-full relative'
       cornerDecoration={variant === 'hero' ? 'all' : undefined}
     >

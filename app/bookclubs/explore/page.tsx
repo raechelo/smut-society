@@ -18,7 +18,7 @@ export default async function ExploreClubsPage() {
           </Button>
         </Link>
 
-        <div className='min-h-0 flex-1 overflow-y-auto pr-xs'>
+        <div className='min-h-0 flex-1 overflow-y-auto pr-xs pt-1'>
           {clubs.length > 0 ? (
             <div className='grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3'>
               {clubs.map((club) => (

@@ -25,9 +25,7 @@ const Typography = ({
   children,
 }: TypographyProps) => {
   const Tag = variant;
-  return (
-    <Tag className={clsx([styles[variant], classNames])}>{children}</Tag>
-  );
+  return <Tag className={clsx([styles[variant], classNames])}>{children}</Tag>;
 };
 
 export default Typography;

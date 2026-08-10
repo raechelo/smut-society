@@ -4,7 +4,7 @@ import { PageLayout } from '@/components/app/page-layout';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/app/chip';
 import { getMyClubs } from '@/lib/actions/clubs';
-import { ClubCard } from './components/club-card';
+import { MyClubCard } from './components/my-club-card';
 import { CreateClubDialog } from './components/create-club-dialog';
 
 export default async function BookclubsPage() {
@@ -25,35 +25,36 @@ export default async function BookclubsPage() {
           </div>
         </div>
 
-        <div className='min-h-0 flex-1 overflow-y-auto pr-xs'>
+        <div className='min-h-0 flex-1 overflow-y-auto pr-xs pt-1'>
           {clubs.length > 0 ? (
-            <div className='grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3'>
+            <div className='flex flex-col gap-md'>
               {clubs.map((club) => (
-                <Link key={club.id} href={`/bookclubs/${club.id}`}>
-                  <ClubCard
-                    name={club.name}
-                    description={club.description}
-                    memberCount={club.memberCount}
-                    badges={
-                      <>
+                <MyClubCard
+                  key={club.id}
+                  id={club.id}
+                  name={club.name}
+                  description={club.description}
+                  memberCount={club.memberCount}
+                  upcomingEventCount={club.upcomingEventCount}
+                  badges={
+                    <>
+                      <Chip
+                        label={club.isPublic ? 'Public' : 'Private'}
+                        size='small'
+                        variant='painted'
+                        colors={club.isPublic ? 'sapphire' : 'ink'}
+                      />
+                      {club.role === 'admin' && (
                         <Chip
-                          label={club.isPublic ? 'Public' : 'Private'}
+                          label='Admin'
                           size='small'
-                          variant='painted'
-                          colors={club.isPublic ? 'sapphire' : 'ink'}
+                          variant='outline'
+                          colors='accent'
                         />
-                        {club.role === 'admin' && (
-                          <Chip
-                            label='Admin'
-                            size='small'
-                            variant='outline'
-                            colors='accent'
-                          />
-                        )}
-                      </>
-                    }
-                  />
-                </Link>
+                      )}
+                    </>
+                  }
+                />
               ))}
             </div>
           ) : (

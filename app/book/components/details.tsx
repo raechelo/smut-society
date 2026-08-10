@@ -37,6 +37,7 @@ const DetailsItem = ({
 export const Details = () => {
   return (
     <Card
+      shadow
       cornerDecoration='top'
       className='w-[40%] h-full'
     >

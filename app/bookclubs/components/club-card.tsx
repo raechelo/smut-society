@@ -18,6 +18,7 @@ export function ClubCard({
 }) {
   return (
     <Card
+      shadow
       cornerDecoration='diagonal'
       className='flex h-full flex-col gap-sm transition-transform hover:-translate-y-0.5'
     >

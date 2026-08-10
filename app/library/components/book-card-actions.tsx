@@ -2,31 +2,17 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import {
-  Heart,
-  BookOpen,
-  Plus,
-  Star,
-  ChevronRight,
-  Loader2,
-} from 'lucide-react';
+import { Heart, Plus, Users } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import {
-  getUserClubs,
-  nominateBook,
-  toggleFavorite,
-} from '@/lib/actions/books';
+import { toggleFavorite } from '@/lib/actions/books';
 import { toast } from 'sonner';
 import type { GoogleBook } from '@/lib/types/books';
-
-type Club = { id: string; name: string };
-
-type State = 'idle' | 'loading-clubs' | 'nominating';
+import { SubmitToPoolDialog } from './submit-to-pool-dialog';
 
 type BookCardActionsProps = {
   book: GoogleBook;
@@ -34,159 +20,107 @@ type BookCardActionsProps = {
   onFavoriteChange?: (bookId: string, favorited: boolean) => void;
 };
 
-export function BookCardActions({ book, isFavorited = false, onFavoriteChange }: BookCardActionsProps) {
+export function BookCardActions({
+  book,
+  isFavorited = false,
+  onFavoriteChange,
+}: BookCardActionsProps) {
   const { status } = useSession();
   const isLoggedIn = status === 'authenticated';
   const [open, setOpen] = useState(false);
+  const [poolOpen, setPoolOpen] = useState(false);
   const [favorited, setFavorited] = useState(isFavorited);
-  const [clubs, setClubs] = useState<Club[] | null>(null);
-  const [clubsExpanded, setClubsExpanded] = useState(false);
-  const [state, setState] = useState<State>('idle');
-  const [nominatedClubs, setNominatedClubs] = useState<Set<string>>(new Set());
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    setFavorited((f) => !f);
+    setOpen(false);
+    const next = !favorited;
+    setFavorited(next);
     try {
       const res = await toggleFavorite(book.id);
       setFavorited(res.favorited);
       onFavoriteChange?.(book.id, res.favorited);
-      toast.success(res.favorited ? 'Added to favorites' : 'Removed from favorites');
+      toast.success(
+        res.favorited ? 'Added to favorites' : 'Removed from favorites'
+      );
     } catch (err) {
-      setFavorited((f) => !f);
+      setFavorited(!next);
       const msg = err instanceof Error ? err.message : 'Something went wrong';
       toast.error(msg === 'Unauthorized' ? 'Sign in to save favorites' : msg);
     }
   };
 
-  const handleClubsToggle = async (e: React.MouseEvent) => {
+  const handleSubmitClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!clubsExpanded && clubs === null) {
-      setState('loading-clubs');
-      const result = await getUserClubs();
-      setClubs(result);
-      setState('idle');
+    setOpen(false);
+    if (!isLoggedIn) {
+      toast.error('Sign in to suggest books to your clubs');
+      return;
     }
-    setClubsExpanded((v) => !v);
-  };
-
-  const handleNominate = async (clubId: string) => {
-    const { title, authors, imageLinks } = book.volumeInfo;
-    setState('nominating');
-    try {
-      await nominateBook(clubId, {
-        bookId: book.id,
-        bookTitle: title,
-        bookCover: imageLinks?.thumbnail?.replace('http://', 'https://'),
-        bookAuthor: authors?.join(', '),
-      });
-      setNominatedClubs((s) => new Set(s).add(clubId));
-    } finally {
-      setState('idle');
-    }
+    setPoolOpen(true);
   };
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={(v) => {
-        setOpen(v);
-        if (!v) setClubsExpanded(false);
-      }}
-    >
-      <PopoverTrigger asChild>
-        <button
-          className='absolute top-2 right-2 z-10 flex size-7 cursor-pointer items-center justify-center rounded-full bg-primary text-parchment opacity-0 shadow-[0_2px_10px_rgba(0,0,0,0.5)] transition-all duration-150 group-hover/card:opacity-100 hover:scale-110 hover:text-ink hover:shadow-[0_4px_14px_rgba(0,0,0,0.55)]'
-          onClick={(e) => e.stopPropagation()}
-          aria-label='Book actions'
-        >
-          <Plus className='size-3.5' />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        className='w-48 p-1'
-        align='end'
-        sideOffset={6}
+    <>
+      <Popover
+        open={open}
+        onOpenChange={setOpen}
       >
-        <div className='flex flex-col gap-0.5'>
-          {/* Favorite */}
-          {isLoggedIn && (
+        {/* Bookmark ribbon trigger. drop-shadow traces the clip-path as an ink border. */}
+        <div
+          className='absolute top-0 right-3 z-10'
+          style={{ filter: 'drop-shadow(0 1px 1px var(--color-ink))' }}
+        >
+          <PopoverTrigger asChild>
             <button
-              onClick={handleFavorite}
-              className={cn(
-                'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-all duration-100 hover:bg-primary/10 hover:text-primary active:scale-[0.98]',
-                favorited && 'text-accent hover:bg-accent/10 hover:text-accent'
-              )}
+              onClick={(e) => e.stopPropagation()}
+              aria-label='Book actions'
+              style={{
+                clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 76%, 0 100%)',
+              }}
+              className='flex h-12 w-9 cursor-pointer items-center justify-center pb-4 bg-primary text-parchment transition-colors duration-150 hover:bg-primary-dark'
             >
-              <Heart
-                className={cn('size-4 shrink-0', favorited && 'fill-current')}
-              />
-              {favorited ? 'Unfavorite' : 'Favorite'}
+              <Plus className='size-4' />
             </button>
-          )}
+          </PopoverTrigger>
+        </div>
+        <PopoverContent
+          className='w-52 p-1'
+          align='end'
+          sideOffset={6}
+        >
+          <div className='flex flex-col gap-0.5'>
+            {isLoggedIn && (
+              <button
+                onClick={handleFavorite}
+                className={cn(
+                  'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-all duration-100 hover:bg-primary/10 hover:text-primary active:scale-[0.98]',
+                  favorited && 'text-accent hover:bg-accent/10 hover:text-accent'
+                )}
+              >
+                <Heart
+                  className={cn('size-4 shrink-0', favorited && 'fill-current')}
+                />
+                {favorited ? 'Remove from favorites' : 'Add to favorites'}
+              </button>
+            )}
 
-          {/* Club pool */}
-          <div>
             <button
-              onClick={handleClubsToggle}
+              onClick={handleSubmitClick}
               className='flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-all duration-100 hover:bg-primary/10 hover:text-primary active:scale-[0.98]'
             >
-              {state === 'loading-clubs' ? (
-                <Loader2 className='size-4 shrink-0 animate-spin' />
-              ) : (
-                <BookOpen className='size-4 shrink-0' />
-              )}
-              Add to club pool
-              <ChevronRight
-                className={cn(
-                  'ml-auto size-3 shrink-0 transition-transform',
-                  clubsExpanded && 'rotate-90'
-                )}
-              />
+              <Users className='size-4 shrink-0' />
+              Submit to pool…
             </button>
-
-            {clubsExpanded && (
-              <div className='ml-2 flex flex-col border-l border-border/40 pl-2 pb-0.5'>
-                {clubs?.length === 0 ? (
-                  <p className='px-1 py-1 text-xs text-muted-foreground'>
-                    No clubs joined
-                  </p>
-                ) : (
-                  clubs?.map((club) => (
-                    <button
-                      key={club.id}
-                      disabled={
-                        nominatedClubs.has(club.id) || state === 'nominating'
-                      }
-                      onClick={() => handleNominate(club.id)}
-                      className={cn(
-                        'rounded-sm px-1 py-1 text-left text-xs transition-all duration-100 hover:bg-primary/10 hover:text-primary active:scale-[0.98]',
-                        nominatedClubs.has(club.id) &&
-                          'text-muted-foreground cursor-default hover:bg-transparent hover:text-muted-foreground'
-                      )}
-                    >
-                      {nominatedClubs.has(club.id) ? '✓ ' : ''}
-                      {club.name}
-                    </button>
-                  ))
-                )}
-              </div>
-            )}
           </div>
+        </PopoverContent>
+      </Popover>
 
-          <div className='my-0.5 h-px bg-border/40' />
-
-          {/* Rate — placeholder */}
-          <button
-            disabled
-            className='flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground/50 cursor-not-allowed'
-          >
-            <Star className='size-4 shrink-0' />
-            Rate
-            <span className='ml-auto text-[10px]'>soon</span>
-          </button>
-        </div>
-      </PopoverContent>
-    </Popover>
+      <SubmitToPoolDialog
+        book={book}
+        open={poolOpen}
+        onOpenChange={setPoolOpen}
+      />
+    </>
   );
 }

@@ -58,14 +58,15 @@ export function EventRsvp({
       <div className='grid grid-cols-2 gap-xs'>
         <Button
           size='sm'
-          variant={status === 'not_going' ? 'secondary' : 'outline'}
+          variant={status === 'not_going' ? 'solid' : 'outline'}
+          color={status === 'not_going' ? 'secondary' : 'primary'}
           onClick={() => apply('not_going')}
         >
           <X className='size-4' />
         </Button>
         <Button
           size='sm'
-          variant={status === 'not_going' ? 'outline' : 'default'}
+          variant={status === 'not_going' ? 'outline' : 'solid'}
           onClick={() => apply('going')}
         >
           <Check className='size-4' />

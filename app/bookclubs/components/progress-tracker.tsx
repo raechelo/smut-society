@@ -125,9 +125,10 @@ export function ProgressTracker({
 
         <Button
           size='sm'
-          variant='secondary'
           onClick={handleSave}
           disabled={pending}
+          color='accent'
+          variant='outline'
           className='w-full'
         >
           {pending && <Loader2 className='size-4 animate-spin' />}

@@ -18,8 +18,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarFooter,
-  SidebarTrigger,
-  useSidebar,
   SidebarMenuItem,
   SidebarMenuButton,
 } from '../ui/sidebar';
@@ -31,7 +29,6 @@ import { Divider } from './divider';
 import { usePathname } from 'next/navigation';
 
 export const Sidebar = () => {
-  const { open } = useSidebar();
   const { data: session } = useSession();
   const activePath = usePathname();
   return (
@@ -58,7 +55,7 @@ export const Sidebar = () => {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup className='pt-0'>
-          <Divider />
+          <Divider fancy />
           <Link href='/book'>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={activePath.includes('book')}>
@@ -83,7 +80,7 @@ export const Sidebar = () => {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </Link>
-          <Divider />
+          <Divider fancy />
           <Link href='/library'>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={activePath.includes('library')}>

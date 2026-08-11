@@ -72,14 +72,14 @@ export function CreateClubDialog({ trigger }: { trigger?: ReactNode }) {
         <div className='grid grid-cols-2 gap-xs'>
           <Button
             type='button'
-            variant={isPublic === true ? 'default' : 'outline'}
+            variant={isPublic === true ? 'solid' : 'outline'}
             onClick={() => setIsPublic(true)}
           >
             <Globe /> Public
           </Button>
           <Button
             type='button'
-            variant={isPublic === false ? 'default' : 'outline'}
+            variant={isPublic === false ? 'solid' : 'outline'}
             onClick={() => setIsPublic(false)}
           >
             <Lock /> Private

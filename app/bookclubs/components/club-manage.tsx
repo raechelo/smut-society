@@ -241,7 +241,8 @@ function AdminControls({
           onOpenChange={setDeleteOpen}
           trigger={
             <Button
-              variant='error'
+              variant='outline'
+              color='error'
               size='sm'
               className={ROW}
             >
@@ -260,7 +261,7 @@ function AdminControls({
                 Cancel
               </Button>
               <Button
-                variant='error'
+                color='error'
                 onClick={handleDelete}
                 disabled={busy === 'delete'}
               >

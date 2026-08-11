@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { CircleUser, Sparkles } from 'lucide-react';
+import { CircleUser } from 'lucide-react';
 import { PageLayout } from '@/components/app/page-layout';
 import { Chip } from '@/components/app/chip';
 import { getClub } from '@/lib/actions/clubs';
@@ -7,8 +7,8 @@ import { JoinButton } from '../components/join-button';
 import { ClubManage } from '../components/club-manage';
 import { PromoteMemberButton } from '../components/promote-member-button';
 import { BookThumb } from '../components/next-read-section';
+import { CurrentlyReading } from '../components/currently-reading';
 import { NextReadPanel } from '../components/next-read-panel';
-import { FinishBookButton } from '../components/finish-book-button';
 import { NextEventPanel } from '../components/next-event-card';
 import { ProgressTracker } from '../components/progress-tracker';
 import { Breadcrumbs } from '@/components/app/breadcrumb';
@@ -73,51 +73,11 @@ export default async function ClubPage({
               </p>
             )}
 
-            {/* Current read */}
-            <div className='flex flex-col gap-sm'>
-              <h2 className='font-heading text-lg font-semibold tracking-wide'>
-                Currently reading
-              </h2>
-              {club.currentBook ? (
-                <div className='flex items-center gap-md rounded-md border border-border/50 bg-card/40 p-md'>
-                  <BookThumb
-                    cover={club.currentBook.cover}
-                    title={club.currentBook.title}
-                  />
-                  <div className='flex min-w-0 flex-col gap-sm'>
-                    <div>
-                      <p className='font-heading text-lg font-semibold'>
-                        {club.currentBook.title}
-                      </p>
-                      {club.currentBook.author && (
-                        <p className='text-sm text-muted-foreground'>
-                          {club.currentBook.author}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  {club.isAdmin && (
-                    <div className='ml-auto self-start'>
-                      <FinishBookButton clubId={club.id} />
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className='flex items-start gap-sm rounded-md border border-dashed border-primary/40 bg-primary/5 p-md text-sm'>
-                  <Sparkles className='mt-0.5 size-5 shrink-0 text-primary' />
-                  <div>
-                    <p className='font-medium text-foreground'>
-                      No book picked yet.
-                    </p>
-                    <p className='text-muted-foreground'>
-                      {club.isAdmin
-                        ? 'Pick the club’s next read from the nominations in the sidebar.'
-                        : 'The club needs to pick its next read from the nominations in the sidebar.'}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
+            <CurrentlyReading
+              clubId={club.id}
+              book={club.currentBook}
+              isAdmin={club.isAdmin}
+            />
 
             {/* Reading history */}
             {club.finishedBooks.length > 0 && (

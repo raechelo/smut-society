@@ -65,7 +65,7 @@ export const Details = () => {
           value='Oct. 22 2018'
           IconComponent={<Calendar />}
         />
-        <Divider variant='short' />
+        <Divider />
 
         <DetailsItem
           label='published'
@@ -78,7 +78,7 @@ export const Details = () => {
           IconComponent={<Star />}
         />
 
-        <Divider variant='short' />
+        <Divider />
 
         <DetailsItem
           label='reading status'

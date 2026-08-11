@@ -2,34 +2,35 @@ import { cn } from '../../lib/utils';
 
 export const Divider = ({
   classNames,
-  variant = 'fancy',
+  fancy = false,
 }: {
   classNames?: string;
-  variant?: 'fancy' | 'long' | 'short';
+  // When true, render the ornamental divider.png. Otherwise render a plain
+  // horizontal line like a regular divider.
+  fancy?: boolean;
 }) => {
-  let src = '/divider.png';
-  let imgClassNames = 'w-full h-[70px] my-[-8px] divider-filter-fancy';
-
-  if (variant === 'long') {
-    src = '/long-divider.png';
-    imgClassNames = 'w-full h-[70px] divider-filter';
-  }
-  if (variant === 'short') {
-    src = '/short-divider.png';
-    imgClassNames = 'w-full h-[35px] my-sm divider-filter';
+  if (fancy) {
+    return (
+      <div
+        data-slot='divider'
+        className={cn('relative flex w-full min-w-0', classNames)}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src='/divider.png'
+          alt=''
+          role='presentation'
+          className='w-full h-[70px] my-[-8px] divider-filter-fancy'
+        />
+      </div>
+    );
   }
 
   return (
     <div
       data-slot='divider'
-      className={cn('relative flex w-full min-w-0', classNames)}
-    >
-      <img
-        src={src}
-        alt=''
-        role='presentation'
-        className={imgClassNames}
-      />
-    </div>
+      role='presentation'
+      className={cn('w-full border-t border-border', classNames)}
+    />
   );
 };

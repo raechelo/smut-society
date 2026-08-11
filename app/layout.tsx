@@ -26,7 +26,8 @@ const libreBaskerville = Libre_Baskerville({
 
 export const metadata: Metadata = {
   title: 'Smut Society',
-  description: 'Your cozy corner for romance reads, book clubs, and spicy challenges.',
+  description:
+    'Your cozy corner for romance reads, book clubs, and spicy challenges.',
   icons: { icon: '/favicon.png' },
 };
 
@@ -52,7 +53,7 @@ export default function RootLayout({
         <Providers>
           <SidebarProvider>
             <Sidebar />
-            <main className='relative flex-1 min-h-0 h-full p-xl overflow-hidden'>
+            <main className='relative flex-1 min-h-0 h-full px-lg py-xl overflow-hidden'>
               <img
                 src='/big-corner.png'
                 alt=''

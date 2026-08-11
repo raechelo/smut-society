@@ -1,21 +1,16 @@
 import type { ReactNode } from 'react';
-import Typography from '../ui/typography';
+import { Breadcrumbs } from './breadcrumb';
 
 type PageLayoutProps = {
-  title: string;
+  crumbs?: { link?: string; label: string }[];
   children: ReactNode;
 };
 
-export const PageLayout = ({ title, children }: PageLayoutProps) => {
+export const PageLayout = ({ crumbs, children }: PageLayoutProps) => {
   return (
-    <div className='flex size-full flex-col px-lg'>
-      <Typography
-        variant='h1'
-        classNames='text-primary !mb-sm'
-      >
-        {title}
-      </Typography>
-      <div className='min-h-0 flex-1'>{children}</div>
+    <div className='size-full min-h-0'>
+      {crumbs && <Breadcrumbs breadcrumbs={crumbs} />}
+      {children}
     </div>
   );
 };

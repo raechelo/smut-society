@@ -11,7 +11,7 @@ export default async function BookclubsPage() {
   const clubs = await getMyClubs();
 
   return (
-    <PageLayout title='Bookclubs'>
+    <PageLayout>
       <div className='flex h-full flex-col gap-md'>
         <div className='flex flex-wrap items-center justify-between gap-sm'>
           <p className='text-sm text-muted-foreground'>Your book clubs</p>

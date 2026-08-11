@@ -3,7 +3,7 @@ import { LibraryClient } from './components/library-client';
 
 const Library = () => {
   return (
-    <PageLayout title='Library'>
+    <PageLayout>
       <LibraryClient />
     </PageLayout>
   );

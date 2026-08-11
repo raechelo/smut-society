@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Eye } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { PageLayout } from '@/components/app/page-layout';
 import { Button } from '@/components/ui/button';
 import { getPublicClubs } from '@/lib/actions/clubs';
@@ -10,14 +10,13 @@ export default async function ExploreClubsPage() {
   const clubs = await getPublicClubs();
 
   return (
-    <PageLayout title='Explore Clubs'>
+    <PageLayout
+      crumbs={[
+        { label: 'Bookclubs', link: '/bookclubs' },
+        { label: 'Explore' },
+      ]}
+    >
       <div className='flex h-full flex-col gap-md'>
-        <Link href='/bookclubs'>
-          <Button variant='ghost' className='px-0'>
-            <ArrowLeft /> Back to my bookclubs
-          </Button>
-        </Link>
-
         <div className='min-h-0 flex-1 overflow-y-auto pr-xs pt-1'>
           {clubs.length > 0 ? (
             <div className='grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3'>
@@ -34,7 +33,10 @@ export default async function ExploreClubsPage() {
                           <Eye /> View
                         </Button>
                       </Link>
-                      <JoinButton clubId={club.id} joined={club.isMember} />
+                      <JoinButton
+                        clubId={club.id}
+                        joined={club.isMember}
+                      />
                     </>
                   }
                 />

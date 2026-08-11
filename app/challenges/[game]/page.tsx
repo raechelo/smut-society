@@ -1,9 +1,6 @@
 'use client';
 
 import { PageLayout } from '@/components/app/page-layout';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 export const Page = () => {
@@ -14,18 +11,10 @@ export const Page = () => {
     .join(' ');
 
   return (
-    <PageLayout title={title}>
-      <div className='flex flex-col'>
-        <Link href='/challenges'>
-          <Button
-            variant='ghost'
-            className='px-0'
-          >
-            <ArrowLeft /> Back to challenges
-          </Button>
-        </Link>
-        Page
-      </div>
+    <PageLayout
+      crumbs={[{ label: 'Challenges', link: '/challenges' }, { label: title }]}
+    >
+      <div className='flex flex-col'>Page</div>
     </PageLayout>
   );
 };

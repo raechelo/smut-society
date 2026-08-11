@@ -1,13 +1,26 @@
 import type { Metadata } from 'next';
-import { Fleur_De_Leah, Libre_Baskerville, Noto_Sans } from 'next/font/google';
+import {
+  Fleur_De_Leah,
+  Imperial_Script,
+  Libre_Baskerville,
+  Noto_Sans,
+} from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Providers } from '@/components/app/providers';
 import { Sidebar } from '@/components/app/sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
-const fleurDeLeah = Fleur_De_Leah({
+// Everyday display font: drives all headings (Typography h1–h6, dialog titles).
+const imperialScript = Imperial_Script({
   variable: '--font-display',
+  weight: '400',
+  subsets: ['latin'],
+});
+
+// Extra-fancy banner font, used sparingly (e.g. the sidebar brand title).
+const fleurDeLeah = Fleur_De_Leah({
+  variable: '--font-banner',
   weight: '400',
   subsets: ['latin'],
 });
@@ -43,6 +56,7 @@ export default function RootLayout({
       className={cn(
         'h-full',
         'antialiased',
+        imperialScript.variable,
         fleurDeLeah.variable,
         libreBaskerville.variable,
         notoSans.variable,

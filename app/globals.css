@@ -8,6 +8,7 @@
   --color-background: var(--parchment);
   --color-foreground: var(--foreground);
   --font-display: var(--font-display);
+  --font-banner: var(--font-banner);
   --font-serif: var(--font-libre-serif);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-fleur-display);

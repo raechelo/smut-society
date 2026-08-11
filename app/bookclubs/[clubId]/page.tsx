@@ -9,7 +9,7 @@ import { PromoteMemberButton } from '../components/promote-member-button';
 import { BookThumb } from '../components/next-read-section';
 import { CurrentlyReading } from '../components/currently-reading';
 import { NextReadPanel } from '../components/next-read-panel';
-import { NextEventPanel } from '../components/next-event-card';
+import { NextEvent } from '../components/next-event';
 import { ProgressTracker } from '../components/progress-tracker';
 import { Breadcrumbs } from '@/components/app/breadcrumb';
 
@@ -29,7 +29,13 @@ export default async function ClubPage({
         { label: club.name },
       ]}
     >
-      <div className='flex h-full flex-col gap-md overflow-y-auto pr-xs'></div>
+      <div className='flex size-full flex-col gap-md overflow-y-auto pr-xs'>
+        <NextEvent
+          events={club.upcomingEvents}
+          totalCount={club.upcomingEventCount}
+          isMember={club.isMember}
+        />
+      </div>
     </PageLayout>
   );
 }

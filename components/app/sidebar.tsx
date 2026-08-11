@@ -48,7 +48,7 @@ export const Sidebar = () => {
       <SidebarHeader className='p-4'>
         <Typography
           variant='h1'
-          classNames='font-sidebar-foreground text-[68px]/[.9] pl-12 -indent-12 !mb-0'
+          classNames='!font-banner text-[68px]/[.9] pl-12 -indent-12 !mb-0'
         >
           Smut Society
         </Typography>

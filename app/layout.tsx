@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import {
   Fleur_De_Leah,
-  Imperial_Script,
+  Rouge_Script,
   Libre_Baskerville,
   Noto_Sans,
 } from 'next/font/google';
@@ -12,7 +12,7 @@ import { Sidebar } from '@/components/app/sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
 // Everyday display font: drives all headings (Typography h1–h6, dialog titles).
-const imperialScript = Imperial_Script({
+const rogueScript = Rouge_Script({
   variable: '--font-display',
   weight: '400',
   subsets: ['latin'],
@@ -56,7 +56,7 @@ export default function RootLayout({
       className={cn(
         'h-full',
         'antialiased',
-        imperialScript.variable,
+        rogueScript.variable,
         fleurDeLeah.variable,
         libreBaskerville.variable,
         notoSans.variable,

@@ -31,8 +31,8 @@ export default async function ClubPage({
     >
       <div className='flex size-full flex-col gap-md overflow-y-auto pr-xs'>
         <NextEvent
+          clubName={club.name}
           events={club.upcomingEvents}
-          totalCount={club.upcomingEventCount}
           isMember={club.isMember}
         />
       </div>

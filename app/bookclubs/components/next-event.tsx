@@ -1,115 +1,141 @@
 'use client';
 
-import { CalendarPlus, MapPin } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import type { ClubEvent } from '@/lib/actions/clubs';
-import { EventRsvp } from './event-rsvp';
-import { googleCalendarUrl, relativeTime, shortDate } from '../utils';
+import { useState, useTransition } from 'react';
+import { Check, X } from 'lucide-react';
+import { toast } from 'sonner';
 import Typography from '@/components/ui/typography';
+import { Button } from '@/components/ui/button';
+import {
+  setEventRsvp,
+  type ClubEvent,
+  type RsvpStatus,
+} from '@/lib/actions/clubs';
 
-type NextEventPanelProps = {
-  clubId: string;
+type NextEventProps = {
+  clubName: string;
   events: ClubEvent[];
-  totalCount: number;
-  isMember: boolean;
-  isAdmin: boolean;
-};
-
-type NextEventCardProps = {
-  events: ClubEvent[];
-  totalCount: number;
   isMember: boolean;
 };
 
-export function NextEvent({
-  events,
-  totalCount,
-  isMember,
-}: NextEventCardProps) {
-  const [next, following] = events;
-  const moreCount = totalCount - events.length;
+const DOT = 'text-sidebar-foreground/40';
+
+export function NextEvent({ clubName, events, isMember }: NextEventProps) {
+  const next = events[0] ?? null;
 
   return (
-    <Card
-      shadow
-      cornerDecoration='top-right'
-      className='flex gap-sm'
-    >
-      <Typography variant='h3'>{next.title}</Typography>
-      <EventWhen startsAt={next.startsAt} />
-      {next.location && (
-        <p className='flex items-start gap-1.5 text-sm text-muted-foreground'>
-          <MapPin className='mt-0.5 size-4 shrink-0' />
-          <span className='min-w-0 break-words'>{next.location}</span>
-        </p>
-      )}
-
-      <EventRsvp
-        eventId={next.id}
-        attendingCount={next.attendingCount}
-        myRsvp={next.myRsvp}
-        canRsvp={isMember}
-      />
-
-      <a
-        href={googleCalendarUrl(next)}
-        target='_blank'
-        rel='noopener noreferrer'
-        className='inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline'
+    <div className='flex h-fit shrink-0 items-center gap-md rounded-md bg-sidebar px-md text-sidebar-foreground z-3'>
+      <Typography
+        variant='h3'
+        classNames='!mb-0 min-w-0 truncate pl-2 leading-[2] text-accent-light'
       >
-        <CalendarPlus className='size-4' />
-        Add to Google Calendar
-      </a>
+        {clubName}
+      </Typography>
 
-      {following && (
-        <ul className='mt-xs list-disc border-t border-border/40 pl-4 pt-sm text-sm text-muted-foreground marker:text-primary/60'>
-          <li>
-            <span className='font-medium text-foreground'>
-              {following.title}
-            </span>{' '}
-            &middot;{' '}
-            <span suppressHydrationWarning>
-              {shortDate(following.startsAt)}
-            </span>
-          </li>
-        </ul>
+      {next ? (
+        <div className='ml-auto flex shrink-0 items-center gap-3 text-sm'>
+          <span suppressHydrationWarning>{eventDate(next.startsAt)}</span>
+          <span className={DOT}>·</span>
+          <span suppressHydrationWarning>{eventTime(next.startsAt)}</span>
+          <span className={DOT}>·</span>
+          <div className='flex items-center gap-3'>
+            <Rsvp
+              eventId={next.id}
+              attendingCount={next.attendingCount}
+              myRsvp={next.myRsvp}
+              canRsvp={isMember}
+            />
+          </div>
+        </div>
+      ) : (
+        <span className='ml-auto text-sm text-sidebar-foreground/70'>
+          No upcoming events
+        </span>
       )}
-
-      {moreCount > 0 && (
-        <p className='text-xs text-muted-foreground'>
-          +{moreCount} more scheduled
-        </p>
-      )}
-    </Card>
+    </div>
   );
 }
 
-// Formatted with the viewer's locale/timezone. suppressHydrationWarning covers
+function Rsvp({
+  eventId,
+  attendingCount,
+  myRsvp,
+  canRsvp,
+}: {
+  eventId: string;
+  attendingCount: number;
+  myRsvp: RsvpStatus | null;
+  canRsvp: boolean;
+}) {
+  const [count, setCount] = useState(attendingCount);
+  const [status, setStatus] = useState<RsvpStatus | null>(myRsvp);
+  const [, startTransition] = useTransition();
+
+  const apply = (target: RsvpStatus) => {
+    if (!canRsvp) {
+      toast.error('Join this club to RSVP');
+      return;
+    }
+    const nextStatus = status === target ? null : target;
+    const prevStatus = status;
+    const prevCount = count;
+
+    setStatus(nextStatus);
+    setCount(
+      (c) => c + (nextStatus === 'going' ? 1 : 0) - (status === 'going' ? 1 : 0)
+    );
+
+    startTransition(async () => {
+      try {
+        await setEventRsvp(eventId, nextStatus);
+      } catch (err) {
+        setStatus(prevStatus);
+        setCount(prevCount);
+        toast.error(
+          err instanceof Error ? err.message : 'Could not save your RSVP'
+        );
+      }
+    });
+  };
+
+  return (
+    <>
+      <Typography classNames='whitespace-nowrap'>{count} going</Typography>
+      <span className={DOT}>·</span>
+      <div className='flex items-center gap-1.5'>
+        <Button
+          variant='outline'
+          color='accent'
+          aria-pressed={status === 'not_going'}
+          onClick={() => apply('not_going')}
+        >
+          <X />
+        </Button>
+        <Button
+          variant='solid'
+          color='accent'
+          aria-pressed={status === 'going'}
+          onClick={() => apply('going')}
+        >
+          <Check />
+        </Button>
+      </div>
+    </>
+  );
+}
+
+// Formatted with the viewer's locale/timezone; suppressHydrationWarning covers
 // the expected server↔browser difference (server TZ vs. the user's).
-function EventWhen({ startsAt }: { startsAt: Date }) {
-  const date = new Date(startsAt);
-  const abs = date.toLocaleString(undefined, {
-    weekday: 'short',
+function eventDate(startsAt: Date): string {
+  return new Date(startsAt).toLocaleDateString(undefined, {
+    weekday: 'long',
     month: 'short',
     day: 'numeric',
+  });
+}
+
+function eventTime(startsAt: Date): string {
+  return new Date(startsAt).toLocaleTimeString(undefined, {
     hour: 'numeric',
     minute: '2-digit',
   });
-
-  return (
-    <div>
-      <p
-        className='text-sm font-medium'
-        suppressHydrationWarning
-      >
-        {abs}
-      </p>
-      <p
-        className='text-xs text-primary'
-        suppressHydrationWarning
-      >
-        {relativeTime(date)}
-      </p>
-    </div>
-  );
 }

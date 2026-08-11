@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import {
   Fleur_De_Leah,
-  Rouge_Script,
   Libre_Baskerville,
   Noto_Sans,
 } from 'next/font/google';
@@ -11,16 +10,10 @@ import { Providers } from '@/components/app/providers';
 import { Sidebar } from '@/components/app/sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
-// Everyday display font: drives all headings (Typography h1–h6, dialog titles).
-const rogueScript = Rouge_Script({
-  variable: '--font-display',
-  weight: '400',
-  subsets: ['latin'],
-});
-
-// Extra-fancy banner font, used sparingly (e.g. the sidebar brand title).
+// Display font: drives all headings (Typography h1–h6, dialog titles) and the
+// sidebar brand.
 const fleurDeLeah = Fleur_De_Leah({
-  variable: '--font-banner',
+  variable: '--font-display',
   weight: '400',
   subsets: ['latin'],
 });
@@ -56,7 +49,6 @@ export default function RootLayout({
       className={cn(
         'h-full',
         'antialiased',
-        rogueScript.variable,
         fleurDeLeah.variable,
         libreBaskerville.variable,
         notoSans.variable,

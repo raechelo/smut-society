@@ -71,6 +71,9 @@ export type ClubMember = {
   name: string | null;
   image: string | null;
   role: ClubRole;
+  // Whether this member is the viewer, and their progress on the current book.
+  isMe: boolean;
+  progress: ReadingProgress | null;
 };
 
 export type ClubBook = {
@@ -359,11 +362,13 @@ export async function getClub(clubId: string): Promise<ClubDetail | null> {
       }
     : null;
 
-  // The viewer's progress on the current book, if any.
-  let myProgress: ReadingProgress | null = null;
-  if (userId && currentBook) {
-    const [row] = await db
+  // Every member's progress on the current book, keyed by user. Drives the
+  // club-progress section; myProgress is just the viewer's entry.
+  const progressByUser = new Map<string, ReadingProgress>();
+  if (currentBook && members.length > 0) {
+    const rows = await db
       .select({
+        userId: readingProgress.userId,
         unit: readingProgress.unit,
         value: readingProgress.value,
         finished: readingProgress.finished,
@@ -371,14 +376,32 @@ export async function getClub(clubId: string): Promise<ClubDetail | null> {
       .from(readingProgress)
       .where(
         and(
-          eq(readingProgress.userId, userId),
           eq(readingProgress.clubId, clubId),
-          eq(readingProgress.bookId, currentBook.bookId)
+          eq(readingProgress.bookId, currentBook.bookId),
+          inArray(
+            readingProgress.userId,
+            members.map((m) => m.id)
+          )
         )
-      )
-      .limit(1);
-    if (row) myProgress = row;
+      );
+    for (const r of rows) {
+      progressByUser.set(r.userId, {
+        unit: r.unit,
+        value: r.value,
+        finished: r.finished,
+      });
+    }
   }
+
+  const enrichedMembers: ClubMember[] = members.map((m) => ({
+    ...m,
+    isMe: m.id === userId,
+    progress: progressByUser.get(m.id) ?? null,
+  }));
+
+  const myProgress: ReadingProgress | null = userId
+    ? progressByUser.get(userId) ?? null
+    : null;
 
   return {
     id: club.id,
@@ -388,7 +411,7 @@ export async function getClub(clubId: string): Promise<ClubDetail | null> {
     createdBy: club.createdBy,
     isOwner: club.createdBy === userId,
     archivedAt: club.archivedAt,
-    members,
+    members: enrichedMembers,
     memberCount: members.length,
     isMember,
     isAdmin,

@@ -8,6 +8,9 @@ import { ClubManage } from '../components/club-manage';
 import { PromoteMemberButton } from '../components/promote-member-button';
 import { BookThumb } from '../components/next-read-section';
 import { CurrentlyReading } from '../components/currently-reading';
+import { ClubProgress } from '../components/club-progress';
+import { Discussion } from '../components/discussion';
+import { Challenge } from '../components/challenge';
 import { NextReadPanel } from '../components/next-read-panel';
 import { NextEvent } from '../components/next-event';
 import { ProgressTracker } from '../components/progress-tracker';
@@ -35,6 +38,35 @@ export default async function ClubPage({
           events={club.upcomingEvents}
           isMember={club.isMember}
         />
+        <CurrentlyReading
+          clubId={club.id}
+          book={club.currentBook}
+          isAdmin={club.isAdmin}
+        />
+        <ClubProgress
+          clubId={club.id}
+          book={club.currentBook}
+          members={club.members}
+          isMember={club.isMember}
+        />
+
+        <div className='grid grid-cols-1 gap-md lg:grid-cols-10'>
+          <div className='lg:col-span-4'>
+            <Discussion />
+          </div>
+          <div className='lg:col-span-3'>
+            <Challenge />
+          </div>
+          <div className='lg:col-span-3'>
+            <NextReadPanel
+              clubId={club.id}
+              nominations={club.nominations}
+              isMember={club.isMember}
+              isAdmin={club.isAdmin}
+              hasCurrentBook={club.currentBook !== null}
+            />
+          </div>
+        </div>
       </div>
     </PageLayout>
   );

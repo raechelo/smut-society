@@ -9,6 +9,7 @@ import Typography from '@/components/ui/typography';
 import { Rating } from '@/components/ui/rating';
 import { Chip } from '@/components/app/chip';
 import { Pepper } from '@/components/icons/pepper';
+import { Divider } from '@/components/app/divider';
 
 // TODO: spice, series, club rating, and tropes have no data source yet — these
 // are placeholders. Genre / page count / global rating come from Google Books.
@@ -31,7 +32,10 @@ function SpiceMeter({ value }: { value: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <Pepper
           key={i}
-          className={cn('size-5', i < value ? 'text-rust' : 'text-foreground/15')}
+          className={cn(
+            'size-5',
+            i < value ? 'text-rust' : 'text-foreground/15'
+          )}
         />
       ))}
     </div>
@@ -94,7 +98,7 @@ export async function CurrentlyReading({
     .join(' · ');
 
   return (
-    <div className='relative flex w-full gap-lg rounded-md border border-accent/40 bg-card/40 p-md'>
+    <div className='card-gradient card-shadow relative flex w-full gap-lg rounded-md border border-accent/40 bg-card/40 p-md'>
       {isAdmin && (
         <div className='absolute right-md top-md'>
           <FinishBookButton clubId={clubId} />
@@ -137,6 +141,8 @@ export async function CurrentlyReading({
           )}
         </div>
 
+        <Divider classNames='my-md' />
+
         <div className='flex flex-wrap items-end gap-8'>
           <StatBlock label='Spice'>
             <SpiceMeter value={PLACEHOLDER_SPICE} />
@@ -163,6 +169,8 @@ export async function CurrentlyReading({
             )}
           </StatBlock>
         </div>
+
+        <Divider classNames='my-md' />
 
         <div className='flex flex-wrap gap-1.5'>
           {PLACEHOLDER_TROPES.map((trope) => (

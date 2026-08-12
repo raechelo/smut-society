@@ -21,7 +21,7 @@ export function NextReadPanel({
     <div className='flex flex-col gap-2'>
       <Card
         shadow
-        className='gap-sm'
+        className='gap-sm border-accent/40'
       >
         <NextReadSection
           compact

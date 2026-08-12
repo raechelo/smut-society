@@ -1,20 +1,12 @@
 import { notFound } from 'next/navigation';
-import { CircleUser } from 'lucide-react';
 import { PageLayout } from '@/components/app/page-layout';
-import { Chip } from '@/components/app/chip';
 import { getClub } from '@/lib/actions/clubs';
-import { JoinButton } from '../components/join-button';
-import { ClubManage } from '../components/club-manage';
-import { PromoteMemberButton } from '../components/promote-member-button';
-import { BookThumb } from '../components/next-read-section';
 import { CurrentlyReading } from '../components/currently-reading';
 import { ClubProgress } from '../components/club-progress';
 import { Discussion } from '../components/discussion';
 import { Challenge } from '../components/challenge';
 import { NextReadPanel } from '../components/next-read-panel';
 import { NextEvent } from '../components/next-event';
-import { ProgressTracker } from '../components/progress-tracker';
-import { Breadcrumbs } from '@/components/app/breadcrumb';
 
 export default async function ClubPage({
   params,

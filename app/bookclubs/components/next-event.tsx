@@ -23,7 +23,7 @@ export function NextEvent({ clubName, events, isMember }: NextEventProps) {
   const next = events[0] ?? null;
 
   return (
-    <div className='flex h-fit shrink-0 items-center gap-md rounded-md bg-sidebar px-md text-sidebar-foreground z-3'>
+    <div className='panel-shadow z-3 flex h-fit shrink-0 items-center gap-md rounded-md bg-sidebar px-md text-sidebar-foreground'>
       <Typography
         variant='h3'
         classNames='!mb-0 min-w-0 truncate pl-2 leading-[2] text-accent-light'

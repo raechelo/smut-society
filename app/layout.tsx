@@ -1,17 +1,11 @@
 import type { Metadata } from 'next';
-import {
-  Fleur_De_Leah,
-  Libre_Baskerville,
-  Noto_Sans,
-} from 'next/font/google';
+import { Fleur_De_Leah, Libre_Baskerville, Noto_Sans } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Providers } from '@/components/app/providers';
 import { Sidebar } from '@/components/app/sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
-// Display font: drives all headings (Typography h1–h6, dialog titles) and the
-// sidebar brand.
 const fleurDeLeah = Fleur_De_Leah({
   variable: '--font-display',
   weight: '400',

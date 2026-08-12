@@ -105,11 +105,12 @@
   /* BG */
   --background: oklch(1 0 0);
   --foreground: oklch(0.147 0.004 49.3);
+  --border: #c9922a;
 
   /* CARD */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.147 0.004 49.3);
-  --card-border: #5a2a1e;
+  --card-border: #c9922a;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.147 0.004 49.3);
 
@@ -254,5 +255,38 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  /* Shared card surface so every card reads as one system: a very subtle
+     parchment gradient and a soft shadow. */
+  .card-gradient {
+    background-image: radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      rgba(90, 42, 30, 0.08) 100%
+    );
+  }
+  .dark .card-gradient {
+    background-image: radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      rgba(134, 119, 169, 0.08) 100%
+    );
+  }
+  .card-shadow {
+    box-shadow: 0 3px 14px rgba(80, 34, 24, 0.15);
+  }
+  .dark .card-shadow {
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.32);
+  }
+  /* The dark sidebar panels read heavier at the same values, so keep them a
+     touch lighter than the parchment cards. */
+  .panel-shadow {
+    box-shadow: 0 2px 10px rgba(80, 34, 24, 0.1);
+  }
+  .dark .panel-shadow {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
   }
 }

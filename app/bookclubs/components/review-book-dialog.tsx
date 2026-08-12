@@ -29,14 +29,15 @@ function StarPicker({
   return (
     <div className='flex items-center gap-1'>
       {[1, 2, 3, 4, 5].map((n) => (
-        <button
+        <Button
           key={n}
           type='button'
+          variant='ghost'
+          size='icon-sm'
           aria-label={`${n} star${n > 1 ? 's' : ''}`}
           onClick={() => onChange(n)}
           onMouseEnter={() => setHover(n)}
           onMouseLeave={() => setHover(0)}
-          className='p-0.5 text-foreground transition-transform hover:scale-110'
         >
           <Star
             className={cn(
@@ -46,7 +47,7 @@ function StarPicker({
                 : 'fill-foreground/10 stroke-foreground/25'
             )}
           />
-        </button>
+        </Button>
       ))}
     </div>
   );

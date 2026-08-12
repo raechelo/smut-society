@@ -96,31 +96,18 @@ export function SubmitToPoolDialog({
             const checked = selected.has(club.id);
             return (
               <li key={club.id}>
-                <button
+                <Button
                   type='button'
+                  variant={checked ? 'solid' : 'outline'}
                   onClick={() => toggle(club.id)}
                   aria-pressed={checked}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
-                    checked
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border/60 hover:border-primary/50'
-                  )}
+                  className='w-full justify-start font-normal normal-case tracking-normal'
                 >
-                  <span
-                    className={cn(
-                      'flex size-5 shrink-0 items-center justify-center rounded-[5px] border',
-                      checked
-                        ? 'border-primary bg-primary text-parchment'
-                        : 'border-border'
-                    )}
-                  >
-                    {checked && <Check className='size-3.5' />}
-                  </span>
-                  <span className='min-w-0 truncate font-medium'>
-                    {club.name}
-                  </span>
-                </button>
+                  <Check
+                    className={cn('size-4 shrink-0', !checked && 'opacity-0')}
+                  />
+                  <span className='min-w-0 truncate'>{club.name}</span>
+                </Button>
               </li>
             );
           })}

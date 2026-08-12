@@ -133,14 +133,17 @@ export const Filter = ({
           </div>
 
           {hasActiveFilters && (
-            <button
+            <Button
+              type='button'
+              variant='link'
+              color='secondary'
               onClick={() =>
                 onFiltersChange({ ...DEFAULT_FILTERS, sortBy: filters.sortBy })
               }
-              className='self-start text-xs text-muted-foreground underline-offset-2 hover:underline'
+              className='h-auto self-start p-0'
             >
               Clear filters
-            </button>
+            </Button>
           )}
         </PopoverContent>
       </Popover>

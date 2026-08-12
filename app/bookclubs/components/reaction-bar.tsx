@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   toggleCommentReaction,
   toggleThreadReaction,
@@ -69,21 +69,18 @@ export function ReactionBar({
   return (
     <div className='flex flex-wrap items-center gap-1.5'>
       {reactions.map((r) => (
-        <button
+        <Button
           key={r.emoji}
           type='button'
+          size='xs'
+          variant={r.reacted ? 'solid' : 'outline'}
           disabled={pending}
           onClick={() => toggle(r.emoji)}
-          className={cn(
-            'flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors disabled:opacity-60',
-            r.reacted
-              ? 'border-primary/60 bg-primary/10 text-primary'
-              : 'border-border/60 hover:border-primary/50'
-          )}
+          className='rounded-full'
         >
           <span className='text-sm leading-none'>{r.emoji}</span>
           <span className='tabular-nums'>{r.count}</span>
-        </button>
+        </Button>
       ))}
 
       {canReact && (
@@ -92,13 +89,15 @@ export function ReactionBar({
           onOpenChange={setOpen}
         >
           <PopoverTrigger asChild>
-            <button
+            <Button
               type='button'
+              size='icon-xs'
+              variant='outline'
               aria-label='Add reaction'
-              className='flex size-6 items-center justify-center rounded-full border border-border/60 text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary'
+              className='rounded-full'
             >
               <SmilePlus className='size-3.5' />
-            </button>
+            </Button>
           </PopoverTrigger>
           <PopoverContent
             align='start'

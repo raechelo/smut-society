@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { markAllNotificationsRead } from '@/lib/actions/home';
 
 export function MarkAllReadButton() {
@@ -22,13 +23,14 @@ export function MarkAllReadButton() {
   };
 
   return (
-    <button
+    <Button
       type='button'
+      variant='link'
       onClick={onClick}
       disabled={pending}
-      className='text-xs font-medium text-primary hover:underline disabled:opacity-50'
+      className='h-auto p-0'
     >
       Mark all read
-    </button>
+    </Button>
   );
 }

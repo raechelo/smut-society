@@ -9,10 +9,16 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { toggleFavorite, toggleShelf } from '@/lib/actions/books';
 import { toast } from 'sonner';
 import type { GoogleBook } from '@/lib/types/books';
 import { SubmitToPoolDialog } from './submit-to-pool-dialog';
+
+// Popover menu rows: full-width, left-aligned, and readable (not the Button's
+// default uppercase) since this is a menu, not a standalone action.
+const MENU_ITEM =
+  'w-full justify-start gap-2 rounded-sm px-2 text-sm font-normal normal-case tracking-normal hover:bg-primary/10 hover:text-primary';
 
 type BookCardActionsProps = {
   book: GoogleBook;
@@ -109,16 +115,17 @@ export function BookCardActions({
           style={{ filter: 'drop-shadow(0 1px 1px var(--color-ink))' }}
         >
           <PopoverTrigger asChild>
-            <button
+            <Button
               onClick={(e) => e.stopPropagation()}
               aria-label='Book actions'
+              size='icon-sm'
               style={{
                 clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 76%, 0 100%)',
               }}
-              className='flex h-12 w-9 cursor-pointer items-center justify-center pb-4 bg-primary text-parchment transition-colors duration-150 hover:bg-primary-dark'
+              className='h-12 rounded-none pb-4'
             >
               <Plus className='size-4' />
-            </button>
+            </Button>
           </PopoverTrigger>
         </div>
         <PopoverContent
@@ -128,10 +135,12 @@ export function BookCardActions({
         >
           <div className='flex flex-col gap-0.5'>
             {isLoggedIn && (
-              <button
+              <Button
+                variant='ghost'
+                size='sm'
                 onClick={handleFavorite}
                 className={cn(
-                  'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-all duration-100 hover:bg-primary/10 hover:text-primary active:scale-[0.98]',
+                  MENU_ITEM,
                   favorited && 'text-accent hover:bg-accent/10 hover:text-accent'
                 )}
               >
@@ -139,14 +148,16 @@ export function BookCardActions({
                   className={cn('size-4 shrink-0', favorited && 'fill-current')}
                 />
                 {favorited ? 'Remove from favorites' : 'Add to favorites'}
-              </button>
+              </Button>
             )}
 
             {isLoggedIn && (
-              <button
+              <Button
+                variant='ghost'
+                size='sm'
                 onClick={handleShelf}
                 className={cn(
-                  'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-all duration-100 hover:bg-primary/10 hover:text-primary active:scale-[0.98]',
+                  MENU_ITEM,
                   onShelf && 'text-accent hover:bg-accent/10 hover:text-accent'
                 )}
               >
@@ -154,16 +165,18 @@ export function BookCardActions({
                   className={cn('size-4 shrink-0', onShelf && 'fill-current')}
                 />
                 {onShelf ? 'On your shelf' : 'Add to currently reading'}
-              </button>
+              </Button>
             )}
 
-            <button
+            <Button
+              variant='ghost'
+              size='sm'
               onClick={handleSubmitClick}
-              className='flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-all duration-100 hover:bg-primary/10 hover:text-primary active:scale-[0.98]'
+              className={MENU_ITEM}
             >
               <Users className='size-4 shrink-0' />
               Submit to pool…
-            </button>
+            </Button>
           </div>
         </PopoverContent>
       </Popover>

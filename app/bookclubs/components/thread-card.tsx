@@ -5,6 +5,7 @@ import { CircleUser } from 'lucide-react';
 import { CommentForm } from './comment-form';
 import { ReactionBar } from './reaction-bar';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import type { ThreadComment, ThreadDetail } from '@/lib/actions/discussions';
 
 const PREVIEW_COUNT = 2;
@@ -109,13 +110,14 @@ export function ThreadCard({
             />
           ))}
           {hidden > 0 && (
-            <button
+            <Button
               type='button'
+              variant='link'
               onClick={() => setExpanded(true)}
-              className='self-start text-xs font-medium text-primary hover:underline'
+              className='h-auto self-start p-0'
             >
               View {hidden} more {hidden === 1 ? 'reply' : 'replies'}
-            </button>
+            </Button>
           )}
         </div>
       )}

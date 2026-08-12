@@ -174,20 +174,17 @@ function VoteButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      size='sm'
+      variant={active ? 'solid' : 'outline'}
       onClick={onClick}
       aria-pressed={active}
       aria-label={active ? 'Remove vote' : 'Vote'}
-      className={cn(
-        'flex w-11 shrink-0 flex-col items-center rounded-md border px-1 py-1 text-sm font-semibold transition-colors',
-        active
-          ? 'border-primary bg-primary/10 text-primary'
-          : 'border-border/60 text-muted-foreground hover:border-primary/60 hover:text-primary'
-      )}
+      className='shrink-0'
     >
       <ChevronUp className='size-4' />
       {count}
-    </button>
+    </Button>
   );
 }
 

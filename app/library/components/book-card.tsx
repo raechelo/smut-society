@@ -1,7 +1,7 @@
 import { Card, CardFooter } from '@/components/ui/card';
 import { Chip } from '@/components/app/chip';
 import type { GoogleBook } from '@/lib/types/books';
-import { BookmarkButton } from './bookmark-button';
+import { BookCardActions } from './book-card-actions';
 import { BookCoverImage } from './book-cover-image';
 import { BookDescription } from './book-description';
 
@@ -87,11 +87,12 @@ export function BookCard({
 
   return (
     <Card
+      shadow
       className='h-full p-0'
       cornerDecoration='diagonal'
     >
-      <BookmarkButton
-        bookId={book.id}
+      <BookCardActions
+        book={book}
         isFavorited={isFavorited}
         onFavoriteChange={onFavoriteChange}
       />

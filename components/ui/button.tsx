@@ -9,16 +9,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary-dark',
-        outline:
-          'border-primary bg-transparent text-primary hover:border-accent-dark hover:text-accent-dark aria-expanded:text-primary dark:hover:text-accent-light dark:aria-expanded:text-accent-light dark:hover:border-accent-light',
-        secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary-light aria-expanded:bg-secondary-light',
-        ghost:
-          'hover:text-foreground aria-expanded:text-foreground dark:hover:text-accent dark:aria-expanded:text-accent',
-        error:
-          'bg-error/10 text-error hover:bg-error/20 focus-visible:border-error/40 focus-visible:ring-error/20 dark:bg-error/20 dark:hover:bg-error/30 dark:focus-visible:ring-error/40',
-        link: 'text-primary underline underline-offset-4 hover:text-primary-dark hover:underline',
+        solid: '',
+        outline: 'bg-transparent',
+        ghost: 'bg-transparent',
+        link: 'bg-transparent underline underline-offset-4 hover:underline',
+      },
+      // Actual colors are applied per (variant, color) in compoundVariants.
+      color: {
+        primary: '',
+        accent: '',
+        secondary: '',
+        error: '',
       },
       size: {
         default:
@@ -33,8 +34,98 @@ const buttonVariants = cva(
         'icon-lg': 'size-11',
       },
     },
+    compoundVariants: [
+      {
+        variant: 'solid',
+        color: 'primary',
+        class: 'bg-primary text-primary-foreground hover:bg-primary-dark',
+      },
+      {
+        variant: 'solid',
+        color: 'accent',
+        class:
+          'bg-accent text-accent-foreground hover:bg-accent-light aria-expanded:bg-accent-light',
+      },
+      {
+        variant: 'solid',
+        color: 'secondary',
+        class:
+          'bg-secondary text-secondary-foreground hover:bg-secondary-light aria-expanded:bg-secondary-light',
+      },
+      {
+        variant: 'solid',
+        color: 'error',
+        class: 'bg-error text-parchment hover:bg-error/90',
+      },
+      {
+        variant: 'outline',
+        color: 'primary',
+        class:
+          'border-primary text-primary hover:border-accent-dark hover:text-accent-dark aria-expanded:text-primary dark:hover:text-accent-light dark:aria-expanded:text-accent-light dark:hover:border-accent-light',
+      },
+      {
+        variant: 'outline',
+        color: 'accent',
+        class:
+          'border-accent text-accent hover:border-accent-dark hover:bg-accent/10 aria-expanded:text-accent-dark dark:text-accent-light dark:hover:border-accent-light',
+      },
+      {
+        variant: 'outline',
+        color: 'secondary',
+        class:
+          'border-secondary text-secondary hover:bg-secondary/10 dark:text-secondary-foreground',
+      },
+      {
+        variant: 'outline',
+        color: 'error',
+        class: 'border-error text-error hover:bg-error/10',
+      },
+      {
+        variant: 'ghost',
+        color: 'primary',
+        class:
+          'hover:text-foreground aria-expanded:text-foreground dark:hover:text-accent dark:aria-expanded:text-accent',
+      },
+      {
+        variant: 'ghost',
+        color: 'accent',
+        class: 'text-accent-dark hover:bg-accent/10 dark:text-accent-light',
+      },
+      {
+        variant: 'ghost',
+        color: 'secondary',
+        class:
+          'text-secondary hover:bg-secondary/10 dark:text-secondary-foreground',
+      },
+      {
+        variant: 'ghost',
+        color: 'error',
+        class: 'text-error hover:bg-error/10',
+      },
+      {
+        variant: 'link',
+        color: 'primary',
+        class: 'text-primary hover:text-primary-dark',
+      },
+      {
+        variant: 'link',
+        color: 'accent',
+        class: 'text-accent-dark hover:text-accent dark:text-accent-light',
+      },
+      {
+        variant: 'link',
+        color: 'secondary',
+        class: 'text-secondary hover:text-secondary-light',
+      },
+      {
+        variant: 'link',
+        color: 'error',
+        class: 'text-error hover:text-error/80',
+      },
+    ],
     defaultVariants: {
-      variant: 'default',
+      variant: 'solid',
+      color: 'primary',
       size: 'default',
     },
   }
@@ -42,7 +133,8 @@ const buttonVariants = cva(
 
 function Button({
   className,
-  variant = 'default',
+  variant = 'solid',
+  color = 'primary',
   size = 'default',
   asChild = false,
   ...props
@@ -56,8 +148,9 @@ function Button({
     <Comp
       data-slot='button'
       data-variant={variant}
+      data-color={color}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, color, size, className }))}
       {...props}
     />
   );

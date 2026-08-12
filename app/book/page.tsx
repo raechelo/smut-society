@@ -5,7 +5,7 @@ import { Extras } from './components/extra';
 
 const BookPage = () => {
   return (
-    <PageLayout title='Current Book'>
+    <PageLayout>
       <div className='size-full flex flex-col gap-md'>
         <div className='flex gap-md h-[64%]'>
           <Hero />

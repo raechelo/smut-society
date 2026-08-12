@@ -58,6 +58,7 @@ export const LibraryCard = ({
 
   return (
     <Card
+      shadow
       className='border-accent-light h-full relative'
       cornerDecoration={variant === 'hero' ? 'all' : undefined}
     >
@@ -126,7 +127,7 @@ export const LibraryCard = ({
         <Link href={links[title as keyof typeof links]}>
           <Button
             size={variant === 'hero' ? 'lg' : 'default'}
-            variant={variant === 'hero' ? 'default' : 'outline'}
+            variant={variant === 'hero' ? 'solid' : 'outline'}
           >
             Play
             {variant === 'hero' && <ArrowRight />}

@@ -10,6 +10,7 @@ import {
   LogOut,
   MessageCircle,
   MessageCircleQuestionMark,
+  UsersRound,
 } from 'lucide-react';
 import {
   Sidebar as RawSidebar,
@@ -17,8 +18,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarFooter,
-  SidebarTrigger,
-  useSidebar,
   SidebarMenuItem,
   SidebarMenuButton,
 } from '../ui/sidebar';
@@ -30,7 +29,6 @@ import { Divider } from './divider';
 import { usePathname } from 'next/navigation';
 
 export const Sidebar = () => {
-  const { open } = useSidebar();
   const { data: session } = useSession();
   const activePath = usePathname();
   return (
@@ -50,14 +48,14 @@ export const Sidebar = () => {
       <SidebarHeader className='p-4'>
         <Typography
           variant='h1'
-          classNames='font-sidebar-foreground text-[68px]/[.9] pl-12 -indent-12 !mb-0'
+          classNames='text-[68px]/[.9] pl-12 -indent-12 !mb-0'
         >
           Smut Society
         </Typography>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup className='pt-0'>
-          <Divider />
+          <Divider fancy />
           <Link href='/book'>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={activePath.includes('book')}>
@@ -82,7 +80,7 @@ export const Sidebar = () => {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </Link>
-          <Divider />
+          <Divider fancy />
           <Link href='/library'>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={activePath.includes('library')}>
@@ -99,6 +97,14 @@ export const Sidebar = () => {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </Link>
+          <Link href='/bookclubs'>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={activePath.includes('bookclubs')}>
+                <UsersRound />
+                Bookclubs
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </Link>
           <Link href='/challenges'>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={activePath.includes('challenges')}>
@@ -109,7 +115,7 @@ export const Sidebar = () => {
           </Link>
           <Link href='/quizzes'>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={activePath.includes('past-reads')}>
+              <SidebarMenuButton isActive={activePath.includes('quizzes')}>
                 <MessageCircleQuestionMark />
                 Quizzes
               </SidebarMenuButton>

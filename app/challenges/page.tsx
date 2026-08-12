@@ -50,7 +50,7 @@ const challenges = [
 
 const Challenges = () => {
   return (
-    <PageLayout title='Challenges'>
+    <PageLayout>
       <div className='flex flex-col h-full'>
         <div className='flex h-[40%] flex-col gap-sm'>
           <div className='min-h-0 flex-1'>

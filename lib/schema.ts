@@ -77,12 +77,30 @@ export const gameTypeEnum = pgEnum('game_type', [
 
 export const clubRoleEnum = pgEnum('club_role', ['member', 'admin']);
 
+export const rsvpStatusEnum = pgEnum('rsvp_status', ['going', 'not_going']);
+
+export const progressUnitEnum = pgEnum('progress_unit', ['chapter', 'page']);
+
 // ─── Clubs ───────────────────────────────────────────────────────────────────
 
 export const clubs = pgTable('clubs', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   description: text('description'),
+  // Public clubs appear in Explore and can be joined by anyone. The DB default
+  // only backfills existing rows; the create form requires an explicit choice.
+  isPublic: boolean('is_public').notNull().default(false),
+  // The book the club is currently reading. Denormalized from Google Books
+  // (like nominations) so we can render it without re-fetching. Null until an
+  // admin promotes a nomination to the club's next read.
+  currentBookId: text('current_book_id'),
+  currentBookTitle: text('current_book_title'),
+  currentBookCover: text('current_book_cover'),
+  currentBookAuthor: text('current_book_author'),
+  currentBookSetAt: timestamp('current_book_set_at'),
+  // When set, the club is archived: hidden from Explore and read as inactive.
+  // Null means active. An admin can archive/restore from the manage section.
+  archivedAt: timestamp('archived_at'),
   createdBy: text('created_by')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -165,6 +183,75 @@ export const clubNominations = pgTable(
   },
   (t) => [unique().on(t.clubId, t.bookId)]
 );
+
+// A scheduled club event (meeting, discussion, watch party…). startsAt is the
+// event's start time; the club page surfaces the soonest upcoming one.
+export const clubEvents = pgTable('club_events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clubId: uuid('club_id')
+    .notNull()
+    .references(() => clubs.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  location: text('location'),
+  startsAt: timestamp('starts_at', { mode: 'date' }).notNull(),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// A member's reading progress on a specific club book. Keyed on
+// (user, club, book) so history survives when the club moves to the next read.
+// value is the chapter or page number (per `unit`); finished overrides it.
+export const readingProgress = pgTable(
+  'reading_progress',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    clubId: uuid('club_id')
+      .notNull()
+      .references(() => clubs.id, { onDelete: 'cascade' }),
+    bookId: text('book_id').notNull(),
+    unit: progressUnitEnum('unit').notNull().default('chapter'),
+    value: integer('value').notNull().default(0),
+    finished: boolean('finished').notNull().default(false),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.clubId, t.bookId] })]
+);
+
+// A member's RSVP to a club event. One row per (event, user); status flips
+// between going/not_going, and the row is removed when they clear their RSVP.
+export const eventRsvps = pgTable(
+  'event_rsvps',
+  {
+    eventId: uuid('event_id')
+      .notNull()
+      .references(() => clubEvents.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: rsvpStatusEnum('status').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.eventId, t.userId] })]
+);
+
+// A book the club has finished reading. Denormalized from Google Books like
+// nominations/current book, so the "previously read" list renders without a
+// re-fetch. Populated when an admin marks the current book as finished.
+export const clubFinishedBooks = pgTable('club_finished_books', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clubId: uuid('club_id')
+    .notNull()
+    .references(() => clubs.id, { onDelete: 'cascade' }),
+  bookId: text('book_id').notNull(),
+  bookTitle: text('book_title').notNull(),
+  bookCover: text('book_cover'),
+  bookAuthor: text('book_author'),
+  finishedAt: timestamp('finished_at').notNull().defaultNow(),
+});
 
 // Upvote cast by a club member on a nomination.
 export const nominationVotes = pgTable(

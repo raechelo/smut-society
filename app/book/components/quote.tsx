@@ -4,6 +4,7 @@ import Typography from '../../../components/ui/typography';
 export const Quote = () => {
   return (
     <Card
+      shadow
       cornerDecoration='all'
       className='flex-1 h-full'
     >

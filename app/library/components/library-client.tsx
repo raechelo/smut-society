@@ -60,12 +60,6 @@ function subjectClause(genres: string[]): string {
   return `subject:(${terms})`;
 }
 
-// Google Books does no prefix matching, so a fully-quoted title phrase can't
-// match until every word is complete (`intitle:"a touch of dark"` misses "A
-// Touch of Darkness" — "dark" ≠ the token "darkness"). Instead, quote the
-// completed words as a title phrase and leave the last, still-being-typed word
-// loose: `intitle:"a touch of" dark` — the loose term matches "Darkness" and
-// ranks the intended book first while you type.
 function titleClause(input: string): string {
   const words = input.replace(/"/g, '').trim().split(/\s+/).filter(Boolean);
   if (words.length <= 1) return `intitle:${words[0] ?? ''}`;
@@ -117,6 +111,7 @@ export function LibraryClient() {
 
   useEffect(() => {
     if (!apiQuery) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRawBooks([]);
       return;
     }

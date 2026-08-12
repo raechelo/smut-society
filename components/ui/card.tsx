@@ -59,7 +59,10 @@ function CardCorners({ decoration }: { decoration: CornerDecoration }) {
   return (
     <>
       {cornerGroups[decoration].map((position) => (
-        <CardCorner key={position} position={position} />
+        <CardCorner
+          key={position}
+          position={position}
+        />
       ))}
     </>
   );
@@ -69,12 +72,16 @@ function Card({
   className,
   size = 'default',
   cornerDecoration,
+  shadow = false,
   onClick,
   children,
   ...props
 }: React.ComponentProps<'div'> & {
   size?: 'default' | 'sm';
   cornerDecoration?: CornerDecoration;
+  // Heavy parchment drop shadow. Off by default (flat) — it reads oddly on
+  // full-width cards; opt in for cards laid out in a grid.
+  shadow?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }) {
   return (
@@ -83,9 +90,9 @@ function Card({
       data-size={size}
       onClick={onClick}
       className={cn(
-        'group/card relative isolate flex flex-col overflow-hidden rounded-md border border-card-border bg-parchment bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(90,42,30,0.22)_100%)] p-md text-sm shadow-[0_6px_28px_rgba(80,34,24,0.3),inset_0_1px_0_rgba(255,248,235,0.85)] transition-shadow has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-none *:[img:last-child]:rounded-none dark:bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(134,119,169,0.25)_100%)] dark:shadow-[0_8px_36px_rgba(134,119,169,0.25),inset_0_1px_0_rgba(191,197,211,0.09)]',
-        onClick &&
-          'cursor-pointer hover:shadow-[0_6px_28px_rgba(80,34,24,0.33)] dark:hover:shadow-[0_6px_28px_rgba(191,197,211,0.2)]',
+        'group/card card-gradient relative isolate flex flex-col overflow-hidden rounded-md border border-card-border bg-parchment p-md text-sm transition-shadow has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-none *:[img:last-child]:rounded-none',
+        shadow && 'card-shadow',
+        onClick && 'cursor-pointer',
         className
       )}
       {...props}
@@ -114,7 +121,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot='card-title'
       className={cn(
-        'font-heading text-lg font-semibold tracking-wider uppercase',
+        'font-heading text-lg font-semibold tracking-wider',
         className
       )}
       {...props}

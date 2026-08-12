@@ -44,7 +44,7 @@ export default async function ClubPage({
 
         <div className='grid grid-cols-1 gap-md lg:grid-cols-10'>
           <div className='lg:col-span-4'>
-            <Discussion />
+            <Discussion clubId={club.id} />
           </div>
           <div className='lg:col-span-3'>
             <Challenge />

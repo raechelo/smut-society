@@ -268,6 +268,69 @@ export const nominationVotes = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.nominationId] })]
 );
 
+// ─── Discussions ──────────────────────────────────────────────────────────────
+
+// A discussion thread within a club — the top-level post of a threaded board.
+export const clubThreads = pgTable('club_threads', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  clubId: uuid('club_id')
+    .notNull()
+    .references(() => clubs.id, { onDelete: 'cascade' }),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  // Optional opening message for the thread.
+  body: text('body'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// A reply on a discussion thread.
+export const clubThreadComments = pgTable('club_thread_comments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  threadId: uuid('thread_id')
+    .notNull()
+    .references(() => clubThreads.id, { onDelete: 'cascade' }),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  body: text('body').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// An emoji reaction on a thread. One row per (user, thread, emoji), so a user
+// can add several distinct emoji but each only once; toggling removes the row.
+export const threadReactions = pgTable(
+  'thread_reactions',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    threadId: uuid('thread_id')
+      .notNull()
+      .references(() => clubThreads.id, { onDelete: 'cascade' }),
+    emoji: text('emoji').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.threadId, t.emoji] })]
+);
+
+// An emoji reaction on a thread comment. Same shape as thread reactions.
+export const commentReactions = pgTable(
+  'comment_reactions',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    commentId: uuid('comment_id')
+      .notNull()
+      .references(() => clubThreadComments.id, { onDelete: 'cascade' }),
+    emoji: text('emoji').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.commentId, t.emoji] })]
+);
+
 // ─── Favorites ────────────────────────────────────────────────────────────────
 
 export const favorites = pgTable(

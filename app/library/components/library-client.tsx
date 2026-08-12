@@ -11,16 +11,20 @@ import { Filter } from './filter';
 import { BookCard } from './book-card';
 import { Discover } from './discover';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getUserFavoriteIds } from '@/lib/actions/books';
+import { getUserFavoriteIds, getUserShelfIds } from '@/lib/actions/books';
 
 function BookGrid({
   books,
   favoritedIds,
   onFavoriteChange,
+  shelfIds,
+  onShelfChange,
 }: {
   books: GoogleBook[];
   favoritedIds: Set<string>;
   onFavoriteChange: (bookId: string, favorited: boolean) => void;
+  shelfIds: Set<string>;
+  onShelfChange: (bookId: string, onShelf: boolean) => void;
 }) {
   return (
     <div className='grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3'>
@@ -30,6 +34,8 @@ function BookGrid({
           book={book}
           isFavorited={favoritedIds.has(book.id)}
           onFavoriteChange={onFavoriteChange}
+          isOnShelf={shelfIds.has(book.id)}
+          onShelfChange={onShelfChange}
         />
       ))}
     </div>
@@ -88,15 +94,26 @@ export function LibraryClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
+  const [shelfIds, setShelfIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     getUserFavoriteIds().then((ids) => setFavoritedIds(new Set(ids)));
+    getUserShelfIds().then((ids) => setShelfIds(new Set(ids)));
   }, []);
 
   const handleFavoriteChange = (bookId: string, favorited: boolean) => {
     setFavoritedIds((prev) => {
       const next = new Set(prev);
       if (favorited) next.add(bookId);
+      else next.delete(bookId);
+      return next;
+    });
+  };
+
+  const handleShelfChange = (bookId: string, onShelf: boolean) => {
+    setShelfIds((prev) => {
+      const next = new Set(prev);
+      if (onShelf) next.add(bookId);
       else next.delete(bookId);
       return next;
     });
@@ -168,6 +185,8 @@ export function LibraryClient() {
             books={books}
             favoritedIds={favoritedIds}
             onFavoriteChange={handleFavoriteChange}
+            shelfIds={shelfIds}
+            onShelfChange={handleShelfChange}
           />
         ) : hasQuery ? (
           <p className='mt-xl text-center text-sm text-muted-foreground'>
@@ -177,6 +196,8 @@ export function LibraryClient() {
           <Discover
             favoritedIds={favoritedIds}
             onFavoriteChange={handleFavoriteChange}
+            shelfIds={shelfIds}
+            onShelfChange={handleShelfChange}
           />
         )}
       </div>

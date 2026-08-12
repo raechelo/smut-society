@@ -56,9 +56,9 @@ export const Sidebar = () => {
       <SidebarContent>
         <SidebarGroup className='pt-0'>
           <Divider fancy />
-          <Link href='/book'>
+          <Link href='/home'>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={activePath.includes('book')}>
+              <SidebarMenuButton isActive={activePath.includes('home')}>
                 <Book />
                 Home
               </SidebarMenuButton>

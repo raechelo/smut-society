@@ -6,6 +6,7 @@ import type {
 } from '@/lib/actions/clubs';
 import { getBookMeta } from '@/lib/google-books';
 import Typography from '@/components/ui/typography';
+import { Card } from '@/components/ui/card';
 import { LogProgressDialog } from './log-progress-dialog';
 
 // A percent for the viewer's bar, or null when it can't be computed
@@ -123,7 +124,10 @@ export async function ClubProgress({
   const others = members.filter((m) => !m.isMe);
 
   return (
-    <div className='card-gradient card-shadow flex w-full flex-col gap-4 rounded-md border border-accent/40 bg-card/40 p-md'>
+    <Card
+      shadow
+      className='w-full gap-4'
+    >
       <div className='flex items-center justify-between gap-md'>
         <Typography
           variant='h4'
@@ -158,6 +162,6 @@ export async function ClubProgress({
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

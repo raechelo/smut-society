@@ -30,10 +30,14 @@ function ShelfRow({
   shelf,
   favoritedIds,
   onFavoriteChange,
+  shelfIds,
+  onShelfChange,
 }: {
   shelf: Shelf;
   favoritedIds: Set<string>;
   onFavoriteChange: (bookId: string, favorited: boolean) => void;
+  shelfIds: Set<string>;
+  onShelfChange: (bookId: string, onShelf: boolean) => void;
 }) {
   const [books, setBooks] = useState<GoogleBook[] | null>(null);
 
@@ -73,6 +77,8 @@ function ShelfRow({
                 book={book}
                 isFavorited={favoritedIds.has(book.id)}
                 onFavoriteChange={onFavoriteChange}
+                isOnShelf={shelfIds.has(book.id)}
+                onShelfChange={onShelfChange}
               />
             </div>
           ) : (
@@ -92,9 +98,13 @@ function ShelfRow({
 export function Discover({
   favoritedIds,
   onFavoriteChange,
+  shelfIds,
+  onShelfChange,
 }: {
   favoritedIds: Set<string>;
   onFavoriteChange: (bookId: string, favorited: boolean) => void;
+  shelfIds: Set<string>;
+  onShelfChange: (bookId: string, onShelf: boolean) => void;
 }) {
   return (
     <div className='flex flex-col gap-lg'>
@@ -104,6 +114,8 @@ export function Discover({
           shelf={shelf}
           favoritedIds={favoritedIds}
           onFavoriteChange={onFavoriteChange}
+          shelfIds={shelfIds}
+          onShelfChange={onShelfChange}
         />
       ))}
     </div>

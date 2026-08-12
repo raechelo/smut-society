@@ -344,3 +344,54 @@ export const favorites = pgTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.bookId] })]
 );
+
+// ─── User home ────────────────────────────────────────────────────────────────
+
+// A notification for a user — a thread reply, a new club event, a new club read.
+// type is a free string ('thread_reply' | 'club_event' | 'club_book'); link is
+// where clicking it should take the user.
+export const notifications = pgTable('notifications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  type: text('type').notNull(),
+  title: text('title').notNull(),
+  body: text('body'),
+  link: text('link'),
+  isRead: boolean('is_read').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// A user's yearly reading goal (books to finish this year). One row per year.
+export const readingGoals = pgTable(
+  'reading_goals',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    year: integer('year').notNull(),
+    target: integer('target').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.year] })]
+);
+
+// A user's personal "currently reading" shelf — books they've added from the
+// library, independent of any book club. Denormalized from Google Books.
+export const readingShelf = pgTable(
+  'reading_shelf',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    bookId: text('book_id').notNull(),
+    bookTitle: text('book_title').notNull(),
+    bookCover: text('book_cover'),
+    bookAuthor: text('book_author'),
+    // Set when the user marks the book finished — it then leaves the currently
+    // reading shelf but still counts toward the year's reading goal.
+    finishedAt: timestamp('finished_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.bookId] })]
+);

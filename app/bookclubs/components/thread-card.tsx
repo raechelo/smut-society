@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CircleUser } from 'lucide-react';
 import { CommentForm } from './comment-form';
 import { ReactionBar } from './reaction-bar';
+import { Card } from '@/components/ui/card';
 import type { ThreadComment, ThreadDetail } from '@/lib/actions/discussions';
 
 const PREVIEW_COUNT = 2;
@@ -76,9 +77,10 @@ export function ThreadCard({
   const hidden = thread.comments.length - shown.length;
 
   return (
-    <div
+    <Card
+      shadow
       id={`thread-${thread.id}`}
-      className='card-gradient card-shadow flex scroll-mt-4 flex-col gap-3 rounded-md border border-accent/40 bg-card/40 p-md'
+      className='scroll-mt-4 gap-3'
     >
       <div className='flex flex-col gap-1'>
         <h3 className='text-base font-semibold text-primary'>{thread.title}</h3>
@@ -123,6 +125,6 @@ export function ThreadCard({
           <CommentForm threadId={thread.id} />
         </div>
       )}
-    </div>
+    </Card>
   );
 }

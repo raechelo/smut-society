@@ -25,6 +25,16 @@ import {
   sql,
 } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { createNotifications } from '@/lib/notifications';
+
+// Member user ids for a club, excluding the actor (so we don't self-notify).
+async function otherMemberIds(clubId: string, actorId: string) {
+  const rows = await db
+    .select({ userId: clubMembers.userId })
+    .from(clubMembers)
+    .where(eq(clubMembers.clubId, clubId));
+  return rows.map((r) => r.userId).filter((id) => id !== actorId);
+}
 
 function requireAuth() {
   return auth().then((session) => {
@@ -465,6 +475,17 @@ export async function scheduleEvent(
     createdBy: userId,
   });
 
+  const recipients = await otherMemberIds(clubId, userId);
+  await createNotifications(
+    recipients.map((id) => ({
+      userId: id,
+      type: 'club_event' as const,
+      title: 'New event',
+      body: title,
+      link: `/bookclubs/${clubId}`,
+    }))
+  );
+
   revalidatePath(`/bookclubs/${clubId}`);
 }
 
@@ -642,6 +663,17 @@ export async function setCurrentBook(
   await db
     .delete(clubNominations)
     .where(eq(clubNominations.id, nominationId));
+
+  const recipients = await otherMemberIds(clubId, userId);
+  await createNotifications(
+    recipients.map((id) => ({
+      userId: id,
+      type: 'club_book' as const,
+      title: 'New book chosen',
+      body: `“${nomination.bookTitle}” is the club’s next read`,
+      link: `/bookclubs/${clubId}`,
+    }))
+  );
 
   revalidatePath(`/bookclubs/${clubId}`);
 }

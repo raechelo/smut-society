@@ -3,13 +3,17 @@ import { MessagesSquare } from 'lucide-react';
 import { getThreads } from '@/lib/actions/discussions';
 import Typography from '@/components/ui/typography';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 export async function Discussion({ clubId }: { clubId: string }) {
   const threads = await getThreads(clubId, 4);
   const href = `/bookclubs/${clubId}/discussions`;
 
   return (
-    <div className='card-gradient card-shadow flex h-full min-h-40 w-full flex-col gap-2 rounded-md border border-accent/40 bg-card/40 p-md'>
+    <Card
+      shadow
+      className='h-full min-h-40 w-full gap-2'
+    >
       <div className='flex items-center justify-between gap-2'>
         <Typography
           variant='h4'
@@ -53,6 +57,6 @@ export async function Discussion({ clubId }: { clubId: string }) {
           ))}
         </ul>
       )}
-    </div>
+    </Card>
   );
 }

@@ -70,12 +70,16 @@ type BookCardProps = {
   book: GoogleBook;
   isFavorited?: boolean;
   onFavoriteChange?: (bookId: string, favorited: boolean) => void;
+  isOnShelf?: boolean;
+  onShelfChange?: (bookId: string, onShelf: boolean) => void;
 };
 
 export function BookCard({
   book,
   isFavorited = false,
   onFavoriteChange,
+  isOnShelf = false,
+  onShelfChange,
 }: BookCardProps) {
   const { title, authors, imageLinks, industryIdentifiers } = book.volumeInfo;
   const thumbnail = imageLinks?.thumbnail?.replace('http://', 'https://');
@@ -95,6 +99,8 @@ export function BookCard({
         book={book}
         isFavorited={isFavorited}
         onFavoriteChange={onFavoriteChange}
+        isOnShelf={isOnShelf}
+        onShelfChange={onShelfChange}
       />
 
       {/* Cover (left) + Details (right) */}

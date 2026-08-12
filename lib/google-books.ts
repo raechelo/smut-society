@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import type { GoogleBook } from '@/lib/types/books';
 
 // The subset of Google Books volume metadata the currently-reading card needs.
@@ -57,39 +58,46 @@ function prettyGenre(categories: string[] | undefined): string | null {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// Fetch a single Google Books volume's metadata by id. Returns null on any
-// failure so the card can fall back gracefully. Cached for a day since a
-// volume's metadata is effectively static.
-export async function getBookMeta(bookId: string): Promise<BookMeta | null> {
-  const query = process.env.GOOGLE_BOOKS_API_KEY
-    ? `?key=${process.env.GOOGLE_BOOKS_API_KEY}`
-    : '';
-  try {
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(
-        bookId
-      )}${query}`,
-      { next: { revalidate: 60 * 60 * 24 } }
-    );
-    if (!res.ok) return null;
-    const data = (await res.json()) as GoogleBook;
-    const info = data.volumeInfo;
-    if (!info) return null;
+// Fetch a single Google Books volume's metadata by id — including a resolved,
+// well-known cover (Open Library, falling back to Google's thumbnail). This is
+// the single source of truth for book covers, so callers never need to reach
+// for a separately-stored cover or re-fetch one per render.
+//
+// Wrapped in React cache() so repeated calls for the same book within one
+// request are deduped; the underlying fetches are also cached for a day (a
+// volume's metadata is effectively static).
+export const getBookMeta = cache(
+  async (bookId: string): Promise<BookMeta | null> => {
+    const query = process.env.GOOGLE_BOOKS_API_KEY
+      ? `?key=${process.env.GOOGLE_BOOKS_API_KEY}`
+      : '';
+    try {
+      const res = await fetch(
+        `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(
+          bookId
+        )}${query}`,
+        { next: { revalidate: 60 * 60 * 24 } }
+      );
+      if (!res.ok) return null;
+      const data = (await res.json()) as GoogleBook;
+      const info = data.volumeInfo;
+      if (!info) return null;
 
-    // Prefer Open Library's well-known cover; fall back to Google's thumbnail.
-    const wellKnownCover = await getWellKnownCover(
-      info.title,
-      info.authors?.[0]
-    );
+      // Prefer Open Library's well-known cover; fall back to Google's thumbnail.
+      const wellKnownCover = await getWellKnownCover(
+        info.title,
+        info.authors?.[0]
+      );
 
-    return {
-      genre: prettyGenre(info.categories),
-      pageCount: info.pageCount ?? null,
-      publishedYear: info.publishedDate?.slice(0, 4) ?? null,
-      averageRating: info.averageRating ?? null,
-      cover: wellKnownCover ?? normalizeCover(info.imageLinks?.thumbnail),
-    };
-  } catch {
-    return null;
+      return {
+        genre: prettyGenre(info.categories),
+        pageCount: info.pageCount ?? null,
+        publishedYear: info.publishedDate?.slice(0, 4) ?? null,
+        averageRating: info.averageRating ?? null,
+        cover: wellKnownCover ?? normalizeCover(info.imageLinks?.thumbnail),
+      };
+    } catch {
+      return null;
+    }
   }
-}
+);

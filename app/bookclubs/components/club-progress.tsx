@@ -59,9 +59,13 @@ function MyProgress({
 
   return (
     <div className='flex flex-col gap-1.5'>
-      <span className='self-end text-xs text-muted-foreground'>
+      <Typography
+        variant='span'
+        color='muted'
+        classNames='self-end'
+      >
         {progressLabel(progress, totalPages)}
-      </span>
+      </Typography>
       <div className='h-2.5 w-full overflow-hidden rounded-full bg-primary/15'>
         <div
           className='h-full rounded-full bg-primary'
@@ -92,12 +96,19 @@ function MemberAvatar({
         <CircleUser className='size-10 shrink-0 text-muted-foreground' />
       )}
       <div className='flex min-w-0 flex-col'>
-        <span className='max-w-[140px] truncate text-sm font-medium'>
+        <Typography
+          variant='p2'
+          classNames='max-w-[140px] truncate font-medium'
+        >
           {member.name ?? 'Anonymous'}
-        </span>
-        <span className='text-xs tabular-nums text-muted-foreground'>
+        </Typography>
+        <Typography
+          variant='span'
+          color='muted'
+          classNames='tabular-nums'
+        >
           {compactProgress(member.progress, totalPages)}
-        </span>
+        </Typography>
       </div>
     </div>
   );

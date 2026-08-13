@@ -84,12 +84,14 @@ export async function Notifications() {
                     </Typography>
                   )}
                 </div>
-                <span
-                  className='shrink-0 text-xs text-muted-foreground'
+                <Typography
+                  variant='span'
+                  color='muted'
+                  classNames='shrink-0'
                   suppressHydrationWarning
                 >
                   {timeAgo(n.createdAt)}
-                </span>
+                </Typography>
                 {!n.isRead && (
                   <span className='mt-1.5 size-2 shrink-0 rounded-full bg-primary' />
                 )}

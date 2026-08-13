@@ -111,7 +111,12 @@ export function SubmitToPoolDialog({
                   <Check
                     className={cn('size-4 shrink-0', !checked && 'opacity-0')}
                   />
-                  <span className='min-w-0 truncate'>{club.name}</span>
+                  <Typography
+                    variant='span'
+                    classNames='min-w-0 truncate'
+                  >
+                    {club.name}
+                  </Typography>
                 </Button>
               </li>
             );

@@ -42,15 +42,19 @@ function CommentRow({
       <div className='flex min-w-0 flex-col gap-1.5'>
         <div>
           <div className='flex items-baseline gap-2'>
-            <span className='text-sm font-medium'>
+            <Typography
+              variant='p2'
+              classNames='font-medium'
+            >
               {comment.authorName ?? 'Anonymous'}
-            </span>
-            <span
-              className='text-xs text-muted-foreground'
+            </Typography>
+            <Typography
+              variant='span'
+              color='muted'
               suppressHydrationWarning
             >
               {formatTime(comment.createdAt)}
-            </span>
+            </Typography>
           </div>
           <Typography
           variant='p2'

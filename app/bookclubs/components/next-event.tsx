@@ -34,9 +34,19 @@ export function NextEvent({ clubName, events, isMember }: NextEventProps) {
 
       {next ? (
         <div className='ml-auto flex shrink-0 items-center gap-3 text-sm'>
-          <span suppressHydrationWarning>{eventDate(next.startsAt)}</span>
+          <Typography
+            variant='span'
+            suppressHydrationWarning
+          >
+            {eventDate(next.startsAt)}
+          </Typography>
           <span className={DOT}>·</span>
-          <span suppressHydrationWarning>{eventTime(next.startsAt)}</span>
+          <Typography
+            variant='span'
+            suppressHydrationWarning
+          >
+            {eventTime(next.startsAt)}
+          </Typography>
           <span className={DOT}>·</span>
           <div className='flex items-center gap-3'>
             <Rsvp
@@ -48,9 +58,12 @@ export function NextEvent({ clubName, events, isMember }: NextEventProps) {
           </div>
         </div>
       ) : (
-        <span className='ml-auto text-sm text-sidebar-foreground/70'>
+        <Typography
+          variant='span'
+          classNames='ml-auto text-sidebar-foreground/70'
+        >
           No upcoming events
-        </span>
+        </Typography>
       )}
     </div>
   );

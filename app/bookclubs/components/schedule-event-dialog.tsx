@@ -7,10 +7,8 @@ import { toast } from 'sonner';
 import { Dialog } from '@/components/app/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import Typography from '@/components/ui/typography';
 import { scheduleEvent } from '@/lib/actions/clubs';
-
-const LABEL =
-  'text-xs font-medium uppercase tracking-wide text-muted-foreground';
 
 export function ScheduleEventDialog({
   clubId,
@@ -63,7 +61,13 @@ export function ScheduleEventDialog({
       }}
     >
       <label className='flex flex-col gap-1.5'>
-        <span className={LABEL}>Title</span>
+        <Typography
+          variant='caption'
+          color='muted'
+          classNames='text-xs font-medium'
+        >
+          Title
+        </Typography>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -73,7 +77,13 @@ export function ScheduleEventDialog({
       </label>
 
       <label className='flex flex-col gap-1.5'>
-        <span className={LABEL}>Date &amp; time</span>
+        <Typography
+          variant='caption'
+          color='muted'
+          classNames='text-xs font-medium'
+        >
+          Date &amp; time
+        </Typography>
         <Input
           type='datetime-local'
           value={startsAt}
@@ -82,7 +92,13 @@ export function ScheduleEventDialog({
       </label>
 
       <label className='flex flex-col gap-1.5'>
-        <span className={LABEL}>Location</span>
+        <Typography
+          variant='caption'
+          color='muted'
+          classNames='text-xs font-medium'
+        >
+          Location
+        </Typography>
         <Input
           value={location}
           onChange={(e) => setLocation(e.target.value)}

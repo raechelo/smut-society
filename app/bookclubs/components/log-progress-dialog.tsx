@@ -8,6 +8,7 @@ import { Dialog } from '@/components/app/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Typography from '@/components/ui/typography';
 import {
   updateProgress,
   type ProgressUnit,
@@ -18,7 +19,6 @@ const UNIT_LABEL: Record<ProgressUnit, string> = {
   chapter: 'Chapter',
   page: 'Page',
 };
-const LABEL = 'text-xs font-medium uppercase tracking-wide text-muted-foreground';
 
 export function LogProgressDialog({
   clubId,
@@ -68,7 +68,13 @@ export function LogProgressDialog({
   const content = (
     <div className='flex flex-col gap-4'>
       <div className='flex flex-col gap-1.5'>
-        <span className={LABEL}>Tracking by</span>
+        <Typography
+          variant='caption'
+          color='muted'
+          classNames='text-xs font-medium'
+        >
+          Tracking by
+        </Typography>
         <Tabs
           value={unit}
           onValueChange={(v) => setUnit(v as ProgressUnit)}
@@ -81,7 +87,13 @@ export function LogProgressDialog({
       </div>
 
       <label className='flex flex-col gap-1.5'>
-        <span className={LABEL}>{UNIT_LABEL[unit]} number</span>
+        <Typography
+          variant='caption'
+          color='muted'
+          classNames='text-xs font-medium'
+        >
+          {UNIT_LABEL[unit]} number
+        </Typography>
         <Input
           type='number'
           min={0}

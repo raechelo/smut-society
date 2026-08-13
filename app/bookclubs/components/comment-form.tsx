@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2, SendHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { addComment } from '@/lib/actions/discussions';
 
 export function CommentForm({ threadId }: { threadId: string }) {
@@ -36,7 +37,7 @@ export function CommentForm({ threadId }: { threadId: string }) {
         submit();
       }}
     >
-      <textarea
+      <Textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
         onKeyDown={(e) => {
@@ -48,7 +49,7 @@ export function CommentForm({ threadId }: { threadId: string }) {
         }}
         rows={2}
         placeholder='Add a comment…'
-        className='min-h-0 flex-1 resize-none rounded-md border border-primary bg-transparent p-sm text-sm outline-none transition-colors hover:border-accent-dark focus-visible:border-ring dark:hover:border-accent-light'
+        className='min-h-0 flex-1'
       />
       <Button
         type='submit'

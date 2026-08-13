@@ -6,6 +6,7 @@ import { Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { createThread } from '@/lib/actions/discussions';
 
 export function NewThreadForm({ clubId }: { clubId: string }) {
@@ -45,12 +46,11 @@ export function NewThreadForm({ clubId }: { clubId: string }) {
         onChange={(e) => setTitle(e.target.value)}
         placeholder='Start a new thread…'
       />
-      <textarea
+      <Textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
         rows={3}
         placeholder='Say more (optional)…'
-        className='w-full resize-none rounded-md border border-primary bg-transparent p-sm text-sm outline-none transition-colors hover:border-accent-dark focus-visible:border-ring dark:hover:border-accent-light'
       />
       <div className='flex justify-end'>
         <Button

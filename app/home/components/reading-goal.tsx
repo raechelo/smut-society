@@ -34,14 +34,26 @@ export async function ReadingGoal() {
       {goal ? (
         <div className='flex flex-col gap-2'>
           <div className='flex items-baseline justify-between'>
-            <span className='text-2xl font-semibold text-foreground'>
+            <Typography
+              variant='span'
+              classNames='text-2xl font-semibold text-foreground'
+            >
               {goal.read}
-              <span className='text-base font-normal text-muted-foreground'>
+              <Typography
+                variant='span'
+                color='muted'
+                classNames='text-base font-normal'
+              >
                 {' / '}
                 {goal.target} books
-              </span>
-            </span>
-            <span className='text-sm text-muted-foreground'>{goal.year}</span>
+              </Typography>
+            </Typography>
+            <Typography
+              variant='span'
+              color='muted'
+            >
+              {goal.year}
+            </Typography>
           </div>
           <div className='h-2.5 w-full overflow-hidden rounded-full bg-primary/15'>
             <div
@@ -49,11 +61,14 @@ export async function ReadingGoal() {
               style={{ width: `${pct}%` }}
             />
           </div>
-          <span className='text-xs text-muted-foreground'>
+          <Typography
+            variant='span'
+            color='muted'
+          >
             {goal.read >= goal.target
               ? 'Goal reached — incredible! 🎉'
               : `${goal.target - goal.read} to go`}
-          </span>
+          </Typography>
         </div>
       ) : (
         <Typography

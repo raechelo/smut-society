@@ -50,12 +50,20 @@ export async function Discussion({ clubId }: { clubId: string }) {
                 href={`${href}#thread-${t.id}`}
                 className='flex flex-col gap-0.5 py-2 transition-colors hover:text-primary'
               >
-                <span className='truncate text-sm font-medium'>{t.title}</span>
-                <span className='text-xs text-muted-foreground'>
+                <Typography
+                  variant='p2'
+                  classNames='truncate font-medium'
+                >
+                  {t.title}
+                </Typography>
+                <Typography
+                  variant='span'
+                  color='muted'
+                >
                   {t.commentCount} {t.commentCount === 1 ? 'reply' : 'replies'}
                   {' · '}
                   {t.authorName ?? 'Someone'}
-                </span>
+                </Typography>
               </Link>
             </li>
           ))}

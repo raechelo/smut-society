@@ -58,12 +58,19 @@ export async function MyReading() {
                     <BookOpen className='size-6' />
                   </div>
                 )}
-                <span className='truncate text-xs font-medium group-hover:text-primary'>
+                <Typography
+                  variant='span'
+                  classNames='truncate font-medium group-hover:text-primary'
+                >
                   {item.title}
-                </span>
-                <span className='truncate text-[11px] text-muted-foreground'>
+                </Typography>
+                <Typography
+                  variant='span'
+                  color='muted'
+                  classNames='truncate text-[11px]'
+                >
                   {item.subtitle}
-                </span>
+                </Typography>
               </>
             );
             return (

@@ -30,7 +30,9 @@ type TypographyProps = {
   display?: boolean;
   classNames?: string;
   children: React.ReactNode;
-};
+  // Standard HTML attributes (id, title, suppressHydrationWarning, aria-*, …)
+  // pass straight through to the rendered element.
+} & Omit<React.HTMLAttributes<HTMLElement>, 'className' | 'color' | 'children'>;
 
 const styles: Record<Variant, string> = {
   h1: 'text-5xl mb-md',
@@ -41,7 +43,7 @@ const styles: Record<Variant, string> = {
   h6: 'text-lg',
   p: 'text-base',
   p2: 'text-sm',
-  span: 'text-sm',
+  span: 'text-xs',
   caption: 'text-[10px] uppercase tracking-wide',
 };
 
@@ -77,6 +79,7 @@ const Typography = ({
   display = false,
   classNames,
   children,
+  ...rest
 }: TypographyProps) => {
   const Tag = tags[variant];
   return (
@@ -87,6 +90,7 @@ const Typography = ({
         color && colors[color],
         classNames
       )}
+      {...rest}
     >
       {children}
     </Tag>

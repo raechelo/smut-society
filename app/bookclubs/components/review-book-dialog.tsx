@@ -12,9 +12,10 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import Typography from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 
-const LABEL = 'text-xs font-medium uppercase tracking-wide text-muted-foreground';
 
 function StarPicker({
   value,
@@ -99,7 +100,13 @@ export function ReviewBookDialog({
 
         <div className='flex flex-col gap-4'>
           <div className='flex flex-col gap-1.5'>
-            <span className={LABEL}>Rating</span>
+            <Typography
+              variant='caption'
+              color='muted'
+              classNames='text-xs font-medium'
+            >
+              Rating
+            </Typography>
             <StarPicker
               value={rating}
               onChange={setRating}
@@ -107,13 +114,18 @@ export function ReviewBookDialog({
           </div>
 
           <label className='flex flex-col gap-1.5'>
-            <span className={LABEL}>Your review</span>
-            <textarea
+            <Typography
+              variant='caption'
+              color='muted'
+              classNames='text-xs font-medium'
+            >
+              Your review
+            </Typography>
+            <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
               rows={5}
               placeholder='What did you think?'
-              className='w-full resize-none rounded-md border border-primary bg-transparent p-sm text-sm outline-none transition-colors hover:border-accent-dark focus-visible:border-ring dark:hover:border-accent-light'
             />
           </label>
         </div>

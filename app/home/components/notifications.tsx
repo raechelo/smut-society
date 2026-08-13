@@ -39,6 +39,7 @@ export async function Notifications() {
           <Bell className='size-5 text-primary' />
           <Typography
             variant='h4'
+            display
             classNames='!mb-0 text-primary'
           >
             Notifications
@@ -53,7 +54,12 @@ export async function Notifications() {
       </div>
 
       {items.length === 0 ? (
-        <p className='text-sm text-muted-foreground'>You’re all caught up.</p>
+        <Typography
+          variant='p2'
+          color='muted'
+        >
+          You’re all caught up.
+        </Typography>
       ) : (
         <ul className='flex flex-col divide-y divide-border/40'>
           {items.map((n) => {
@@ -62,13 +68,20 @@ export async function Notifications() {
               <div className='flex items-start gap-3 py-2.5'>
                 <Icon className='mt-0.5 size-4 shrink-0 text-muted-foreground' />
                 <div className='min-w-0 flex-1'>
-                  <p className={cn('text-sm', !n.isRead && 'font-semibold')}>
+                  <Typography
+                    variant='p2'
+                    classNames={cn(!n.isRead && 'font-semibold')}
+                  >
                     {n.title}
-                  </p>
+                  </Typography>
                   {n.body && (
-                    <p className='truncate text-xs text-muted-foreground'>
+                    <Typography
+                      variant='p2'
+                      color='muted'
+                      classNames='truncate text-xs'
+                    >
                       {n.body}
-                    </p>
+                    </Typography>
                   )}
                 </div>
                 <span

@@ -11,9 +11,13 @@ export default async function HomePage() {
   if (!session?.user?.id) {
     return (
       <PageLayout>
-        <p className='mt-md text-sm text-muted-foreground'>
+        <Typography
+          variant='p2'
+          color='muted'
+          classNames='mt-md'
+        >
           Sign in to see your home.
-        </p>
+        </Typography>
       </PageLayout>
     );
   }
@@ -25,6 +29,7 @@ export default async function HomePage() {
       <div className='flex size-full min-h-0 flex-col overflow-y-auto pr-xs pb-md'>
         <Typography
           variant='h2'
+          display
           classNames='!mb-0 mt-md text-primary'
         >
           {firstName ? `Welcome back, ${firstName}` : 'Welcome back'}

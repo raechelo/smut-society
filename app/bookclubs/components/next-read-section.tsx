@@ -5,6 +5,7 @@ import { BookOpen, ChevronUp, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import Typography from '@/components/ui/typography';
 import { toggleNominationVote } from '@/lib/actions/books';
 import { setCurrentBook } from '@/lib/actions/clubs';
 import type { ClubNomination } from '@/lib/actions/clubs';
@@ -103,10 +104,13 @@ export function NextReadSection({
 
   if (items.length === 0) {
     return (
-      <p className='text-sm italic text-muted-foreground/70'>
+      <Typography
+        variant='p2'
+        classNames='italic text-muted-foreground/70'
+      >
         No books nominated yet. Add books to the pool from the library to start
         the vote.
-      </p>
+      </Typography>
     );
   }
 
@@ -147,11 +151,20 @@ export function NextReadSection({
               />
               <BookThumb cover={n.cover} title={n.title} size='sm' />
               <div className='min-w-0 flex-1'>
-                <p className='truncate font-medium'>{n.title}</p>
+                <Typography
+                  variant='p2'
+                  classNames='truncate font-medium'
+                >
+                  {n.title}
+                </Typography>
                 {n.author && (
-                  <p className='truncate text-xs text-muted-foreground'>
+                  <Typography
+                    variant='p2'
+                    color='muted'
+                    classNames='truncate text-xs'
+                  >
                     {n.author}
-                  </p>
+                  </Typography>
                 )}
               </div>
               {!compact && pick}

@@ -27,6 +27,7 @@ export async function MyReading() {
         <BookOpen className='size-5 text-primary' />
         <Typography
           variant='h4'
+          display
           classNames='!mb-0 text-primary'
         >
           Currently reading
@@ -34,9 +35,12 @@ export async function MyReading() {
       </div>
 
       {withCovers.length === 0 ? (
-        <p className='text-sm text-muted-foreground'>
+        <Typography
+          variant='p2'
+          color='muted'
+        >
           Nothing on your shelf right now.
-        </p>
+        </Typography>
       ) : (
         <div className='flex flex-wrap gap-4'>
           {withCovers.map(({ item, cover }) => {

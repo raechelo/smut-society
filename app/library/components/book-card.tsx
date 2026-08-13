@@ -1,5 +1,6 @@
 import { Card, CardFooter } from '@/components/ui/card';
 import { Chip } from '@/components/app/chip';
+import Typography from '@/components/ui/typography';
 import type { GoogleBook } from '@/lib/types/books';
 import { BookCardActions } from './book-card-actions';
 import { BookCoverImage } from './book-cover-image';
@@ -119,13 +120,20 @@ export function BookCard({
 
         {/* Details — remaining 65% */}
         <div className='flex flex-1 flex-col gap-sm py-sm pr-sm'>
-          <p className='line-clamp-3 text-sm font-semibold leading-snug'>
+          <Typography
+            variant='p2'
+            classNames='line-clamp-3 font-semibold leading-snug'
+          >
             {title}
-          </p>
+          </Typography>
           {author && (
-            <p className='line-clamp-2 text-xs italic text-muted-foreground'>
+            <Typography
+              variant='p2'
+              color='muted'
+              classNames='line-clamp-2 text-xs italic'
+            >
               {author}
-            </p>
+            </Typography>
           )}
           <BookDescription book={book} />
         </div>

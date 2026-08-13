@@ -26,6 +26,7 @@ export function NextEvent({ clubName, events, isMember }: NextEventProps) {
     <div className='panel-shadow z-3 flex h-fit shrink-0 items-center gap-md rounded-md bg-sidebar px-md text-sidebar-foreground'>
       <Typography
         variant='h3'
+        display
         classNames='!mb-0 min-w-0 truncate pl-2 leading-[2] text-accent-light'
       >
         {clubName}

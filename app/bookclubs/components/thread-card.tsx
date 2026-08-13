@@ -6,6 +6,7 @@ import { CommentForm } from './comment-form';
 import { ReactionBar } from './reaction-bar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Typography from '@/components/ui/typography';
 import type { ThreadComment, ThreadDetail } from '@/lib/actions/discussions';
 
 const PREVIEW_COUNT = 2;
@@ -51,7 +52,12 @@ function CommentRow({
               {formatTime(comment.createdAt)}
             </span>
           </div>
-          <p className='whitespace-pre-wrap text-sm'>{comment.body}</p>
+          <Typography
+          variant='p2'
+          classNames='whitespace-pre-wrap'
+        >
+          {comment.body}
+        </Typography>
         </div>
         <ReactionBar
           targetType='comment'
@@ -84,12 +90,27 @@ export function ThreadCard({
       className='scroll-mt-4 gap-3'
     >
       <div className='flex flex-col gap-1'>
-        <h3 className='text-base font-semibold text-primary'>{thread.title}</h3>
-        <p className='text-xs text-muted-foreground'>
+        <Typography
+          variant='h3'
+          color='primary'
+          classNames='text-base font-semibold'
+        >
+          {thread.title}
+        </Typography>
+        <Typography
+          variant='p2'
+          color='muted'
+          classNames='text-xs'
+        >
           {thread.authorName ?? 'Someone'} · {formatTime(thread.createdAt)}
-        </p>
+        </Typography>
         {thread.body && (
-          <p className='mt-1 whitespace-pre-wrap text-sm'>{thread.body}</p>
+          <Typography
+            variant='p2'
+            classNames='mt-1 whitespace-pre-wrap'
+          >
+            {thread.body}
+          </Typography>
         )}
       </div>
 

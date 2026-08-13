@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Compass } from 'lucide-react';
 import { PageLayout } from '@/components/app/page-layout';
 import { Button } from '@/components/ui/button';
+import Typography from '@/components/ui/typography';
 import { Chip } from '@/components/app/chip';
 import { getMyClubs } from '@/lib/actions/clubs';
 import { MyClubCard } from './components/my-club-card';
@@ -14,7 +15,12 @@ export default async function BookclubsPage() {
     <PageLayout>
       <div className='flex h-full flex-col gap-md'>
         <div className='flex flex-wrap items-center justify-between gap-sm'>
-          <p className='text-sm text-muted-foreground'>Your book clubs</p>
+          <Typography
+            variant='p2'
+            color='muted'
+          >
+            Your book clubs
+          </Typography>
           <div className='flex items-center gap-xs'>
             <Link href='/bookclubs/explore'>
               <Button variant='outline'>
@@ -59,9 +65,12 @@ export default async function BookclubsPage() {
             </div>
           ) : (
             <div className='mt-xl flex flex-col items-center gap-sm text-center'>
-              <p className='text-sm text-muted-foreground'>
+              <Typography
+                variant='p2'
+                color='muted'
+              >
                 You have not joined any book clubs yet.
-              </p>
+              </Typography>
               <div className='flex gap-xs'>
                 <Link href='/bookclubs/explore'>
                   <Button variant='outline'>

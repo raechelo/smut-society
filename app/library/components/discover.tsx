@@ -65,7 +65,12 @@ function ShelfRow({
 
   return (
     <section className='flex flex-col gap-sm'>
-      <Typography variant='h2'>{shelf.label}</Typography>
+      <Typography
+        variant='h2'
+        display
+      >
+        {shelf.label}
+      </Typography>
       <div className='flex gap-md overflow-x-auto pb-xs'>
         {(books ?? Array.from({ length: 4 }).map(() => null)).map((book, i) =>
           book ? (

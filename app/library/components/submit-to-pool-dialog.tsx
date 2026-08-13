@@ -5,6 +5,7 @@ import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog } from '@/components/app/dialog';
 import { Button } from '@/components/ui/button';
+import Typography from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 import { getUserClubs, nominateBook } from '@/lib/actions/books';
 import type { GoogleBook } from '@/lib/types/books';
@@ -87,9 +88,13 @@ export function SubmitToPoolDialog({
           <Loader2 className='size-5 animate-spin' />
         </div>
       ) : clubs.length === 0 ? (
-        <p className='py-4 text-center text-sm text-muted-foreground'>
+        <Typography
+          variant='p2'
+          color='muted'
+          classNames='py-4 text-center'
+        >
           You haven’t joined any book clubs yet.
-        </p>
+        </Typography>
       ) : (
         <ul className='flex flex-col gap-1'>
           {clubs.map((club) => {

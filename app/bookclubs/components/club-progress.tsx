@@ -131,6 +131,7 @@ export async function ClubProgress({
       <div className='flex items-center justify-between gap-md'>
         <Typography
           variant='h4'
+          display
           classNames='!mb-0 text-primary'
         >
           Club&apos;s Progress

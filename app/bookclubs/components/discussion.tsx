@@ -17,6 +17,7 @@ export async function Discussion({ clubId }: { clubId: string }) {
       <div className='flex items-center justify-between gap-2'>
         <Typography
           variant='h4'
+          display
           classNames='!mb-0 text-primary'
         >
           Discussion
@@ -35,9 +36,12 @@ export async function Discussion({ clubId }: { clubId: string }) {
       </div>
 
       {threads.length === 0 ? (
-        <p className='text-sm text-muted-foreground'>
+        <Typography
+          variant='p2'
+          color='muted'
+        >
           No threads yet — start the conversation.
-        </p>
+        </Typography>
       ) : (
         <ul className='flex flex-col divide-y divide-border/40'>
           {threads.map((t) => (

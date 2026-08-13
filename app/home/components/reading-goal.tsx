@@ -22,6 +22,7 @@ export async function ReadingGoal() {
           <Target className='size-5 text-primary' />
           <Typography
             variant='h4'
+            display
             classNames='!mb-0 text-primary'
           >
             Reading goal
@@ -55,9 +56,12 @@ export async function ReadingGoal() {
           </span>
         </div>
       ) : (
-        <p className='text-sm text-muted-foreground'>
+        <Typography
+          variant='p2'
+          color='muted'
+        >
           Set a goal for how many books you want to read this year.
-        </p>
+        </Typography>
       )}
     </Card>
   );

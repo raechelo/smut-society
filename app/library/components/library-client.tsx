@@ -11,6 +11,7 @@ import { Filter } from './filter';
 import { BookCard } from './book-card';
 import { Discover } from './discover';
 import { Skeleton } from '@/components/ui/skeleton';
+import Typography from '@/components/ui/typography';
 import { getUserFavoriteIds, getUserShelfIds } from '@/lib/actions/books';
 
 function BookGrid({
@@ -179,7 +180,13 @@ export function LibraryClient() {
         {loading ? (
           <BookGridSkeleton />
         ) : error ? (
-          <p className='mt-xl text-center text-sm text-destructive'>{error}</p>
+          <Typography
+            variant='p2'
+            color='error'
+            classNames='mt-xl text-center'
+          >
+            {error}
+          </Typography>
         ) : books.length > 0 ? (
           <BookGrid
             books={books}
@@ -189,9 +196,13 @@ export function LibraryClient() {
             onShelfChange={handleShelfChange}
           />
         ) : hasQuery ? (
-          <p className='mt-xl text-center text-sm text-muted-foreground'>
+          <Typography
+            variant='p2'
+            color='muted'
+            classNames='mt-xl text-center'
+          >
             No books found
-          </p>
+          </Typography>
         ) : (
           <Discover
             favoritedIds={favoritedIds}

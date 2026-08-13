@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Card } from '@/components/ui/card';
+import Typography from '@/components/ui/typography';
 
 // Presentational club card. Wrap in a <Link> (My Bookclubs) to make the whole
 // card navigate, or pass `footer` actions (Explore) instead.
@@ -22,20 +23,36 @@ export function ClubCard({
       cornerDecoration='diagonal'
       className='flex h-full flex-col gap-sm transition-transform hover:-translate-y-0.5'
     >
-      <h3 className='font-heading text-lg font-semibold tracking-wide'>{name}</h3>
+      <Typography
+        variant='h6'
+        classNames='font-semibold tracking-wide'
+      >
+        {name}
+      </Typography>
       {badges ? <div className='flex flex-wrap gap-xs'>{badges}</div> : null}
       {description ? (
-        <p className='line-clamp-3 text-sm leading-relaxed text-muted-foreground'>
+        <Typography
+          variant='p2'
+          color='muted'
+          classNames='line-clamp-3 leading-relaxed'
+        >
           {description}
-        </p>
+        </Typography>
       ) : (
-        <p className='text-sm italic text-muted-foreground/70'>
+        <Typography
+          variant='p2'
+          classNames='italic text-muted-foreground/70'
+        >
           No description yet.
-        </p>
+        </Typography>
       )}
-      <p className='mt-auto text-xs text-muted-foreground'>
+      <Typography
+        variant='p2'
+        color='muted'
+        classNames='mt-auto text-xs'
+      >
         {memberCount} {memberCount === 1 ? 'member' : 'members'}
-      </p>
+      </Typography>
       {footer ? <div className='flex gap-xs pt-xs'>{footer}</div> : null}
     </Card>
   );

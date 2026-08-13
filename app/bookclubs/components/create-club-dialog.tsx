@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Dialog } from '@/components/app/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import Typography from '@/components/ui/typography';
 import { createClub } from '@/lib/actions/clubs';
 import { toast } from 'sonner';
 import { Globe, Lock, Plus } from 'lucide-react';
@@ -85,13 +86,17 @@ export function CreateClubDialog({ trigger }: { trigger?: ReactNode }) {
             <Lock /> Private
           </Button>
         </div>
-        <p className='text-xs text-muted-foreground'>
+        <Typography
+          variant='p2'
+          color='muted'
+          classNames='text-xs'
+        >
           {isPublic === true
             ? 'Anyone can find and join this club.'
             : isPublic === false
               ? 'Hidden from Explore; only members can view it.'
               : 'Choose who can find and join.'}
-        </p>
+        </Typography>
       </div>
 
       <Button type='submit' disabled={!canSubmit}>

@@ -5,6 +5,7 @@ import { Dialog } from '@/components/app/dialog';
 import { Chip } from '@/components/app/chip';
 import { BookCoverImage } from './book-cover-image';
 import { Button } from '@/components/ui/button';
+import Typography from '@/components/ui/typography';
 
 // Google Books descriptions arrive as light HTML (<p>, <br>, <i>, entities).
 // We never render it as markup — convert to plain text, keeping paragraph
@@ -63,9 +64,12 @@ export function BookDescription({ book }: { book: GoogleBook }) {
         />
       </div>
 
-      <p className='whitespace-pre-line text-sm leading-relaxed text-foreground/90'>
+      <Typography
+        variant='p2'
+        classNames='whitespace-pre-line leading-relaxed text-foreground/90'
+      >
         {text}
-      </p>
+      </Typography>
     </div>
   );
 
@@ -100,9 +104,13 @@ export function BookDescription({ book }: { book: GoogleBook }) {
 
   return (
     <div className='flex flex-col items-start gap-0.5'>
-      <p className='line-clamp-2 text-xs leading-snug text-muted-foreground'>
+      <Typography
+        variant='p2'
+        color='muted'
+        classNames='line-clamp-2 text-xs leading-snug'
+      >
         {text.replace(/\n+/g, ' ')}
-      </p>
+      </Typography>
 
       <Dialog
         trigger={

@@ -76,10 +76,18 @@ export async function CurrentlyReading({
       <div className='flex w-full items-start gap-sm rounded-md border border-dashed border-primary/40 bg-primary/5 p-md text-sm'>
         <Sparkles className='mt-0.5 size-5 shrink-0 text-primary' />
         <div>
-          <p className='font-medium text-foreground'>No book picked yet.</p>
-          <p className='text-muted-foreground'>
+          <Typography
+            variant='p2'
+            classNames='font-medium'
+          >
+            No book picked yet.
+          </Typography>
+          <Typography
+            variant='p2'
+            color='muted'
+          >
             The club needs to pick its next read from the nominations.
-          </p>
+          </Typography>
         </div>
       </div>
     );
@@ -127,6 +135,7 @@ export async function CurrentlyReading({
           </Typography>
           <Typography
             variant='h2'
+            display
             classNames='!mb-0 leading-tight'
           >
             {book.title}

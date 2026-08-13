@@ -4,7 +4,7 @@ import type {
   ClubMember,
   ReadingProgress,
 } from '@/lib/actions/clubs';
-import { getBookMeta } from '@/lib/google-books';
+import { searchBookMeta } from '@/lib/hardcover';
 import Typography from '@/components/ui/typography';
 import { Card } from '@/components/ui/card';
 import { LogProgressDialog } from './log-progress-dialog';
@@ -128,7 +128,7 @@ export async function ClubProgress({
   // No current read — nothing to track.
   if (!book) return null;
 
-  const meta = await getBookMeta(book.bookId);
+  const meta = await searchBookMeta(book.title, book.author);
   const totalPages = meta?.pageCount ?? null;
 
   const me = members.find((m) => m.isMe) ?? null;

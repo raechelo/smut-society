@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { BookOpen } from 'lucide-react';
 import { getCurrentlyReading } from '@/lib/actions/home';
-import { getBookMeta } from '@/lib/google-books';
+import { searchBookMeta } from '@/lib/hardcover';
 import Typography from '@/components/ui/typography';
 import { Card } from '@/components/ui/card';
 import { FinishReadingButton } from './finish-reading-button';
@@ -9,11 +9,14 @@ import { FinishReadingButton } from './finish-reading-button';
 export async function MyReading() {
   const items = await getCurrentlyReading();
 
-  // Resolve well-known covers (stored club covers are often empty).
+  // Resolve curated covers from Hardcover (stored covers are often empty).
   const withCovers = await Promise.all(
     items.map(async (item) => ({
       item,
-      cover: (await getBookMeta(item.bookId))?.cover || item.cover || null,
+      cover:
+        (await searchBookMeta(item.title, item.author))?.cover ||
+        item.cover ||
+        null,
     }))
   );
 

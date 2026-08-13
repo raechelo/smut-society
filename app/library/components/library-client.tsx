@@ -5,8 +5,8 @@ import {
   DEFAULT_FILTERS,
   matchesLength,
   type BookFilters,
-  type GoogleBook,
 } from '@/lib/types/books';
+import type { HardcoverBook } from '@/lib/hardcover';
 import { Filter } from './filter';
 import { BookCard } from './book-card';
 import { Discover } from './discover';
@@ -21,7 +21,7 @@ function BookGrid({
   shelfIds,
   onShelfChange,
 }: {
-  books: GoogleBook[];
+  books: HardcoverBook[];
   favoritedIds: Set<string>;
   onFavoriteChange: (bookId: string, favorited: boolean) => void;
   shelfIds: Set<string>;
@@ -31,11 +31,11 @@ function BookGrid({
     <div className='grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3'>
       {books.map((book) => (
         <BookCard
-          key={book.id}
+          key={book.slug}
           book={book}
-          isFavorited={favoritedIds.has(book.id)}
+          isFavorited={favoritedIds.has(book.slug)}
           onFavoriteChange={onFavoriteChange}
-          isOnShelf={shelfIds.has(book.id)}
+          isOnShelf={shelfIds.has(book.slug)}
           onShelfChange={onShelfChange}
         />
       ))}
@@ -60,38 +60,17 @@ function BookGridSkeleton() {
   );
 }
 
-const DEFAULT_SUBJECTS = 'subject:(fiction OR romance OR erotica OR fantasy)';
-
-function subjectClause(genres: string[]): string {
-  const terms = genres.map((g) => `"${g}"`).join(' OR ');
-  return `subject:(${terms})`;
-}
-
-function titleClause(input: string): string {
-  const words = input.replace(/"/g, '').trim().split(/\s+/).filter(Boolean);
-  if (words.length <= 1) return `intitle:${words[0] ?? ''}`;
-  const phrase = words.slice(0, -1).join(' ');
-  const last = words[words.length - 1];
-  return `intitle:"${phrase}" ${last}`;
-}
-
+// Hardcover's search is full-text (Typesense) — no field operators. Combine the
+// user's text with any selected genre terms into one query.
 function buildQuery(input: string, genres: string[]): string {
-  const base = input.trim();
-  if (!base && !genres.length) return '';
-
-  const titlePart = base ? titleClause(base) : '';
-
-  if (!genres.length) return titlePart || DEFAULT_SUBJECTS;
-
-  const clause = subjectClause(genres);
-  return titlePart ? `${titlePart} ${clause}` : clause;
+  return [input.trim(), ...genres].filter(Boolean).join(' ').trim();
 }
 
 export function LibraryClient() {
   const [inputValue, setInputValue] = useState('');
   const [debouncedInput, setDebouncedInput] = useState('');
   const [filters, setFilters] = useState<BookFilters>(DEFAULT_FILTERS);
-  const [rawBooks, setRawBooks] = useState<GoogleBook[]>([]);
+  const [rawBooks, setRawBooks] = useState<HardcoverBook[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
@@ -138,17 +117,17 @@ export function LibraryClient() {
     setLoading(true);
     setError(null);
 
-    const params = new URLSearchParams({
-      q: apiQuery,
-      orderBy: filters.sortBy,
-    });
+    const params = new URLSearchParams({ q: apiQuery });
 
-    fetch(`/api/books/search?${params}`)
+    fetch(`/api/hardcover/search?${params}`)
       .then((r) => r.json())
       .then(({ items, error }) => {
         if (cancelled) return;
         if (error) setError(error);
         else setRawBooks(items);
+      })
+      .catch(() => {
+        if (!cancelled) setError('Search failed. Try again.');
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -157,14 +136,16 @@ export function LibraryClient() {
     return () => {
       cancelled = true;
     };
-  }, [apiQuery, filters.sortBy]);
+  }, [apiQuery]);
 
-  const books =
+  const filtered =
     filters.lengths.length > 0
-      ? rawBooks.filter((b) =>
-          matchesLength(b.volumeInfo.pageCount, filters.lengths)
-        )
+      ? rawBooks.filter((b) => matchesLength(b.pages, filters.lengths))
       : rawBooks;
+  const books =
+    filters.sortBy === 'newest'
+      ? [...filtered].sort((a, b) => (b.releaseYear ?? 0) - (a.releaseYear ?? 0))
+      : filtered;
 
   const hasQuery = !!apiQuery;
 

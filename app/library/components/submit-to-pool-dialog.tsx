@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import Typography from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 import { getUserClubs, nominateBook } from '@/lib/actions/books';
-import type { GoogleBook } from '@/lib/types/books';
+import type { HardcoverBook } from '@/lib/hardcover';
 
 type Club = { id: string; name: string };
 
@@ -17,7 +17,7 @@ export function SubmitToPoolDialog({
   open,
   onOpenChange,
 }: {
-  book: GoogleBook;
+  book: HardcoverBook;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -52,16 +52,15 @@ export function SubmitToPoolDialog({
 
   const handleSubmit = async () => {
     if (selected.size === 0) return;
-    const { title, authors, imageLinks } = book.volumeInfo;
     setSubmitting(true);
     try {
       await Promise.all(
         [...selected].map((clubId) =>
           nominateBook(clubId, {
-            bookId: book.id,
-            bookTitle: title,
-            bookCover: imageLinks?.thumbnail?.replace('http://', 'https://'),
-            bookAuthor: authors?.join(', '),
+            bookId: book.slug,
+            bookTitle: book.title,
+            bookCover: book.cover ?? undefined,
+            bookAuthor: book.authors.join(', ') || undefined,
           })
         )
       );
@@ -144,7 +143,7 @@ export function SubmitToPoolDialog({
       onOpenChange={onOpenChange}
       trigger={<span className='hidden' />}
       title='Submit to a club pool'
-      description={`Suggest “${book.volumeInfo.title}” for your clubs’ next read.`}
+      description={`Suggest “${book.title}” for your clubs’ next read.`}
       content={content}
     />
   );

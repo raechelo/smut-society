@@ -1,20 +1,10 @@
+import { BookOpen } from 'lucide-react';
 import { Card, CardFooter } from '@/components/ui/card';
 import { Chip } from '@/components/app/chip';
 import Typography from '@/components/ui/typography';
-import type { GoogleBook } from '@/lib/types/books';
+import type { HardcoverBook } from '@/lib/hardcover';
 import { BookCardActions } from './book-card-actions';
-import { BookCoverImage } from './book-cover-image';
 import { BookDescription } from './book-description';
-
-function detectSeries(title: string): boolean {
-  return (
-    /#\d+/.test(title) ||
-    /\bbook\s+\d+\b/i.test(title) ||
-    /\bvol(ume)?\.?\s*\d+\b/i.test(title) ||
-    /\bpart\s+\d+\b/i.test(title) ||
-    /\(\w[^)]*#\d+\)/.test(title)
-  );
-}
 
 type InfoChip = {
   label: string;
@@ -29,46 +19,34 @@ type InfoChip = {
     | 'rust';
 };
 
-function getInfoChips(book: GoogleBook): InfoChip[] {
-  const { title, pageCount, averageRating, ratingsCount, categories } =
-    book.volumeInfo;
+function getInfoChips(book: HardcoverBook): InfoChip[] {
   const chips: InfoChip[] = [];
 
-  if (categories?.[0]) {
-    chips.push({
-      label: categories[0],
-      variant: 'painted',
-      colors: 'sapphire',
-    });
+  if (book.genres[0]) {
+    chips.push({ label: book.genres[0], variant: 'painted', colors: 'sapphire' });
   }
-
-  if (detectSeries(title)) {
-    chips.push({ label: 'In a Series', variant: 'filled', colors: 'primary' });
+  if (book.series) {
+    chips.push({ label: book.series, variant: 'filled', colors: 'primary' });
   }
-
-  if (pageCount) {
+  if (book.pages) {
     chips.push({
-      label: `${pageCount} pg`,
+      label: `${book.pages} pg`,
       variant: 'outline',
       colors: 'secondary',
     });
   }
-
-  if (averageRating) {
-    const label = ratingsCount
-      ? `★ ${averageRating} (${ratingsCount.toLocaleString()})`
-      : `★ ${averageRating}`;
+  if (book.rating) {
+    const label = book.ratingsCount
+      ? `★ ${book.rating.toFixed(2)} (${book.ratingsCount.toLocaleString()})`
+      : `★ ${book.rating.toFixed(2)}`;
     chips.push({ label, variant: 'painted', colors: 'sienna' });
   }
 
   return chips;
 }
 
-const PLACEHOLDER =
-  'flex h-full w-full items-center justify-center bg-muted p-sm text-center text-xs text-muted-foreground';
-
 type BookCardProps = {
-  book: GoogleBook;
+  book: HardcoverBook;
   isFavorited?: boolean;
   onFavoriteChange?: (bookId: string, favorited: boolean) => void;
   isOnShelf?: boolean;
@@ -82,12 +60,7 @@ export function BookCard({
   isOnShelf = false,
   onShelfChange,
 }: BookCardProps) {
-  const { title, authors, imageLinks, industryIdentifiers } = book.volumeInfo;
-  const thumbnail = imageLinks?.thumbnail?.replace('http://', 'https://');
-  const author = authors?.join(', ');
-  const isbn =
-    industryIdentifiers?.find((i) => i.type === 'ISBN_13')?.identifier ??
-    industryIdentifiers?.find((i) => i.type === 'ISBN_10')?.identifier;
+  const author = book.authors.join(', ');
   const chips = getInfoChips(book);
 
   return (
@@ -107,15 +80,18 @@ export function BookCard({
       {/* Cover (left) + Details (right) */}
       <div className='flex min-h-[200px] flex-1 gap-sm p-sm'>
         <div className='relative w-[35%] shrink-0 overflow-hidden rounded-[8px] border border-ink'>
-          <div className={PLACEHOLDER}>{title}</div>
-          <BookCoverImage
-            title={title}
-            author={author}
-            isbn={isbn}
-            fallback={thumbnail}
-            alt={title}
-            className='absolute inset-0 h-full w-full object-cover'
-          />
+          {book.cover ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={book.cover}
+              alt={book.title}
+              className='absolute inset-0 h-full w-full object-cover'
+            />
+          ) : (
+            <div className='flex h-full w-full items-center justify-center bg-muted text-muted-foreground'>
+              <BookOpen className='size-6' />
+            </div>
+          )}
         </div>
 
         {/* Details — remaining 65% */}
@@ -124,13 +100,13 @@ export function BookCard({
             variant='p2'
             classNames='line-clamp-3 font-semibold leading-snug'
           >
-            {title}
+            {book.title}
           </Typography>
           {author && (
             <Typography
-              variant='p2'
+              variant='span'
               color='muted'
-              classNames='line-clamp-2 text-xs italic'
+              classNames='line-clamp-2 italic'
             >
               {author}
             </Typography>

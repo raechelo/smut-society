@@ -43,6 +43,7 @@ export type ReadingItem = {
   key: string;
   bookId: string;
   title: string;
+  author: string | null;
   cover: string | null;
   // Club name, or a personal-shelf label.
   subtitle: string;
@@ -164,6 +165,7 @@ export async function getCurrentlyReading(): Promise<ReadingItem[]> {
       clubName: clubs.name,
       bookId: clubs.currentBookId,
       title: clubs.currentBookTitle,
+      author: clubs.currentBookAuthor,
       cover: clubs.currentBookCover,
       finished: readingProgress.finished,
     })
@@ -188,6 +190,7 @@ export async function getCurrentlyReading(): Promise<ReadingItem[]> {
       key: `club-${r.clubId}-${r.bookId}`,
       bookId: r.bookId,
       title: r.title ?? 'Untitled',
+      author: r.author,
       cover: r.cover,
       subtitle: r.clubName,
       href: `/bookclubs/${r.clubId}`,
@@ -199,6 +202,7 @@ export async function getCurrentlyReading(): Promise<ReadingItem[]> {
     .select({
       bookId: readingShelf.bookId,
       title: readingShelf.bookTitle,
+      author: readingShelf.bookAuthor,
       cover: readingShelf.bookCover,
     })
     .from(readingShelf)
@@ -214,6 +218,7 @@ export async function getCurrentlyReading(): Promise<ReadingItem[]> {
       key: `shelf-${r.bookId}`,
       bookId: r.bookId,
       title: r.title,
+      author: r.author,
       cover: r.cover,
       subtitle: 'On your shelf',
       href: null,

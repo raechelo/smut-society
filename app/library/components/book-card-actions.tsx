@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { toggleFavorite, toggleShelf } from '@/lib/actions/books';
 import { toast } from 'sonner';
-import type { GoogleBook } from '@/lib/types/books';
+import type { HardcoverBook } from '@/lib/hardcover';
 import { SubmitToPoolDialog } from './submit-to-pool-dialog';
 
 // Popover menu rows: full-width, left-aligned, and readable (not the Button's
@@ -21,7 +21,7 @@ const MENU_ITEM =
   'w-full justify-start gap-2 rounded-sm px-2 text-sm font-normal normal-case tracking-normal hover:bg-primary/10 hover:text-primary';
 
 type BookCardActionsProps = {
-  book: GoogleBook;
+  book: HardcoverBook;
   isFavorited?: boolean;
   onFavoriteChange?: (bookId: string, favorited: boolean) => void;
   isOnShelf?: boolean;
@@ -53,16 +53,13 @@ export function BookCardActions({
     setOnShelf(next);
     try {
       const res = await toggleShelf({
-        bookId: book.id,
-        bookTitle: book.volumeInfo.title,
-        bookCover: book.volumeInfo.imageLinks?.thumbnail?.replace(
-          'http://',
-          'https://'
-        ),
-        bookAuthor: book.volumeInfo.authors?.join(', '),
+        bookId: book.slug,
+        bookTitle: book.title,
+        bookCover: book.cover ?? undefined,
+        bookAuthor: book.authors.join(', ') || undefined,
       });
       setOnShelf(res.onShelf);
-      onShelfChange?.(book.id, res.onShelf);
+      onShelfChange?.(book.slug, res.onShelf);
       toast.success(
         res.onShelf
           ? 'Added to currently reading'
@@ -80,9 +77,9 @@ export function BookCardActions({
     const next = !favorited;
     setFavorited(next);
     try {
-      const res = await toggleFavorite(book.id);
+      const res = await toggleFavorite(book.slug);
       setFavorited(res.favorited);
-      onFavoriteChange?.(book.id, res.favorited);
+      onFavoriteChange?.(book.slug, res.favorited);
       toast.success(
         res.favorited ? 'Added to favorites' : 'Removed from favorites'
       );

@@ -7,7 +7,8 @@ import { toast } from 'sonner';
 import { Dialog } from '@/components/app/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Typography from '@/components/ui/typography';
 import {
   updateProgress,
   type ProgressUnit,
@@ -18,7 +19,6 @@ const UNIT_LABEL: Record<ProgressUnit, string> = {
   chapter: 'Chapter',
   page: 'Page',
 };
-const LABEL = 'text-xs font-medium uppercase tracking-wide text-muted-foreground';
 
 export function LogProgressDialog({
   clubId,
@@ -68,28 +68,32 @@ export function LogProgressDialog({
   const content = (
     <div className='flex flex-col gap-4'>
       <div className='flex flex-col gap-1.5'>
-        <span className={LABEL}>Tracking by</span>
-        <div className='grid grid-cols-2 gap-1 rounded-md border border-border/60 p-0.5'>
-          {(['chapter', 'page'] as ProgressUnit[]).map((u) => (
-            <button
-              key={u}
-              type='button'
-              onClick={() => setUnit(u)}
-              className={cn(
-                'rounded-[5px] px-2 py-1 text-sm transition-colors',
-                unit === u
-                  ? 'bg-primary text-parchment'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {UNIT_LABEL[u]}
-            </button>
-          ))}
-        </div>
+        <Typography
+          variant='caption'
+          color='muted'
+          classNames='text-xs font-medium'
+        >
+          Tracking by
+        </Typography>
+        <Tabs
+          value={unit}
+          onValueChange={(v) => setUnit(v as ProgressUnit)}
+        >
+          <TabsList className='w-full'>
+            <TabsTrigger value='chapter'>Chapter</TabsTrigger>
+            <TabsTrigger value='page'>Page</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       <label className='flex flex-col gap-1.5'>
-        <span className={LABEL}>{UNIT_LABEL[unit]} number</span>
+        <Typography
+          variant='caption'
+          color='muted'
+          classNames='text-xs font-medium'
+        >
+          {UNIT_LABEL[unit]} number
+        </Typography>
         <Input
           type='number'
           min={0}
@@ -100,29 +104,16 @@ export function LogProgressDialog({
         />
       </label>
 
-      <button
+      <Button
         type='button'
+        variant={finished ? 'solid' : 'outline'}
         onClick={() => setFinished((f) => !f)}
         aria-pressed={finished}
-        className={cn(
-          'flex w-full items-center gap-2 rounded-md border px-2 py-2 text-sm transition-colors',
-          finished
-            ? 'border-primary bg-primary/10 text-primary'
-            : 'border-border/60 hover:border-primary/50'
-        )}
+        className='w-full justify-start'
       >
-        <span
-          className={cn(
-            'flex size-4 items-center justify-center rounded-[4px] border',
-            finished
-              ? 'border-primary bg-primary text-parchment'
-              : 'border-border'
-          )}
-        >
-          {finished && <Check className='size-3' />}
-        </span>
+        <Check className='size-4' />
         Finished the book
-      </button>
+      </Button>
     </div>
   );
 

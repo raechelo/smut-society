@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Dialog } from '@/components/app/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import Typography from '@/components/ui/typography';
 import { createClub } from '@/lib/actions/clubs';
 import { toast } from 'sonner';
 import { Globe, Lock, Plus } from 'lucide-react';
 
-const LABEL = 'text-xs font-medium uppercase tracking-wide text-muted-foreground';
 
 export function CreateClubDialog({ trigger }: { trigger?: ReactNode }) {
   const router = useRouter();
@@ -47,7 +48,13 @@ export function CreateClubDialog({ trigger }: { trigger?: ReactNode }) {
       }}
     >
       <label className='flex flex-col gap-1.5'>
-        <span className={LABEL}>Name</span>
+        <Typography
+          variant='caption'
+          color='muted'
+          classNames='text-xs font-medium'
+        >
+          Name
+        </Typography>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -57,18 +64,29 @@ export function CreateClubDialog({ trigger }: { trigger?: ReactNode }) {
       </label>
 
       <label className='flex flex-col gap-1.5'>
-        <span className={LABEL}>Description</span>
-        <textarea
+        <Typography
+          variant='caption'
+          color='muted'
+          classNames='text-xs font-medium'
+        >
+          Description
+        </Typography>
+        <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
           placeholder='What is this club about?'
-          className='w-full resize-none rounded-md border border-primary bg-transparent p-sm text-sm outline-none transition-colors hover:border-accent-dark focus-visible:border-ring dark:hover:border-accent-light'
         />
       </label>
 
       <div className='flex flex-col gap-1.5'>
-        <span className={LABEL}>Visibility</span>
+        <Typography
+          variant='caption'
+          color='muted'
+          classNames='text-xs font-medium'
+        >
+          Visibility
+        </Typography>
         <div className='grid grid-cols-2 gap-xs'>
           <Button
             type='button'
@@ -85,13 +103,17 @@ export function CreateClubDialog({ trigger }: { trigger?: ReactNode }) {
             <Lock /> Private
           </Button>
         </div>
-        <p className='text-xs text-muted-foreground'>
+        <Typography
+          variant='p2'
+          color='muted'
+          classNames='text-xs'
+        >
           {isPublic === true
             ? 'Anyone can find and join this club.'
             : isPublic === false
               ? 'Hidden from Explore; only members can view it.'
               : 'Choose who can find and join.'}
-        </p>
+        </Typography>
       </div>
 
       <Button type='submit' disabled={!canSubmit}>

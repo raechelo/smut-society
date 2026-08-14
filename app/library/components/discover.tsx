@@ -1,27 +1,24 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { GoogleBook } from '@/lib/types/books';
+import type { HardcoverBook } from '@/lib/hardcover';
 import { BookCard } from './book-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import Typography from '@/components/ui/typography';
 
 // Curated browse shelves shown before the user searches. Each shelf is one
-// Google Books subject query, run through the same /api/books/search route
-// (so English + relevance filtering applies). Note: Google Books has no
-// bestseller/rating data to speak of, so these are genre shelves, not "top 10".
+// full-text query run through Hardcover's search.
 type Shelf = {
   label: string;
   query: string;
-  orderBy?: 'relevance' | 'newest';
 };
 
 const SHELVES: Shelf[] = [
-  { label: 'Fantasy Romance', query: 'subject:fantasy subject:romance' },
-  { label: 'Dark Romance', query: 'subject:"dark romance"' },
-  { label: 'Greek Mythology', query: 'subject:"greek mythology"' },
-  { label: 'Paranormal & Vampires', query: 'subject:romance vampire' },
-  { label: 'Romance', query: 'subject:romance' },
+  { label: 'Fantasy Romance', query: 'fantasy romance' },
+  { label: 'Dark Romance', query: 'dark romance' },
+  { label: 'Greek Mythology', query: 'greek mythology romance' },
+  { label: 'Paranormal & Vampires', query: 'vampire romance' },
+  { label: 'Romance', query: 'romance' },
 ];
 
 const SHELF_LIMIT = 12;
@@ -30,22 +27,23 @@ function ShelfRow({
   shelf,
   favoritedIds,
   onFavoriteChange,
+  shelfIds,
+  onShelfChange,
 }: {
   shelf: Shelf;
   favoritedIds: Set<string>;
   onFavoriteChange: (bookId: string, favorited: boolean) => void;
+  shelfIds: Set<string>;
+  onShelfChange: (bookId: string, onShelf: boolean) => void;
 }) {
-  const [books, setBooks] = useState<GoogleBook[] | null>(null);
+  const [books, setBooks] = useState<HardcoverBook[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    const params = new URLSearchParams({
-      q: shelf.query,
-      orderBy: shelf.orderBy ?? 'relevance',
-    });
-    fetch(`/api/books/search?${params}`)
+    const params = new URLSearchParams({ q: shelf.query });
+    fetch(`/api/hardcover/search?${params}`)
       .then((r) => r.json())
-      .then(({ items }: { items?: GoogleBook[] }) => {
+      .then(({ items }: { items?: HardcoverBook[] }) => {
         if (!cancelled) setBooks((items ?? []).slice(0, SHELF_LIMIT));
       })
       .catch(() => {
@@ -54,25 +52,32 @@ function ShelfRow({
     return () => {
       cancelled = true;
     };
-  }, [shelf.query, shelf.orderBy]);
+  }, [shelf.query]);
 
   // Hide shelves that resolved to nothing rather than show an empty heading.
   if (books && books.length === 0) return null;
 
   return (
     <section className='flex flex-col gap-sm'>
-      <Typography variant='h2'>{shelf.label}</Typography>
+      <Typography
+        variant='h2'
+        display
+      >
+        {shelf.label}
+      </Typography>
       <div className='flex gap-md overflow-x-auto pb-xs'>
         {(books ?? Array.from({ length: 4 }).map(() => null)).map((book, i) =>
           book ? (
             <div
-              key={book.id}
+              key={book.slug}
               className='w-[320px] shrink-0'
             >
               <BookCard
                 book={book}
-                isFavorited={favoritedIds.has(book.id)}
+                isFavorited={favoritedIds.has(book.slug)}
                 onFavoriteChange={onFavoriteChange}
+                isOnShelf={shelfIds.has(book.slug)}
+                onShelfChange={onShelfChange}
               />
             </div>
           ) : (
@@ -92,9 +97,13 @@ function ShelfRow({
 export function Discover({
   favoritedIds,
   onFavoriteChange,
+  shelfIds,
+  onShelfChange,
 }: {
   favoritedIds: Set<string>;
   onFavoriteChange: (bookId: string, favorited: boolean) => void;
+  shelfIds: Set<string>;
+  onShelfChange: (bookId: string, onShelf: boolean) => void;
 }) {
   return (
     <div className='flex flex-col gap-lg'>
@@ -104,6 +113,8 @@ export function Discover({
           shelf={shelf}
           favoritedIds={favoritedIds}
           onFavoriteChange={onFavoriteChange}
+          shelfIds={shelfIds}
+          onShelfChange={onShelfChange}
         />
       ))}
     </div>

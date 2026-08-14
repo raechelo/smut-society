@@ -1,14 +1,14 @@
 'use client';
 
-import type { GoogleBook } from '@/lib/types/books';
+import { BookOpen } from 'lucide-react';
+import type { HardcoverBook } from '@/lib/hardcover';
 import { Dialog } from '@/components/app/dialog';
 import { Chip } from '@/components/app/chip';
-import { BookCoverImage } from './book-cover-image';
 import { Button } from '@/components/ui/button';
+import Typography from '@/components/ui/typography';
 
-// Google Books descriptions arrive as light HTML (<p>, <br>, <i>, entities).
-// We never render it as markup — convert to plain text, keeping paragraph
-// breaks so the full description in the dialog stays readable.
+// Descriptions can arrive with light HTML (<p>, <br>, <i>, entities). We never
+// render it as markup — convert to plain text, keeping paragraph breaks.
 function htmlToText(html: string): string {
   return html
     .replace(/<\s*br\s*\/?>/gi, '\n')
@@ -25,71 +25,59 @@ function htmlToText(html: string): string {
     .trim();
 }
 
-function isbnOf(book: GoogleBook): string | undefined {
-  const ids = book.volumeInfo.industryIdentifiers;
-  return (
-    ids?.find((i) => i.type === 'ISBN_13')?.identifier ??
-    ids?.find((i) => i.type === 'ISBN_10')?.identifier
-  );
-}
+export function BookDescription({ book }: { book: HardcoverBook }) {
+  if (!book.description) return null;
 
-export function BookDescription({ book }: { book: GoogleBook }) {
-  const { title, authors, description, categories, pageCount, publishedDate } =
-    book.volumeInfo;
-
-  if (!description) return null;
-
-  const text = htmlToText(description);
-  const author = authors?.join(', ');
-  const thumbnail = book.volumeInfo.imageLinks?.thumbnail?.replace(
-    'http://',
-    'https://'
-  );
-  const year = publishedDate?.slice(0, 4);
+  const text = htmlToText(book.description);
+  const author = book.authors.join(', ');
 
   const details = (
     <div className='flow-root'>
       <div className='relative float-left mr-4 mb-3 aspect-[2/3] w-40 overflow-hidden rounded-md border border-ink'>
-        <div className='flex h-full w-full items-center justify-center bg-muted p-2 text-center text-[10px] font-display text-muted-foreground'>
-          {title}
-        </div>
-        <BookCoverImage
-          title={title}
-          author={author}
-          isbn={isbnOf(book)}
-          fallback={thumbnail}
-          alt={title}
-          className='absolute inset-0 h-full w-full object-cover'
-        />
+        {book.cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={book.cover}
+            alt={book.title}
+            className='absolute inset-0 h-full w-full object-cover'
+          />
+        ) : (
+          <div className='flex h-full w-full items-center justify-center bg-muted text-muted-foreground'>
+            <BookOpen className='size-6' />
+          </div>
+        )}
       </div>
 
-      <p className='whitespace-pre-line text-sm leading-relaxed text-foreground/90'>
+      <Typography
+        variant='p2'
+        classNames='whitespace-pre-line leading-relaxed text-foreground/90'
+      >
         {text}
-      </p>
+      </Typography>
     </div>
   );
 
   const chips = (
     <div className='flex flex-wrap items-center gap-1.5'>
-      {categories?.[0] && (
+      {book.genres[0] && (
         <Chip
-          label={categories[0]}
+          label={book.genres[0]}
           size='small'
           variant='painted'
           colors='sapphire'
         />
       )}
-      {year && (
+      {book.releaseYear && (
         <Chip
-          label={year}
+          label={String(book.releaseYear)}
           size='small'
           variant='outline'
           colors='ink'
         />
       )}
-      {pageCount && (
+      {book.pages && (
         <Chip
-          label={`${pageCount} pg`}
+          label={`${book.pages} pg`}
           size='small'
           variant='outline'
           colors='secondary'
@@ -100,22 +88,26 @@ export function BookDescription({ book }: { book: GoogleBook }) {
 
   return (
     <div className='flex flex-col items-start gap-0.5'>
-      <p className='line-clamp-2 text-xs leading-snug text-muted-foreground'>
+      <Typography
+        variant='p2'
+        color='muted'
+        classNames='line-clamp-2 text-xs leading-snug'
+      >
         {text.replace(/\n+/g, ' ')}
-      </p>
+      </Typography>
 
       <Dialog
         trigger={
           <Button
             variant='link'
             size='xs'
-            className='text-xs font-medium text-primary hover:underline p-0'
+            className='p-0'
           >
             More
           </Button>
         }
-        title={title}
-        description={author ?? 'Unknown author'}
+        title={book.title}
+        description={author || 'Unknown author'}
         content={details}
         footer={chips}
         className='h-[65vh]'

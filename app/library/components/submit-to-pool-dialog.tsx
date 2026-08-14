@@ -5,9 +5,10 @@ import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog } from '@/components/app/dialog';
 import { Button } from '@/components/ui/button';
+import Typography from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 import { getUserClubs, nominateBook } from '@/lib/actions/books';
-import type { GoogleBook } from '@/lib/types/books';
+import type { HardcoverBook } from '@/lib/hardcover';
 
 type Club = { id: string; name: string };
 
@@ -16,7 +17,7 @@ export function SubmitToPoolDialog({
   open,
   onOpenChange,
 }: {
-  book: GoogleBook;
+  book: HardcoverBook;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -51,16 +52,15 @@ export function SubmitToPoolDialog({
 
   const handleSubmit = async () => {
     if (selected.size === 0) return;
-    const { title, authors, imageLinks } = book.volumeInfo;
     setSubmitting(true);
     try {
       await Promise.all(
         [...selected].map((clubId) =>
           nominateBook(clubId, {
-            bookId: book.id,
-            bookTitle: title,
-            bookCover: imageLinks?.thumbnail?.replace('http://', 'https://'),
-            bookAuthor: authors?.join(', '),
+            bookId: book.slug,
+            bookTitle: book.title,
+            bookCover: book.cover ?? undefined,
+            bookAuthor: book.authors.join(', ') || undefined,
           })
         )
       );
@@ -87,40 +87,36 @@ export function SubmitToPoolDialog({
           <Loader2 className='size-5 animate-spin' />
         </div>
       ) : clubs.length === 0 ? (
-        <p className='py-4 text-center text-sm text-muted-foreground'>
+        <Typography
+          variant='p2'
+          color='muted'
+          classNames='py-4 text-center'
+        >
           You haven’t joined any book clubs yet.
-        </p>
+        </Typography>
       ) : (
         <ul className='flex flex-col gap-1'>
           {clubs.map((club) => {
             const checked = selected.has(club.id);
             return (
               <li key={club.id}>
-                <button
+                <Button
                   type='button'
+                  variant={checked ? 'solid' : 'outline'}
                   onClick={() => toggle(club.id)}
                   aria-pressed={checked}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition-colors',
-                    checked
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border/60 hover:border-primary/50'
-                  )}
+                  className='w-full justify-start font-normal normal-case tracking-normal'
                 >
-                  <span
-                    className={cn(
-                      'flex size-5 shrink-0 items-center justify-center rounded-[5px] border',
-                      checked
-                        ? 'border-primary bg-primary text-parchment'
-                        : 'border-border'
-                    )}
+                  <Check
+                    className={cn('size-4 shrink-0', !checked && 'opacity-0')}
+                  />
+                  <Typography
+                    variant='span'
+                    classNames='min-w-0 truncate'
                   >
-                    {checked && <Check className='size-3.5' />}
-                  </span>
-                  <span className='min-w-0 truncate font-medium'>
                     {club.name}
-                  </span>
-                </button>
+                  </Typography>
+                </Button>
               </li>
             );
           })}
@@ -147,7 +143,7 @@ export function SubmitToPoolDialog({
       onOpenChange={onOpenChange}
       trigger={<span className='hidden' />}
       title='Submit to a club pool'
-      description={`Suggest “${book.volumeInfo.title}” for your clubs’ next read.`}
+      description={`Suggest “${book.title}” for your clubs’ next read.`}
       content={content}
     />
   );

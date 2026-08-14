@@ -264,22 +264,22 @@
   .card-gradient {
     background-image: radial-gradient(
       ellipse at center,
-      transparent 55%,
-      rgba(90, 42, 30, 0.08) 100%
+      transparent 62%,
+      rgba(90, 42, 30, 0.05) 100%
     );
   }
   .dark .card-gradient {
     background-image: radial-gradient(
       ellipse at center,
-      transparent 55%,
-      rgba(134, 119, 169, 0.08) 100%
+      transparent 62%,
+      rgba(134, 119, 169, 0.05) 100%
     );
   }
   .card-shadow {
-    box-shadow: 0 3px 14px rgba(80, 34, 24, 0.15);
+    box-shadow: 0 4px 18px rgba(80, 34, 24, 0.09);
   }
   .dark .card-shadow {
-    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.32);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.26);
   }
   /* The dark sidebar panels read heavier at the same values, so keep them a
      touch lighter than the parchment cards. */

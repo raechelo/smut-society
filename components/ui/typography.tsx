@@ -1,5 +1,5 @@
-import clsx from 'clsx';
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 type Variant =
   | 'h1'
@@ -13,24 +13,49 @@ type Variant =
   | 'span'
   | 'caption';
 
+type Color =
+  | 'primary'
+  | 'secondary'
+  | 'accent'
+  | 'wine'
+  | 'muted'
+  | 'foreground'
+  | 'error';
+
 type TypographyProps = {
   variant?: Variant;
-  color?: 'primary' | 'secondary' | 'accent' | 'wine';
+  color?: Color;
+  // Render in the fancy display font (Fleur De Leah). Opt-in so headings can
+  // use Typography without the script face.
+  display?: boolean;
   classNames?: string;
   children: React.ReactNode;
-};
+  // Standard HTML attributes (id, title, suppressHydrationWarning, aria-*, …)
+  // pass straight through to the rendered element.
+} & Omit<React.HTMLAttributes<HTMLElement>, 'className' | 'color' | 'children'>;
 
 const styles: Record<Variant, string> = {
-  h1: 'text-5xl font-display mb-md',
-  h2: 'text-4xl font-display',
-  h3: 'text-3xl font-display',
-  h4: 'text-2xl font-display',
-  h5: 'text-xl font-display',
-  h6: 'text-lg font-display',
+  h1: 'text-5xl mb-md',
+  h2: 'text-4xl',
+  h3: 'text-3xl',
+  h4: 'text-2xl',
+  h5: 'text-xl',
+  h6: 'text-lg',
   p: 'text-base',
   p2: 'text-sm',
-  span: 'text-sm',
+  span: 'text-xs',
   caption: 'text-[10px] uppercase tracking-wide',
+};
+
+// Colors resolve to global tokens so callers don't hand-roll text-* classes.
+const colors: Record<Color, string> = {
+  primary: 'text-primary',
+  secondary: 'text-secondary',
+  accent: 'text-accent',
+  wine: 'text-wine',
+  muted: 'text-muted-foreground',
+  foreground: 'text-foreground',
+  error: 'text-error',
 };
 
 // Some variants are visual only and don't map 1:1 to a tag name — p2 stays a
@@ -50,11 +75,26 @@ const tags: Record<Variant, React.ElementType> = {
 
 const Typography = ({
   variant = 'p',
+  color,
+  display = false,
   classNames,
   children,
+  ...rest
 }: TypographyProps) => {
   const Tag = tags[variant];
-  return <Tag className={clsx([styles[variant], classNames])}>{children}</Tag>;
+  return (
+    <Tag
+      className={cn(
+        styles[variant],
+        display && 'font-display',
+        color && colors[color],
+        classNames
+      )}
+      {...rest}
+    >
+      {children}
+    </Tag>
+  );
 };
 
 export default Typography;

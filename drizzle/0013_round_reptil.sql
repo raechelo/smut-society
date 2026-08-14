@@ -1,0 +1,1 @@
+ALTER TABLE "reading_shelf" ADD COLUMN "finished_at" timestamp;

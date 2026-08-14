@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Typography from '@/components/ui/typography';
 import {
   Popover,
   PopoverContent,
@@ -63,13 +62,9 @@ export const Filter = ({
           className='flex w-80 flex-col gap-lg p-lg'
         >
           <div className='flex flex-col gap-sm'>
-            <Typography
-              variant='caption'
-              color='muted'
-              classNames='text-xs font-semibold tracking-wider'
-            >
+            <p className='text-xs font-semibold tracking-wider text-muted-foreground uppercase'>
               Sort by
-            </Typography>
+            </p>
             <div className='flex gap-xs'>
               {(['relevance', 'newest'] as const).map((s) => (
                 <Chip
@@ -86,13 +81,9 @@ export const Filter = ({
           </div>
 
           <div className='flex flex-col gap-sm'>
-            <Typography
-              variant='caption'
-              color='muted'
-              classNames='text-xs font-semibold tracking-wider'
-            >
+            <p className='text-xs font-semibold tracking-wider text-muted-foreground uppercase'>
               Genre
-            </Typography>
+            </p>
             <div className='flex flex-wrap gap-xs'>
               {GENRES.map((g) => (
                 <Chip
@@ -116,13 +107,9 @@ export const Filter = ({
           </div>
 
           <div className='flex flex-col gap-sm'>
-            <Typography
-              variant='caption'
-              color='muted'
-              classNames='text-xs font-semibold tracking-wider'
-            >
+            <p className='text-xs font-semibold tracking-wider text-muted-foreground uppercase'>
               Length
-            </Typography>
+            </p>
             <div className='flex gap-xs'>
               {LENGTH_OPTIONS.map((l) => (
                 <Chip
@@ -146,17 +133,14 @@ export const Filter = ({
           </div>
 
           {hasActiveFilters && (
-            <Button
-              type='button'
-              variant='link'
-              color='secondary'
+            <button
               onClick={() =>
                 onFiltersChange({ ...DEFAULT_FILTERS, sortBy: filters.sortBy })
               }
-              className='h-auto self-start p-0'
+              className='self-start text-xs text-muted-foreground underline-offset-2 hover:underline'
             >
               Clear filters
-            </Button>
+            </button>
           )}
         </PopoverContent>
       </Popover>

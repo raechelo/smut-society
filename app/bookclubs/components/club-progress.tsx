@@ -4,9 +4,8 @@ import type {
   ClubMember,
   ReadingProgress,
 } from '@/lib/actions/clubs';
-import { searchBookMeta } from '@/lib/hardcover';
+import { getBookMeta } from '@/lib/google-books';
 import Typography from '@/components/ui/typography';
-import { Card } from '@/components/ui/card';
 import { LogProgressDialog } from './log-progress-dialog';
 
 // A percent for the viewer's bar, or null when it can't be computed
@@ -59,13 +58,9 @@ function MyProgress({
 
   return (
     <div className='flex flex-col gap-1.5'>
-      <Typography
-        variant='span'
-        color='muted'
-        classNames='self-end'
-      >
+      <span className='self-end text-xs text-muted-foreground'>
         {progressLabel(progress, totalPages)}
-      </Typography>
+      </span>
       <div className='h-2.5 w-full overflow-hidden rounded-full bg-primary/15'>
         <div
           className='h-full rounded-full bg-primary'
@@ -96,19 +91,12 @@ function MemberAvatar({
         <CircleUser className='size-10 shrink-0 text-muted-foreground' />
       )}
       <div className='flex min-w-0 flex-col'>
-        <Typography
-          variant='p2'
-          classNames='max-w-[140px] truncate font-medium'
-        >
+        <span className='max-w-[140px] truncate text-sm font-medium'>
           {member.name ?? 'Anonymous'}
-        </Typography>
-        <Typography
-          variant='span'
-          color='muted'
-          classNames='tabular-nums'
-        >
+        </span>
+        <span className='text-xs tabular-nums text-muted-foreground'>
           {compactProgress(member.progress, totalPages)}
-        </Typography>
+        </span>
       </div>
     </div>
   );
@@ -128,21 +116,17 @@ export async function ClubProgress({
   // No current read — nothing to track.
   if (!book) return null;
 
-  const meta = await searchBookMeta(book.title, book.author);
+  const meta = await getBookMeta(book.bookId);
   const totalPages = meta?.pageCount ?? null;
 
   const me = members.find((m) => m.isMe) ?? null;
   const others = members.filter((m) => !m.isMe);
 
   return (
-    <Card
-      shadow
-      className='w-full gap-4'
-    >
+    <div className='card-gradient card-shadow flex w-full flex-col gap-4 rounded-md border border-accent/40 bg-card/40 p-md'>
       <div className='flex items-center justify-between gap-md'>
         <Typography
           variant='h4'
-          display
           classNames='!mb-0 text-primary'
         >
           Club&apos;s Progress
@@ -174,6 +158,6 @@ export async function ClubProgress({
           ))}
         </div>
       )}
-    </Card>
+    </div>
   );
 }

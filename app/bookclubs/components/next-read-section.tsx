@@ -5,7 +5,6 @@ import { BookOpen, ChevronUp, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import Typography from '@/components/ui/typography';
 import { toggleNominationVote } from '@/lib/actions/books';
 import { setCurrentBook } from '@/lib/actions/clubs';
 import type { ClubNomination } from '@/lib/actions/clubs';
@@ -104,13 +103,10 @@ export function NextReadSection({
 
   if (items.length === 0) {
     return (
-      <Typography
-        variant='p2'
-        classNames='italic text-muted-foreground/70'
-      >
+      <p className='text-sm italic text-muted-foreground/70'>
         No books nominated yet. Add books to the pool from the library to start
         the vote.
-      </Typography>
+      </p>
     );
   }
 
@@ -151,20 +147,11 @@ export function NextReadSection({
               />
               <BookThumb cover={n.cover} title={n.title} size='sm' />
               <div className='min-w-0 flex-1'>
-                <Typography
-                  variant='p2'
-                  classNames='truncate font-medium'
-                >
-                  {n.title}
-                </Typography>
+                <p className='truncate font-medium'>{n.title}</p>
                 {n.author && (
-                  <Typography
-                    variant='p2'
-                    color='muted'
-                    classNames='truncate text-xs'
-                  >
+                  <p className='truncate text-xs text-muted-foreground'>
                     {n.author}
-                  </Typography>
+                  </p>
                 )}
               </div>
               {!compact && pick}
@@ -187,17 +174,20 @@ function VoteButton({
   onClick: () => void;
 }) {
   return (
-    <Button
-      size='sm'
-      variant={active ? 'solid' : 'outline'}
+    <button
       onClick={onClick}
       aria-pressed={active}
       aria-label={active ? 'Remove vote' : 'Vote'}
-      className='shrink-0'
+      className={cn(
+        'flex w-11 shrink-0 flex-col items-center rounded-md border px-1 py-1 text-sm font-semibold transition-colors',
+        active
+          ? 'border-primary bg-primary/10 text-primary'
+          : 'border-border/60 text-muted-foreground hover:border-primary/60 hover:text-primary'
+      )}
     >
       <ChevronUp className='size-4' />
       {count}
-    </Button>
+    </button>
   );
 }
 

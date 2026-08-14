@@ -33,7 +33,7 @@ export const LENGTH_OPTIONS: { label: string; value: LengthFilter }[] = [
 ];
 
 export function matchesLength(
-  pageCount: number | null | undefined,
+  pageCount: number | undefined,
   lengths: LengthFilter[]
 ): boolean {
   if (!lengths.length) return true;
@@ -44,3 +44,61 @@ export function matchesLength(
     return pageCount > 400;
   });
 }
+
+const RELEVANT_CATEGORY_KEYWORDS = [
+  'fiction',
+  'romance',
+  'erotica',
+  'fantasy',
+  'mystery',
+  'thriller',
+  'horror',
+  'drama',
+  'literary',
+  'comic',
+  'graphic novel',
+  'dragons',
+  'mythical',
+  'creatures',
+];
+
+export function isRelevantBook(book: GoogleBook): boolean {
+  const cats = book.volumeInfo.categories;
+  if (!cats?.length) return true;
+  const lower = cats.map((c) => c.toLowerCase());
+  return lower.some((c) =>
+    RELEVANT_CATEGORY_KEYWORDS.some((kw) => c.includes(kw))
+  );
+}
+
+// Google returns foreign-language editions (a German edition has a German
+// title AND description), and langRestrict doesn't reliably exclude them. Each
+// card is one edition, so keep only English volumes — allowing `en`/`en-US`
+// and volumes with no language set (rare, don't drop otherwise-good results).
+export function isEnglishBook(book: GoogleBook): boolean {
+  const lang = book.volumeInfo.language;
+  return !lang || lang.toLowerCase().startsWith('en');
+}
+
+export type GoogleBook = {
+  id: string;
+  volumeInfo: {
+    title: string;
+    authors?: string[];
+    description?: string;
+    imageLinks?: {
+      thumbnail?: string;
+      smallThumbnail?: string;
+    };
+    industryIdentifiers?: Array<{
+      type: 'ISBN_10' | 'ISBN_13' | 'OTHER';
+      identifier: string;
+    }>;
+    categories?: string[];
+    publishedDate?: string;
+    pageCount?: number;
+    averageRating?: number;
+    ratingsCount?: number;
+    language?: string;
+  };
+};

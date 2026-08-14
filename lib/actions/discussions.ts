@@ -12,7 +12,6 @@ import {
 } from '@/lib/schema';
 import { and, asc, count, desc, eq, inArray, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { createNotifications } from '@/lib/notifications';
 
 function requireAuth() {
   return auth().then((session) => {
@@ -238,11 +237,7 @@ export async function addComment(
   const userId = await requireAuth();
 
   const [thread] = await db
-    .select({
-      clubId: clubThreads.clubId,
-      author: clubThreads.createdBy,
-      title: clubThreads.title,
-    })
+    .select({ clubId: clubThreads.clubId })
     .from(clubThreads)
     .where(eq(clubThreads.id, threadId))
     .limit(1);
@@ -256,19 +251,6 @@ export async function addComment(
   await db
     .insert(clubThreadComments)
     .values({ threadId, createdBy: userId, body: trimmed });
-
-  // Notify the thread's author (unless they're replying to themselves).
-  if (thread.author !== userId) {
-    await createNotifications([
-      {
-        userId: thread.author,
-        type: 'thread_reply',
-        title: 'New reply',
-        body: `New reply on “${thread.title}”`,
-        link: `/bookclubs/${thread.clubId}/discussions#thread-${threadId}`,
-      },
-    ]);
-  }
 
   revalidatePath(`/bookclubs/${thread.clubId}/discussions`);
 }

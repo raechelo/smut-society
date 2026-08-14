@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import { PageLayout } from '@/components/app/page-layout';
-import Typography from '@/components/ui/typography';
 import { getClub } from '@/lib/actions/clubs';
 import { getThreadsWithComments } from '@/lib/actions/discussions';
 import { NewThreadForm } from '../../components/new-thread-form';
@@ -30,21 +29,15 @@ export default async function DiscussionsPage({
           {club.isMember ? (
             <NewThreadForm clubId={clubId} />
           ) : (
-            <Typography
-              variant='p2'
-              color='muted'
-            >
+            <p className='text-sm text-muted-foreground'>
               Join this club to start a thread.
-            </Typography>
+            </p>
           )}
 
           {threads.length === 0 ? (
-            <Typography
-              variant='p2'
-              color='muted'
-            >
+            <p className='text-sm text-muted-foreground'>
               No threads yet — be the first to post.
-            </Typography>
+            </p>
           ) : (
             threads.map((t) => (
               <ThreadCard

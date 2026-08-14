@@ -2,74 +2,34 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { BookMarked, Heart, Plus, Users } from 'lucide-react';
+import { Heart, Plus, Users } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { toggleFavorite, toggleShelf } from '@/lib/actions/books';
+import { toggleFavorite } from '@/lib/actions/books';
 import { toast } from 'sonner';
-import type { HardcoverBook } from '@/lib/hardcover';
+import type { GoogleBook } from '@/lib/types/books';
 import { SubmitToPoolDialog } from './submit-to-pool-dialog';
 
-// Popover menu rows: full-width, left-aligned, and readable (not the Button's
-// default uppercase) since this is a menu, not a standalone action.
-const MENU_ITEM =
-  'w-full justify-start gap-2 rounded-sm px-2 text-sm font-normal normal-case tracking-normal hover:bg-primary/10 hover:text-primary';
-
 type BookCardActionsProps = {
-  book: HardcoverBook;
+  book: GoogleBook;
   isFavorited?: boolean;
   onFavoriteChange?: (bookId: string, favorited: boolean) => void;
-  isOnShelf?: boolean;
-  onShelfChange?: (bookId: string, onShelf: boolean) => void;
 };
 
 export function BookCardActions({
   book,
   isFavorited = false,
   onFavoriteChange,
-  isOnShelf = false,
-  onShelfChange,
 }: BookCardActionsProps) {
   const { status } = useSession();
   const isLoggedIn = status === 'authenticated';
   const [open, setOpen] = useState(false);
   const [poolOpen, setPoolOpen] = useState(false);
   const [favorited, setFavorited] = useState(isFavorited);
-  const [onShelf, setOnShelf] = useState(isOnShelf);
-
-  const handleShelf = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setOpen(false);
-    if (!isLoggedIn) {
-      toast.error('Sign in to add books to your shelf');
-      return;
-    }
-    const next = !onShelf;
-    setOnShelf(next);
-    try {
-      const res = await toggleShelf({
-        bookId: book.slug,
-        bookTitle: book.title,
-        bookCover: book.cover ?? undefined,
-        bookAuthor: book.authors.join(', ') || undefined,
-      });
-      setOnShelf(res.onShelf);
-      onShelfChange?.(book.slug, res.onShelf);
-      toast.success(
-        res.onShelf
-          ? 'Added to currently reading'
-          : 'Removed from currently reading'
-      );
-    } catch (err) {
-      setOnShelf(!next);
-      toast.error(err instanceof Error ? err.message : 'Something went wrong');
-    }
-  };
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -77,9 +37,9 @@ export function BookCardActions({
     const next = !favorited;
     setFavorited(next);
     try {
-      const res = await toggleFavorite(book.slug);
+      const res = await toggleFavorite(book.id);
       setFavorited(res.favorited);
-      onFavoriteChange?.(book.slug, res.favorited);
+      onFavoriteChange?.(book.id, res.favorited);
       toast.success(
         res.favorited ? 'Added to favorites' : 'Removed from favorites'
       );
@@ -112,17 +72,16 @@ export function BookCardActions({
           style={{ filter: 'drop-shadow(0 1px 1px var(--color-ink))' }}
         >
           <PopoverTrigger asChild>
-            <Button
+            <button
               onClick={(e) => e.stopPropagation()}
               aria-label='Book actions'
-              size='icon-sm'
               style={{
                 clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 76%, 0 100%)',
               }}
-              className='h-12 rounded-none pb-4'
+              className='flex h-12 w-9 cursor-pointer items-center justify-center pb-4 bg-primary text-parchment transition-colors duration-150 hover:bg-primary-dark'
             >
               <Plus className='size-4' />
-            </Button>
+            </button>
           </PopoverTrigger>
         </div>
         <PopoverContent
@@ -132,12 +91,10 @@ export function BookCardActions({
         >
           <div className='flex flex-col gap-0.5'>
             {isLoggedIn && (
-              <Button
-                variant='ghost'
-                size='sm'
+              <button
                 onClick={handleFavorite}
                 className={cn(
-                  MENU_ITEM,
+                  'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-all duration-100 hover:bg-primary/10 hover:text-primary active:scale-[0.98]',
                   favorited && 'text-accent hover:bg-accent/10 hover:text-accent'
                 )}
               >
@@ -145,35 +102,16 @@ export function BookCardActions({
                   className={cn('size-4 shrink-0', favorited && 'fill-current')}
                 />
                 {favorited ? 'Remove from favorites' : 'Add to favorites'}
-              </Button>
+              </button>
             )}
 
-            {isLoggedIn && (
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={handleShelf}
-                className={cn(
-                  MENU_ITEM,
-                  onShelf && 'text-accent hover:bg-accent/10 hover:text-accent'
-                )}
-              >
-                <BookMarked
-                  className={cn('size-4 shrink-0', onShelf && 'fill-current')}
-                />
-                {onShelf ? 'On your shelf' : 'Add to currently reading'}
-              </Button>
-            )}
-
-            <Button
-              variant='ghost'
-              size='sm'
+            <button
               onClick={handleSubmitClick}
-              className={MENU_ITEM}
+              className='flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-all duration-100 hover:bg-primary/10 hover:text-primary active:scale-[0.98]'
             >
               <Users className='size-4 shrink-0' />
               Submit to pool…
-            </Button>
+            </button>
           </div>
         </PopoverContent>
       </Popover>

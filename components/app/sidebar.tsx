@@ -48,7 +48,6 @@ export const Sidebar = () => {
       <SidebarHeader className='p-4'>
         <Typography
           variant='h1'
-          display
           classNames='text-[68px]/[.9] pl-12 -indent-12 !mb-0'
         >
           Smut Society
@@ -57,9 +56,9 @@ export const Sidebar = () => {
       <SidebarContent>
         <SidebarGroup className='pt-0'>
           <Divider fancy />
-          <Link href='/home'>
+          <Link href='/book'>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={activePath.includes('home')}>
+              <SidebarMenuButton isActive={activePath.includes('book')}>
                 <Book />
                 Home
               </SidebarMenuButton>

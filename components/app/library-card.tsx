@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import { Stamp } from './stamp';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
-import Typography from '../ui/typography';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
@@ -87,12 +86,14 @@ export const LibraryCard = ({
             variant === 'hero' && 'px-sm gap-md'
           )}
         >
-          <Typography
-            variant='h6'
-            classNames={cn('font-semibold', variant === 'hero' && 'text-2xl')}
+          <h3
+            className={cn(
+              'font-semibold',
+              variant === 'hero' ? 'text-2xl' : 'text-lg'
+            )}
           >
             {title}
-          </Typography>
+          </h3>
           <Separator className='bg-accent-light/30' />
           <p
             className={cn(

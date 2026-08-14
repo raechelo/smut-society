@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { ArrowRight, CalendarClock, Users } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Typography from '@/components/ui/typography';
 
 // Full-width horizontal club card for the My Bookclubs list. The whole card is
 // no longer a link; navigation happens through the "View more" button.
@@ -29,32 +28,22 @@ export function MyClubCard({
     >
       <div className='flex min-w-0 flex-1 flex-col gap-sm'>
         <div className='flex flex-wrap items-center gap-sm'>
-          <Typography
-            variant='h6'
-            classNames='font-semibold tracking-wide'
-          >
+          <h3 className='font-heading text-lg font-semibold tracking-wide'>
             {name}
-          </Typography>
+          </h3>
           {badges ? (
             <div className='flex flex-wrap gap-xs'>{badges}</div>
           ) : null}
         </div>
 
         {description ? (
-          <Typography
-            variant='p2'
-            color='muted'
-            classNames='line-clamp-2 max-w-2xl leading-relaxed'
-          >
+          <p className='line-clamp-2 max-w-2xl text-sm leading-relaxed text-muted-foreground'>
             {description}
-          </Typography>
+          </p>
         ) : (
-          <Typography
-            variant='p2'
-            classNames='italic text-muted-foreground/70'
-          >
+          <p className='text-sm italic text-muted-foreground/70'>
             No description yet.
-          </Typography>
+          </p>
         )}
 
         <div className='flex flex-wrap items-center gap-md text-xs text-muted-foreground'>

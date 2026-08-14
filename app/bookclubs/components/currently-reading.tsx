@@ -1,10 +1,9 @@
 import { BookOpen, Sparkles } from 'lucide-react';
 import type { ClubBook } from '@/lib/actions/clubs';
-import { searchBookMeta } from '@/lib/hardcover';
+import { getBookMeta } from '@/lib/google-books';
 import { cn } from '@/lib/utils';
 import { ReviewBookDialog } from './review-book-dialog';
 import { FinishBookButton } from './finish-book-button';
-import { ContentWarnings } from './content-warnings';
 import { Button } from '@/components/ui/button';
 import Typography from '@/components/ui/typography';
 import { Rating } from '@/components/ui/rating';
@@ -77,40 +76,26 @@ export async function CurrentlyReading({
       <div className='flex w-full items-start gap-sm rounded-md border border-dashed border-primary/40 bg-primary/5 p-md text-sm'>
         <Sparkles className='mt-0.5 size-5 shrink-0 text-primary' />
         <div>
-          <Typography
-            variant='p2'
-            classNames='font-medium'
-          >
-            No book picked yet.
-          </Typography>
-          <Typography
-            variant='p2'
-            color='muted'
-          >
+          <p className='font-medium text-foreground'>No book picked yet.</p>
+          <p className='text-muted-foreground'>
             The club needs to pick its next read from the nominations.
-          </Typography>
+          </p>
         </div>
       </div>
     );
   }
 
-  const meta = await searchBookMeta(book.title, book.author);
+  const meta = await getBookMeta(book.bookId);
   const cover = meta?.cover || book.cover || null;
 
   const subline = [
     book.author,
     meta?.genre,
-    meta?.series ?? PLACEHOLDER_SERIES,
+    PLACEHOLDER_SERIES,
     meta?.pageCount ? `${meta.pageCount} pages` : null,
   ]
     .filter(Boolean)
     .join(' · ');
-
-  // Real "tropes" from Hardcover moods/genres; fall back to placeholders.
-  const tropeSource = meta?.moods.length ? meta.moods : meta?.genres ?? [];
-  const tropes = tropeSource.length
-    ? tropeSource.slice(0, 5)
-    : PLACEHOLDER_TROPES;
 
   return (
     <div className='card-gradient card-shadow relative flex w-full gap-lg rounded-md border border-accent/40 bg-card/40 p-md'>
@@ -142,7 +127,6 @@ export async function CurrentlyReading({
           </Typography>
           <Typography
             variant='h2'
-            display
             classNames='!mb-0 leading-tight'
           >
             {book.title}
@@ -189,7 +173,7 @@ export async function CurrentlyReading({
         <Divider classNames='my-md' />
 
         <div className='flex flex-wrap gap-1.5'>
-          {tropes.map((trope) => (
+          {PLACEHOLDER_TROPES.map((trope) => (
             <Chip
               key={trope}
               label={trope}
@@ -206,11 +190,7 @@ export async function CurrentlyReading({
             size='sm'
           >
             <a
-              href={
-                meta?.slug
-                  ? `https://hardcover.app/books/${meta.slug}`
-                  : `https://hardcover.app/search?q=${encodeURIComponent(book.title)}`
-              }
+              href={`https://books.google.com/books?id=${book.bookId}`}
               target='_blank'
               rel='noopener noreferrer'
             >
@@ -221,7 +201,6 @@ export async function CurrentlyReading({
             bookId={book.bookId}
             title={book.title}
           />
-          <ContentWarnings warnings={meta?.contentWarnings ?? []} />
         </div>
       </div>
     </div>

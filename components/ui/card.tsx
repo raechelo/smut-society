@@ -90,7 +90,7 @@ function Card({
       data-size={size}
       onClick={onClick}
       className={cn(
-        'group/card card-gradient relative isolate flex flex-col overflow-hidden rounded-md border border-accent/40 bg-parchment p-md text-sm transition-shadow has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-none *:[img:last-child]:rounded-none',
+        'group/card card-gradient relative isolate flex flex-col overflow-hidden rounded-md border border-card-border bg-parchment p-md text-sm transition-shadow has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-none *:[img:last-child]:rounded-none',
         shadow && 'card-shadow',
         onClick && 'cursor-pointer',
         className

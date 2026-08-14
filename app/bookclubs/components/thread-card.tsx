@@ -4,9 +4,6 @@ import { useState } from 'react';
 import { CircleUser } from 'lucide-react';
 import { CommentForm } from './comment-form';
 import { ReactionBar } from './reaction-bar';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Typography from '@/components/ui/typography';
 import type { ThreadComment, ThreadDetail } from '@/lib/actions/discussions';
 
 const PREVIEW_COUNT = 2;
@@ -42,26 +39,17 @@ function CommentRow({
       <div className='flex min-w-0 flex-col gap-1.5'>
         <div>
           <div className='flex items-baseline gap-2'>
-            <Typography
-              variant='p2'
-              classNames='font-medium'
-            >
+            <span className='text-sm font-medium'>
               {comment.authorName ?? 'Anonymous'}
-            </Typography>
-            <Typography
-              variant='span'
-              color='muted'
+            </span>
+            <span
+              className='text-xs text-muted-foreground'
               suppressHydrationWarning
             >
               {formatTime(comment.createdAt)}
-            </Typography>
+            </span>
           </div>
-          <Typography
-          variant='p2'
-          classNames='whitespace-pre-wrap'
-        >
-          {comment.body}
-        </Typography>
+          <p className='whitespace-pre-wrap text-sm'>{comment.body}</p>
         </div>
         <ReactionBar
           targetType='comment'
@@ -88,33 +76,17 @@ export function ThreadCard({
   const hidden = thread.comments.length - shown.length;
 
   return (
-    <Card
-      shadow
+    <div
       id={`thread-${thread.id}`}
-      className='scroll-mt-4 gap-3'
+      className='card-gradient card-shadow flex scroll-mt-4 flex-col gap-3 rounded-md border border-accent/40 bg-card/40 p-md'
     >
       <div className='flex flex-col gap-1'>
-        <Typography
-          variant='h3'
-          color='primary'
-          classNames='text-base font-semibold'
-        >
-          {thread.title}
-        </Typography>
-        <Typography
-          variant='p2'
-          color='muted'
-          classNames='text-xs'
-        >
+        <h3 className='text-base font-semibold text-primary'>{thread.title}</h3>
+        <p className='text-xs text-muted-foreground'>
           {thread.authorName ?? 'Someone'} · {formatTime(thread.createdAt)}
-        </Typography>
+        </p>
         {thread.body && (
-          <Typography
-            variant='p2'
-            classNames='mt-1 whitespace-pre-wrap'
-          >
-            {thread.body}
-          </Typography>
+          <p className='mt-1 whitespace-pre-wrap text-sm'>{thread.body}</p>
         )}
       </div>
 
@@ -135,14 +107,13 @@ export function ThreadCard({
             />
           ))}
           {hidden > 0 && (
-            <Button
+            <button
               type='button'
-              variant='link'
               onClick={() => setExpanded(true)}
-              className='h-auto self-start p-0'
+              className='self-start text-xs font-medium text-primary hover:underline'
             >
               View {hidden} more {hidden === 1 ? 'reply' : 'replies'}
-            </Button>
+            </button>
           )}
         </div>
       )}
@@ -152,6 +123,6 @@ export function ThreadCard({
           <CommentForm threadId={thread.id} />
         </div>
       )}
-    </Card>
+    </div>
   );
 }

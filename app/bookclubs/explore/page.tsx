@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { Eye } from 'lucide-react';
 import { PageLayout } from '@/components/app/page-layout';
 import { Button } from '@/components/ui/button';
-import Typography from '@/components/ui/typography';
 import { getPublicClubs } from '@/lib/actions/clubs';
 import { ClubCard } from '../components/club-card';
 import { JoinButton } from '../components/join-button';
@@ -44,13 +43,9 @@ export default async function ExploreClubsPage() {
               ))}
             </div>
           ) : (
-            <Typography
-              variant='p2'
-              color='muted'
-              classNames='mt-xl text-center'
-            >
+            <p className='mt-xl text-center text-sm text-muted-foreground'>
               No public clubs yet. Be the first to create one!
-            </Typography>
+            </p>
           )}
         </div>
       </div>

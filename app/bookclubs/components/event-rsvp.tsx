@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react';
 import { Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import Typography from '@/components/ui/typography';
 import { setEventRsvp, type RsvpStatus } from '@/lib/actions/clubs';
 
 export function EventRsvp({
@@ -52,14 +51,10 @@ export function EventRsvp({
 
   return (
     <div className='flex flex-col gap-xs'>
-      <Typography
-        variant='p2'
-        color='muted'
-        classNames='text-xs'
-      >
+      <p className='text-xs text-muted-foreground'>
         {count} attending
         {status === 'going' && count > 0 && ' · you’re in'}
-      </Typography>
+      </p>
       <div className='grid grid-cols-2 gap-xs'>
         <Button
           size='sm'

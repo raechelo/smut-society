@@ -72,7 +72,7 @@ function BookGridSkeleton() {
   );
 }
 
-export function LibraryClient() {
+export function LibraryClient({ trending }: { trending: HardcoverBook[] }) {
   const [inputValue, setInputValue] = useState('');
   const [debouncedInput, setDebouncedInput] = useState('');
   const [filters, setFilters] = useState<BookFilters>(DEFAULT_FILTERS);
@@ -180,6 +180,26 @@ export function LibraryClient() {
 
   return (
     <div className='flex flex-col gap-md'>
+      {/* Trending — the small romance-only slice of Hardcover's trending set. */}
+      {trending.length > 0 && (
+        <section className='flex flex-col gap-sm'>
+          <Typography
+            variant='h4'
+            display
+            classNames='!mb-0 text-primary'
+          >
+            Trending
+          </Typography>
+          <BookGrid
+            books={trending}
+            favoritedIds={favoritedIds}
+            onFavoriteChange={handleFavoriteChange}
+            shelfIds={shelfIds}
+            onShelfChange={handleShelfChange}
+          />
+        </section>
+      )}
+
       <Filter
         value={inputValue}
         onChange={setInputValue}

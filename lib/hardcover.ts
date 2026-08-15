@@ -210,12 +210,6 @@ export const searchBooks = cache(
   }
 );
 
-// The top book for a query — used for the librarian's-pick hero.
-export const topBook = cache(async (query: string): Promise<HardcoverBook | null> => {
-  const { items } = await searchBooks(query, 1, 1);
-  return items[0] ?? null;
-});
-
 // Popular romance (by reader count), paginated. Used for the default library
 // grid when there's no active search/trope. Scoped to romance via the
 // denormalized `cached_tags.Genre` — the consensus genre list Hardcover shows on
@@ -255,5 +249,88 @@ const cachedPopular = unstable_cache(
 export const popularBooks = cache(
   (page = 1, perPage = 12): Promise<HardcoverBook[]> =>
     cachedPopular(perPage, Math.max(1, page))
+);
+
+export type TrendingWindow = 'week' | 'month' | 'three_month' | 'one_year' | 'all';
+
+// Fields the book-card/hero need from a `books` table row (vs a search hit).
+const BOOK_TABLE_FIELDS = `
+  id
+  slug
+  title
+  rating
+  ratings_count
+  release_year
+  pages
+  description
+  image { url }
+  cached_tags
+  contributions { author { name } }
+`;
+
+// Trending romance in Hardcover's trending order. `books_trending` is global
+// (mostly non-romance) and caps at 100 ids, so the romance slice is a small,
+// deliberately curated set (~11 for a week, ~17 for a month) scoped by the same
+// `cached_tags.Genre` filter as the popular grid.
+async function fetchTrendingRomance(
+  duration: TrendingWindow
+): Promise<HardcoverBook[]> {
+  const trending = await hardcoverQuery<{ books_trending: { ids: number[] } }>(
+    `query Trending($d: TrendingDuration!) {
+      books_trending(duration: $d, limit: 100) { ids }
+    }`,
+    { d: duration }
+  );
+  const ids: number[] = trending?.books_trending?.ids ?? [];
+  if (ids.length === 0) return [];
+
+  const data = await hardcoverQuery<{ books: any[] }>(
+    `query TrendingBooks($ids: [Int!]!) {
+      books(
+        where: {
+          id: { _in: $ids }
+          cached_tags: { _contains: { Genre: [{ tag: "Romance" }] } }
+        }
+      ) {${BOOK_TABLE_FIELDS}}
+    }`,
+    { ids }
+  );
+
+  // Preserve Hardcover's trending order.
+  const rank = new Map(ids.map((id, i) => [id, i] as const));
+  return (data?.books ?? [])
+    .filter((b) => b.slug)
+    .sort((a, b) => (rank.get(a.id) ?? Infinity) - (rank.get(b.id) ?? Infinity))
+    .map(toBookFromTable);
+}
+
+// The Trending section grid — revalidated hourly, keyed by window.
+const cachedTrendingRomance = unstable_cache(
+  (duration: TrendingWindow) => fetchTrendingRomance(duration),
+  ['hardcover-trending-romance'],
+  { revalidate: 60 * 60 }
+);
+
+export const trendingBooks = cache(
+  (duration: TrendingWindow = 'month'): Promise<HardcoverBook[]> =>
+    cachedTrendingRomance(duration)
+);
+
+// The librarian's-pick highlight: the top trending romance, frozen per ISO week
+// (fresh weekly, stable within it). Falls back to the top all-time-popular
+// romance if a week's trending set has no romance.
+const cachedLibrariansPick = unstable_cache(
+  async (_weekKey: number): Promise<HardcoverBook | null> => {
+    const trending = await fetchTrendingRomance('week');
+    return trending[0] ?? (await popularBooks(1, 1))[0] ?? null;
+  },
+  ['hardcover-librarians-pick'],
+  { revalidate: 7 * DAY }
+);
+
+const WEEK_MS = 7 * DAY * 1000;
+export const librariansPick = cache(
+  (): Promise<HardcoverBook | null> =>
+    cachedLibrariansPick(Math.floor(Date.now() / WEEK_MS))
 );
 /* eslint-enable @typescript-eslint/no-explicit-any */

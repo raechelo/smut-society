@@ -1,27 +1,8 @@
 import { BookOpen, Sparkles } from 'lucide-react';
-import { topBook } from '@/lib/hardcover';
+import { librariansPick } from '@/lib/hardcover';
 import { Card } from '@/components/ui/card';
 import { Chip } from '@/components/app/chip';
 import Typography from '@/components/ui/typography';
-
-// TODO: stubbed weekly pick — a hardcoded rotation of titles until real picks
-// are curated. Rotates by ISO week so it changes weekly.
-const PICKS = [
-  'Heated Rivalry',
-  'A Court of Thorns and Roses',
-  'The Love Hypothesis',
-  'Fourth Wing',
-  'Red, White & Royal Blue',
-];
-
-function weekIndex(len: number): number {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 1);
-  const week = Math.floor(
-    (now.getTime() - start.getTime()) / (7 * 24 * 60 * 60 * 1000)
-  );
-  return ((week % len) + len) % len;
-}
 
 function stripHtml(s: string): string {
   return s
@@ -33,7 +14,7 @@ function stripHtml(s: string): string {
 }
 
 export async function LibrariansPick() {
-  const book = await topBook(PICKS[weekIndex(PICKS.length)]);
+  const book = await librariansPick();
   if (!book) return null;
 
   return (

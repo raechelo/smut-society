@@ -5,6 +5,9 @@ import { db } from '@/lib/db';
 import { accounts, sessions, users, verificationTokens } from '@/lib/schema';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  // Netlify isn't Vercel, so NextAuth won't auto-trust the deploy host. Without
+  // this it throws an UntrustedHost `Configuration` error (500 on /api/auth/*).
+  trustHost: true,
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,

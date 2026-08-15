@@ -9,14 +9,14 @@ import {
 } from '@/lib/types/books';
 import type { HardcoverBook } from '@/lib/hardcover';
 import { Filter } from './filter';
-import { BookCard } from './book-card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Chip } from '@/components/app/chip';
-import { Button } from '@/components/ui/button';
 import Typography from '@/components/ui/typography';
 import { getUserFavoriteIds, getUserShelfIds } from '@/lib/actions/books';
+import { Trending } from './trending';
+import { BookGrid, BookGridSkeleton } from './book-grid';
 
-const PER_PAGE = 12;
+// Fetch a batch big enough to page through as single rows client-side.
+const PER_PAGE = 24;
 const TROPES = [
   'Enemies to Lovers',
   'Slow Burn',
@@ -29,48 +29,6 @@ const TROPES = [
   'Fated Mates',
   'Friends to Lovers',
 ];
-
-function BookGrid({
-  books,
-  favoritedIds,
-  onFavoriteChange,
-  shelfIds,
-  onShelfChange,
-}: {
-  books: HardcoverBook[];
-  favoritedIds: Set<string>;
-  onFavoriteChange: (bookId: string, favorited: boolean) => void;
-  shelfIds: Set<string>;
-  onShelfChange: (bookId: string, onShelf: boolean) => void;
-}) {
-  return (
-    <div className='grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3'>
-      {books.map((book) => (
-        <BookCard
-          key={book.slug}
-          book={book}
-          isFavorited={favoritedIds.has(book.slug)}
-          onFavoriteChange={onFavoriteChange}
-          isOnShelf={shelfIds.has(book.slug)}
-          onShelfChange={onShelfChange}
-        />
-      ))}
-    </div>
-  );
-}
-
-function BookGridSkeleton() {
-  return (
-    <div className='grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3'>
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton
-          key={i}
-          className='h-[220px] w-full rounded-md'
-        />
-      ))}
-    </div>
-  );
-}
 
 export function LibraryClient({ trending }: { trending: HardcoverBook[] }) {
   const [inputValue, setInputValue] = useState('');
@@ -124,6 +82,10 @@ export function LibraryClient({ trending }: { trending: HardcoverBook[] }) {
     .trim();
   const isPopular = !userQuery;
 
+  // Trending only belongs on the default browse view — hide it once the user is
+  // narrowing by search, trope, genre (all folded into `userQuery`), or length.
+  const isDefaultView = isPopular && filters.lengths.length === 0;
+
   useEffect(() => {
     let cancelled = false;
     /* eslint-disable react-hooks/set-state-in-effect */
@@ -166,40 +128,36 @@ export function LibraryClient({ trending }: { trending: HardcoverBook[] }) {
       : rawBooks;
   const books =
     filters.sortBy === 'newest'
-      ? [...filtered].sort((a, b) => (b.releaseYear ?? 0) - (a.releaseYear ?? 0))
+      ? [...filtered].sort(
+          (a, b) => (b.releaseYear ?? 0) - (a.releaseYear ?? 0)
+        )
       : filtered;
 
-  const hasPrev = page > 1;
-  const hasNext = hasMore;
-  const title = isPopular ? 'Popular books' : (activeTrope ?? 'Results');
+  const title = isPopular ? 'Popular books' : activeTrope ?? 'Results';
 
   const toggleTrope = (t: string) => {
     setActiveTrope((cur) => (cur === t ? null : t));
     setPage(1);
   };
 
+  if (loading) {
+    return <BookGridSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <Typography
+        variant='p2'
+        color='error'
+        classNames='mt-xl text-center'
+      >
+        {error}
+      </Typography>
+    );
+  }
+
   return (
     <div className='flex flex-col gap-md'>
-      {/* Trending — the small romance-only slice of Hardcover's trending set. */}
-      {trending.length > 0 && (
-        <section className='flex flex-col gap-sm'>
-          <Typography
-            variant='h4'
-            display
-            classNames='!mb-0 text-primary'
-          >
-            Trending
-          </Typography>
-          <BookGrid
-            books={trending}
-            favoritedIds={favoritedIds}
-            onFavoriteChange={handleFavoriteChange}
-            shelfIds={shelfIds}
-            onShelfChange={handleShelfChange}
-          />
-        </section>
-      )}
-
       <Filter
         value={inputValue}
         onChange={setInputValue}
@@ -238,50 +196,21 @@ export function LibraryClient({ trending }: { trending: HardcoverBook[] }) {
         </div>
       </div>
 
-      {/* Popular / results */}
-      <section className='flex flex-col gap-sm'>
-        <div className='flex items-center justify-between gap-sm'>
-          <Typography
-            variant='h4'
-            display
-            classNames='!mb-0 text-primary'
-          >
-            {title}
-          </Typography>
-          <div className='flex items-center gap-1.5'>
-            <Button
-              size='icon-sm'
-              variant='outline'
-              disabled={!hasPrev || loading}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              aria-label='Previous page'
-            >
-              <ChevronLeft className='size-4' />
-            </Button>
-            <Button
-              size='icon-sm'
-              variant='outline'
-              disabled={!hasNext || loading}
-              onClick={() => setPage((p) => p + 1)}
-              aria-label='Next page'
-            >
-              <ChevronRight className='size-4' />
-            </Button>
-          </div>
-        </div>
+      {isDefaultView && trending.length > 0 && (
+        <Trending
+          trending={trending}
+          favoritedIds={favoritedIds}
+          handleFavoriteChange={handleFavoriteChange}
+          shelfIds={shelfIds}
+          handleShelfChange={handleShelfChange}
+        />
+      )}
 
-        {loading ? (
-          <BookGridSkeleton />
-        ) : error ? (
-          <Typography
-            variant='p2'
-            color='error'
-            classNames='mt-xl text-center'
-          >
-            {error}
-          </Typography>
-        ) : books.length > 0 ? (
+      <section className='flex flex-col gap-sm'>
+        {books.length > 0 ? (
           <BookGrid
+            key={`${userQuery}|${filters.sortBy}|${filters.lengths.join(',')}`}
+            title={title}
             books={books}
             favoritedIds={favoritedIds}
             onFavoriteChange={handleFavoriteChange}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   DEFAULT_FILTERS,
   matchesLength,
@@ -9,10 +10,25 @@ import {
 import type { HardcoverBook } from '@/lib/hardcover';
 import { Filter } from './filter';
 import { BookCard } from './book-card';
-import { Discover } from './discover';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Chip } from '@/components/app/chip';
+import { Button } from '@/components/ui/button';
 import Typography from '@/components/ui/typography';
 import { getUserFavoriteIds, getUserShelfIds } from '@/lib/actions/books';
+
+const PER_PAGE = 12;
+const TROPES = [
+  'Enemies to Lovers',
+  'Slow Burn',
+  'Grumpy Sunshine',
+  'Fake Dating',
+  'Second Chance',
+  'Forced Proximity',
+  'Found Family',
+  'Forbidden Love',
+  'Fated Mates',
+  'Friends to Lovers',
+];
 
 function BookGrid({
   books,
@@ -46,31 +62,24 @@ function BookGrid({
 function BookGridSkeleton() {
   return (
     <div className='grid grid-cols-1 gap-md sm:grid-cols-2 lg:grid-cols-3'>
-      {Array.from({ length: 10 }).map((_, i) => (
-        <div
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Skeleton
           key={i}
-          className='flex flex-col gap-sm'
-        >
-          <Skeleton className='aspect-[2/3] w-full rounded-md' />
-          <Skeleton className='h-4 w-3/4' />
-          <Skeleton className='h-3 w-1/2' />
-        </div>
+          className='h-[220px] w-full rounded-md'
+        />
       ))}
     </div>
   );
-}
-
-// Hardcover's search is full-text (Typesense) — no field operators. Combine the
-// user's text with any selected genre terms into one query.
-function buildQuery(input: string, genres: string[]): string {
-  return [input.trim(), ...genres].filter(Boolean).join(' ').trim();
 }
 
 export function LibraryClient() {
   const [inputValue, setInputValue] = useState('');
   const [debouncedInput, setDebouncedInput] = useState('');
   const [filters, setFilters] = useState<BookFilters>(DEFAULT_FILTERS);
+  const [activeTrope, setActiveTrope] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [rawBooks, setRawBooks] = useState<HardcoverBook[]>([]);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
@@ -100,31 +109,44 @@ export function LibraryClient() {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedInput(inputValue.trim()), 400);
+    const timer = setTimeout(() => {
+      setDebouncedInput(inputValue.trim());
+      setPage(1);
+    }, 400);
     return () => clearTimeout(timer);
   }, [inputValue]);
 
-  const apiQuery = buildQuery(debouncedInput, filters.genres);
+  // Query terms: search + selected trope + genre filters. Falls back to a
+  // popular query when nothing is selected.
+  const userQuery = [debouncedInput, activeTrope, ...filters.genres]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  const isPopular = !userQuery;
 
   useEffect(() => {
-    if (!apiQuery) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setRawBooks([]);
-      return;
-    }
-
     let cancelled = false;
+    /* eslint-disable react-hooks/set-state-in-effect */
     setLoading(true);
     setError(null);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
-    const params = new URLSearchParams({ q: apiQuery });
+    // Empty query → the API returns the popular grid.
+    const params = new URLSearchParams({
+      q: userQuery,
+      page: String(page),
+      per: String(PER_PAGE),
+    });
 
     fetch(`/api/hardcover/search?${params}`)
       .then((r) => r.json())
-      .then(({ items, error }) => {
+      .then(({ items, hasMore, error }) => {
         if (cancelled) return;
         if (error) setError(error);
-        else setRawBooks(items);
+        else {
+          setRawBooks(items ?? []);
+          setHasMore(!!hasMore);
+        }
       })
       .catch(() => {
         if (!cancelled) setError('Search failed. Try again.');
@@ -136,7 +158,7 @@ export function LibraryClient() {
     return () => {
       cancelled = true;
     };
-  }, [apiQuery]);
+  }, [userQuery, page]);
 
   const filtered =
     filters.lengths.length > 0
@@ -147,17 +169,87 @@ export function LibraryClient() {
       ? [...filtered].sort((a, b) => (b.releaseYear ?? 0) - (a.releaseYear ?? 0))
       : filtered;
 
-  const hasQuery = !!apiQuery;
+  const hasPrev = page > 1;
+  const hasNext = hasMore;
+  const title = isPopular ? 'Popular books' : (activeTrope ?? 'Results');
+
+  const toggleTrope = (t: string) => {
+    setActiveTrope((cur) => (cur === t ? null : t));
+    setPage(1);
+  };
 
   return (
-    <div className='flex h-full flex-col gap-md'>
+    <div className='flex flex-col gap-md'>
       <Filter
         value={inputValue}
         onChange={setInputValue}
         filters={filters}
-        onFiltersChange={setFilters}
+        onFiltersChange={(f) => {
+          setFilters(f);
+          setPage(1);
+        }}
       />
-      <div className='min-h-0 flex-1 overflow-y-auto pr-xs'>
+
+      {/* Browse by trope */}
+      <div className='flex flex-col gap-1.5'>
+        <Typography
+          variant='caption'
+          color='muted'
+        >
+          Browse by trope
+        </Typography>
+        <div className='flex flex-wrap gap-1.5'>
+          {TROPES.map((t) => (
+            <button
+              key={t}
+              type='button'
+              onClick={() => toggleTrope(t)}
+              className='cursor-pointer'
+              aria-pressed={activeTrope === t}
+            >
+              <Chip
+                label={t}
+                size='small'
+                variant={activeTrope === t ? 'filled' : 'outline'}
+                colors='wine'
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Popular / results */}
+      <section className='flex flex-col gap-sm'>
+        <div className='flex items-center justify-between gap-sm'>
+          <Typography
+            variant='h4'
+            display
+            classNames='!mb-0 text-primary'
+          >
+            {title}
+          </Typography>
+          <div className='flex items-center gap-1.5'>
+            <Button
+              size='icon-sm'
+              variant='outline'
+              disabled={!hasPrev || loading}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              aria-label='Previous page'
+            >
+              <ChevronLeft className='size-4' />
+            </Button>
+            <Button
+              size='icon-sm'
+              variant='outline'
+              disabled={!hasNext || loading}
+              onClick={() => setPage((p) => p + 1)}
+              aria-label='Next page'
+            >
+              <ChevronRight className='size-4' />
+            </Button>
+          </div>
+        </div>
+
         {loading ? (
           <BookGridSkeleton />
         ) : error ? (
@@ -176,7 +268,7 @@ export function LibraryClient() {
             shelfIds={shelfIds}
             onShelfChange={handleShelfChange}
           />
-        ) : hasQuery ? (
+        ) : (
           <Typography
             variant='p2'
             color='muted'
@@ -184,15 +276,8 @@ export function LibraryClient() {
           >
             No books found
           </Typography>
-        ) : (
-          <Discover
-            favoritedIds={favoritedIds}
-            onFavoriteChange={handleFavoriteChange}
-            shelfIds={shelfIds}
-            onShelfChange={handleShelfChange}
-          />
         )}
-      </div>
+      </section>
     </div>
   );
 }

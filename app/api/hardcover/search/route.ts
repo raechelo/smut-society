@@ -1,10 +1,16 @@
-import { searchBooks } from '@/lib/hardcover';
+import { searchBooks, popularBooks } from '@/lib/hardcover';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q') ?? '';
-  if (!q.trim()) return Response.json({ items: [] });
+  const page = Number(searchParams.get('page') ?? '1') || 1;
+  const perPage = Number(searchParams.get('per') ?? '12') || 12;
 
-  const items = await searchBooks(q, 24);
-  return Response.json({ items });
+  // No query → the default "Popular books" grid (by reader count).
+  const items = q.trim()
+    ? (await searchBooks(q, page, perPage)).items
+    : await popularBooks(page, perPage);
+
+  // A full page implies there's likely a next one.
+  return Response.json({ items, hasMore: items.length === perPage });
 }

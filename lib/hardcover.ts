@@ -111,6 +111,28 @@ function toBook(d: any): HardcoverBook {
   };
 }
 
+// Maps a row from the `books` table (contributions/cached_tags shape) rather
+// than a search hit document.
+function toBookFromTable(b: any): HardcoverBook {
+  const genreTags: any[] = b.cached_tags?.Genre ?? [];
+  return {
+    id: Number(b.id),
+    slug: b.slug,
+    title: b.title,
+    authors: (b.contributions ?? [])
+      .map((c: any) => c.author?.name)
+      .filter(Boolean),
+    cover: b.image?.url ?? null,
+    genres: genreTags.map((t) => t.tag),
+    pages: typeof b.pages === 'number' ? b.pages : null,
+    releaseYear: typeof b.release_year === 'number' ? b.release_year : null,
+    rating: typeof b.rating === 'number' ? b.rating : null,
+    ratingsCount: typeof b.ratings_count === 'number' ? b.ratings_count : null,
+    description: b.description ?? null,
+    series: null,
+  };
+}
+
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 // The uncached search+map, keyed by the full query string and the title we want
@@ -157,28 +179,81 @@ export const searchBookMeta = cache(
   }
 );
 
-// Full-text book search for the library. Cached per query across requests.
+export type SearchResult = { items: HardcoverBook[]; total: number };
+
+// Full-text, paginated book search for the library. Cached per query/page.
 const cachedSearchBooks = unstable_cache(
-  async (q: string, limit: number): Promise<HardcoverBook[]> => {
+  async (q: string, perPage: number, page: number): Promise<SearchResult> => {
     const data = await hardcoverQuery<{ search: { results: any } }>(
-      `query Search($q: String!, $per: Int!) {
-        search(query: $q, query_type: "Book", per_page: $per, page: 1) {
+      `query Search($q: String!, $per: Int!, $page: Int!) {
+        search(query: $q, query_type: "Book", per_page: $per, page: $page) {
           results
         }
       }`,
-      { q, per: limit }
+      { q, per: perPage, page }
     );
-    const hits: any[] = data?.search?.results?.hits ?? [];
-    return hits.map((h) => toBook(h.document)).filter((b) => b.slug);
+    const results = data?.search?.results;
+    const hits: any[] = results?.hits ?? [];
+    return {
+      items: hits.map((h) => toBook(h.document)).filter((b) => b.slug),
+      total: typeof results?.found === 'number' ? results.found : hits.length,
+    };
   },
   ['hardcover-search-books'],
   { revalidate: 60 * 60 }
 );
 
 export const searchBooks = cache(
-  async (query: string, limit = 20): Promise<HardcoverBook[]> => {
-    if (!query.trim()) return [];
-    return cachedSearchBooks(query.trim(), limit);
+  async (query: string, page = 1, perPage = 12): Promise<SearchResult> => {
+    if (!query.trim()) return { items: [], total: 0 };
+    return cachedSearchBooks(query.trim(), perPage, Math.max(1, page));
   }
+);
+
+// The top book for a query — used for the librarian's-pick hero.
+export const topBook = cache(async (query: string): Promise<HardcoverBook | null> => {
+  const { items } = await searchBooks(query, 1, 1);
+  return items[0] ?? null;
+});
+
+// Popular romance (by reader count), paginated. Used for the default library
+// grid when there's no active search/trope. Scoped to romance via the
+// denormalized `cached_tags.Genre` — the consensus genre list Hardcover shows on
+// a book, so it reflects agreement rather than a single user's stray tag (a
+// plain `taggings` filter leaks mainstream titles like Harry Potter).
+const cachedPopular = unstable_cache(
+  async (perPage: number, page: number): Promise<HardcoverBook[]> => {
+    const data = await hardcoverQuery<{ books: any[] }>(
+      `query Popular($limit: Int!, $offset: Int!) {
+        books(
+          where: { cached_tags: { _contains: { Genre: [{ tag: "Romance" }] } } }
+          order_by: { users_read_count: desc_nulls_last }
+          limit: $limit
+          offset: $offset
+        ) {
+          id
+          slug
+          title
+          rating
+          ratings_count
+          release_year
+          pages
+          description
+          image { url }
+          cached_tags
+          contributions { author { name } }
+        }
+      }`,
+      { limit: perPage, offset: (page - 1) * perPage }
+    );
+    return (data?.books ?? []).map(toBookFromTable).filter((b) => b.slug);
+  },
+  ['hardcover-popular-romance'],
+  { revalidate: 60 * 60 }
+);
+
+export const popularBooks = cache(
+  (page = 1, perPage = 12): Promise<HardcoverBook[]> =>
+    cachedPopular(perPage, Math.max(1, page))
 );
 /* eslint-enable @typescript-eslint/no-explicit-any */

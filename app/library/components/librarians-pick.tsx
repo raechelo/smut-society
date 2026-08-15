@@ -39,26 +39,31 @@ export async function LibrariansPick() {
   return (
     <Card
       shadow
-      cornerDecoration='top-right'
-      className='w-full flex-row gap-lg'
+      cornerDecoration='all'
+      className='h-[30%] min-h-0 w-full shrink-0 flex-row gap-lg bg-sidebar text-sidebar-foreground'
     >
-      {book.cover ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={book.cover}
-          alt={book.title}
-          className='h-[240px] w-40 shrink-0 rounded-md object-cover shadow-sm'
-        />
-      ) : (
-        <div className='flex h-[240px] w-40 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground'>
-          <BookOpen className='size-10' />
-        </div>
-      )}
+      {/* Wrapped so the card's `>img:first-child` top-padding rule (meant for
+          cover-on-top grid cards) doesn't misfire in this side-by-side layout.
+          The cover scales to the card's height and keeps book proportions. */}
+      <div className='relative aspect-[2/3] h-full shrink-0 overflow-hidden rounded-md shadow-sm'>
+        {book.cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={book.cover}
+            alt={book.title}
+            className='h-full w-full object-cover'
+          />
+        ) : (
+          <div className='flex h-full w-full items-center justify-center bg-sidebar-accent text-sidebar-foreground/60'>
+            <BookOpen className='size-10' />
+          </div>
+        )}
+      </div>
 
-      <div className='flex min-w-0 flex-1 flex-col gap-2'>
+      <div className='flex min-w-0 flex-1 flex-col gap-1.5 overflow-hidden'>
         <Typography
           variant='caption'
-          classNames='flex items-center gap-1.5 text-accent-dark dark:text-accent-light'
+          classNames='flex items-center gap-1.5 text-sidebar-accent-foreground'
         >
           <Sparkles className='size-3.5' />
           Librarian&apos;s pick · this week
@@ -66,13 +71,13 @@ export async function LibrariansPick() {
         <Typography
           variant='h2'
           display
-          classNames='!mb-0 leading-tight'
+          classNames='!mb-0 leading-tight text-sidebar-foreground'
         >
           {book.title}
         </Typography>
         <Typography
           variant='p2'
-          color='muted'
+          classNames='text-sidebar-foreground/70'
         >
           {[
             book.authors.join(', '),
@@ -85,7 +90,7 @@ export async function LibrariansPick() {
         {book.description && (
           <Typography
             variant='p2'
-            classNames='line-clamp-4 leading-relaxed text-foreground/90'
+            classNames='line-clamp-3 leading-relaxed text-sidebar-foreground/85'
           >
             {stripHtml(book.description)}
           </Typography>
@@ -98,7 +103,7 @@ export async function LibrariansPick() {
                 label={g}
                 size='small'
                 variant='painted'
-                colors='wine'
+                colors='accent'
               />
             ))}
           </div>

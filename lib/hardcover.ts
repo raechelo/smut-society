@@ -316,6 +316,29 @@ export const trendingBooks = cache(
     cachedTrendingRomance(duration)
 );
 
+// Resolve a single book by its Hardcover slug (our stored bookId). Used to
+// rebuild cover/title/author + overall rating for a finished book from just the
+// id we kept.
+const cachedBookBySlug = unstable_cache(
+  async (slug: string): Promise<HardcoverBook | null> => {
+    const data = await hardcoverQuery<{ books: any[] }>(
+      `query BySlug($slug: String!) {
+        books(where: { slug: { _eq: $slug } }, limit: 1) {${BOOK_TABLE_FIELDS}}
+      }`,
+      { slug }
+    );
+    const b = data?.books?.[0];
+    return b ? toBookFromTable(b) : null;
+  },
+  ['hardcover-book-by-slug'],
+  { revalidate: DAY }
+);
+
+export const bookBySlug = cache(
+  (slug: string): Promise<HardcoverBook | null> =>
+    slug.trim() ? cachedBookBySlug(slug.trim()) : Promise.resolve(null)
+);
+
 // The librarian's-pick highlight: the top trending romance, frozen per ISO week
 // (fresh weekly, stable within it). Falls back to the top all-time-popular
 // romance if a week's trending set has no romance.

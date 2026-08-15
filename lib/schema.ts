@@ -81,6 +81,11 @@ export const rsvpStatusEnum = pgEnum('rsvp_status', ['going', 'not_going']);
 
 export const progressUnitEnum = pgEnum('progress_unit', ['chapter', 'page']);
 
+export const goalStatusEnum = pgEnum('goal_status', [
+  'in progress',
+  'completed',
+]);
+
 // ─── Clubs ───────────────────────────────────────────────────────────────────
 
 export const clubs = pgTable('clubs', {
@@ -364,6 +369,8 @@ export const notifications = pgTable('notifications', {
 });
 
 // A user's yearly reading goal (books to finish this year). One row per year.
+// status flips to 'completed' once the target is met or the year has passed, so
+// past goals can be browsed under a "Completed" tab.
 export const readingGoals = pgTable(
   'reading_goals',
   {
@@ -372,8 +379,29 @@ export const readingGoals = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     year: integer('year').notNull(),
     target: integer('target').notNull(),
+    status: goalStatusEnum('status').notNull().default('in progress'),
   },
   (t) => [primaryKey({ columns: [t.userId, t.year] })]
+);
+
+// A user's private rating + spice rating (and optional written review) for a
+// book, keyed by Hardcover slug. One row per (user, book); saving again updates
+// it. Powers the "completed books" table on the past-reads page.
+export const bookReviews = pgTable(
+  'book_reviews',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    bookId: text('book_id').notNull(),
+    // 1–5; nullable so a review can set spice without stars or vice versa.
+    rating: integer('rating'),
+    spiceRating: integer('spice_rating'),
+    reviewText: text('review_text'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.bookId] })]
 );
 
 // A user's personal "currently reading" shelf — books they've added from the

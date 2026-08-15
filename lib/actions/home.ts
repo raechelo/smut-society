@@ -3,6 +3,7 @@
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import {
+  bookReviews,
   clubs,
   clubMembers,
   notifications,
@@ -12,6 +13,7 @@ import {
 } from '@/lib/schema';
 import { and, count, desc, eq, gte, isNotNull, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { bookBySlug } from '@/lib/hardcover';
 
 function currentYear() {
   return new Date().getFullYear();
@@ -278,4 +280,202 @@ export async function finishShelfBook(bookId: string): Promise<void> {
     .set({ finishedAt: new Date() })
     .where(and(eq(readingShelf.userId, userId), eq(readingShelf.bookId, bookId)));
   revalidatePath('/home');
+}
+
+// ─── Past reads ────────────────────────────────────────────────────────────
+
+export type ReadingGoalRow = {
+  year: number;
+  target: number;
+  read: number;
+  status: 'in progress' | 'completed';
+};
+
+// All of the viewer's yearly goals, newest first, with their finished-book
+// count. A goal is completed once its target is met or its year has passed; we
+// persist that transition so the stored status stays accurate for the tabs.
+export async function getReadingGoals(): Promise<ReadingGoalRow[]> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return [];
+
+  const rows = await db
+    .select({
+      year: readingGoals.year,
+      target: readingGoals.target,
+      status: readingGoals.status,
+    })
+    .from(readingGoals)
+    .where(eq(readingGoals.userId, userId))
+    .orderBy(desc(readingGoals.year));
+
+  const thisYear = currentYear();
+  const result: ReadingGoalRow[] = [];
+  for (const g of rows) {
+    const read = await booksReadThisYear(userId, g.year);
+    const status: ReadingGoalRow['status'] =
+      read >= g.target || g.year < thisYear ? 'completed' : 'in progress';
+    if (status !== g.status) {
+      await db
+        .update(readingGoals)
+        .set({ status })
+        .where(
+          and(eq(readingGoals.userId, userId), eq(readingGoals.year, g.year))
+        );
+    }
+    result.push({ year: g.year, target: g.target, read, status });
+  }
+  return result;
+}
+
+export type CompletedBook = {
+  bookId: string;
+  title: string;
+  author: string | null;
+  cover: string | null;
+  userRating: number | null;
+  overallRating: number | null;
+  userSpice: number | null;
+  // No per-club spice rating exists yet — always null (rendered as n/a).
+  clubSpice: number | null;
+  finishedAt: Date;
+  clubName: string | null;
+};
+
+// Every book the viewer has marked finished — club reads (with the club name)
+// and personal-shelf books (club = null → n/a) — joined to their own review and
+// to Hardcover for cover/title/author + the overall rating. Newest first.
+export async function getCompletedBooks(): Promise<CompletedBook[]> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return [];
+
+  const clubRows = await db
+    .select({
+      bookId: readingProgress.bookId,
+      clubName: clubs.name,
+      finishedAt: readingProgress.updatedAt,
+    })
+    .from(readingProgress)
+    .innerJoin(clubs, eq(readingProgress.clubId, clubs.id))
+    .where(
+      and(eq(readingProgress.userId, userId), eq(readingProgress.finished, true))
+    );
+
+  const shelfRows = await db
+    .select({
+      bookId: readingShelf.bookId,
+      title: readingShelf.bookTitle,
+      author: readingShelf.bookAuthor,
+      cover: readingShelf.bookCover,
+      finishedAt: readingShelf.finishedAt,
+    })
+    .from(readingShelf)
+    .where(
+      and(eq(readingShelf.userId, userId), isNotNull(readingShelf.finishedAt))
+    );
+
+  const reviews = await db
+    .select({
+      bookId: bookReviews.bookId,
+      rating: bookReviews.rating,
+      spiceRating: bookReviews.spiceRating,
+    })
+    .from(bookReviews)
+    .where(eq(bookReviews.userId, userId));
+  const reviewByBook = new Map(reviews.map((r) => [r.bookId, r]));
+
+  // Merge by book; a club read wins over a personal-shelf entry for the same
+  // book (keeps the club name), but we borrow the shelf's denormalized fields
+  // as a fallback if Hardcover can't resolve the slug.
+  type Merged = {
+    bookId: string;
+    finishedAt: Date;
+    clubName: string | null;
+    title: string | null;
+    author: string | null;
+    cover: string | null;
+  };
+  const merged = new Map<string, Merged>();
+  for (const r of clubRows) {
+    if (!r.bookId) continue;
+    const prev = merged.get(r.bookId);
+    if (!prev || r.finishedAt > prev.finishedAt) {
+      merged.set(r.bookId, {
+        bookId: r.bookId,
+        finishedAt: r.finishedAt,
+        clubName: r.clubName,
+        title: prev?.title ?? null,
+        author: prev?.author ?? null,
+        cover: prev?.cover ?? null,
+      });
+    }
+  }
+  for (const r of shelfRows) {
+    if (!r.bookId || !r.finishedAt) continue;
+    const prev = merged.get(r.bookId);
+    if (!prev) {
+      merged.set(r.bookId, {
+        bookId: r.bookId,
+        finishedAt: r.finishedAt,
+        clubName: null,
+        title: r.title,
+        author: r.author,
+        cover: r.cover,
+      });
+    } else {
+      prev.title ??= r.title;
+      prev.author ??= r.author;
+      prev.cover ??= r.cover;
+    }
+  }
+
+  const books = await Promise.all(
+    [...merged.values()].map(async (e): Promise<CompletedBook> => {
+      const meta = await bookBySlug(e.bookId);
+      const review = reviewByBook.get(e.bookId);
+      return {
+        bookId: e.bookId,
+        title: meta?.title ?? e.title ?? 'Untitled',
+        author: meta?.authors[0] ?? e.author ?? null,
+        cover: meta?.cover ?? e.cover ?? null,
+        userRating: review?.rating ?? null,
+        overallRating: meta?.rating ?? null,
+        userSpice: review?.spiceRating ?? null,
+        clubSpice: null,
+        finishedAt: e.finishedAt,
+        clubName: e.clubName,
+      };
+    })
+  );
+
+  books.sort((a, b) => b.finishedAt.getTime() - a.finishedAt.getTime());
+  return books;
+}
+
+// Save (or update) the viewer's rating + spice rating + review for a book,
+// keyed by Hardcover slug. 0 means "not set" → stored as null.
+export async function saveBookReview(
+  bookId: string,
+  rating: number,
+  spiceRating: number,
+  text?: string
+): Promise<void> {
+  const userId = await requireAuth();
+  const clamp = (n: number) =>
+    n ? Math.min(5, Math.max(1, Math.trunc(n))) : null;
+  const reviewText = text?.trim() || null;
+  const row = {
+    rating: clamp(rating),
+    spiceRating: clamp(spiceRating),
+    reviewText,
+  };
+  await db
+    .insert(bookReviews)
+    .values({ userId, bookId, ...row })
+    .onConflictDoUpdate({
+      target: [bookReviews.userId, bookReviews.bookId],
+      set: { ...row, updatedAt: new Date() },
+    });
+  revalidatePath('/past-reads');
 }

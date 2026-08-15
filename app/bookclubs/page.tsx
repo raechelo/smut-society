@@ -14,24 +14,7 @@ export default async function BookclubsPage() {
   return (
     <PageLayout>
       <div className='flex h-full flex-col gap-md'>
-        <div className='flex flex-wrap items-center justify-between gap-sm'>
-          <Typography
-            variant='p2'
-            color='muted'
-          >
-            Your book clubs
-          </Typography>
-          <div className='flex items-center gap-xs'>
-            <Link href='/bookclubs/explore'>
-              <Button variant='outline'>
-                <Compass /> Explore
-              </Button>
-            </Link>
-            <CreateClubDialog />
-          </div>
-        </div>
-
-        <div className='min-h-0 flex-1 overflow-y-auto pr-xs pt-1'>
+        <div className='min-h-0 overflow-y-auto pr-xs pt-1'>
           {clubs.length > 0 ? (
             <div className='flex flex-col gap-md'>
               {clubs.map((club) => (
@@ -81,6 +64,15 @@ export default async function BookclubsPage() {
               </div>
             </div>
           )}
+        </div>
+
+        <div className='flex items-center gap-xs w-full justify-center'>
+          <Link href='/bookclubs/explore'>
+            <Button variant='outline'>
+              <Compass /> Explore
+            </Button>
+          </Link>
+          <CreateClubDialog />
         </div>
       </div>
     </PageLayout>

@@ -1,13 +1,18 @@
 import { PageLayout } from '@/components/app/page-layout';
-import { getCompletedBooks, getReadingGoals } from '@/lib/actions/home';
+import { getReadingShelfBooks, getReadingGoals } from '@/lib/actions/home';
+import { getGenreStats, getSpiceStats, getSourceStats } from '@/lib/actions/stats';
 import Typography from '@/components/ui/typography';
 import { ReadingGoals } from './components/reading-goals';
-import { CompletedBooksTable } from './components/completed-books-table';
+import { ReadingStats } from './components/reading-stats';
+import { ReadingShelfTable } from './components/reading-shelf-table';
 
 const PastReads = async () => {
-  const [goals, books] = await Promise.all([
+  const [goals, books, genres, spice, source] = await Promise.all([
     getReadingGoals(),
-    getCompletedBooks(),
+    getReadingShelfBooks(),
+    getGenreStats(),
+    getSpiceStats(),
+    getSourceStats(),
   ]);
 
   return (
@@ -15,15 +20,21 @@ const PastReads = async () => {
       <div className='flex size-full min-h-0 flex-col gap-lg overflow-y-auto pr-xs pb-md'>
         <ReadingGoals goals={goals} />
 
+        <ReadingStats
+          genres={genres}
+          spice={spice}
+          source={source}
+        />
+
         <section className='flex flex-col gap-sm'>
           <Typography
             variant='h3'
             display
             classNames='!mb-0 text-primary'
           >
-            Completed books
+            Reading shelf
           </Typography>
-          <CompletedBooksTable books={books} />
+          <ReadingShelfTable books={books} />
         </section>
       </div>
     </PageLayout>

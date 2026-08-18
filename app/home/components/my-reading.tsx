@@ -4,7 +4,7 @@ import { getCurrentlyReading } from '@/lib/actions/home';
 import { searchBookMeta } from '@/lib/hardcover';
 import Typography from '@/components/ui/typography';
 import { Card } from '@/components/ui/card';
-import { FinishReadingButton } from './finish-reading-button';
+import { ReadingStatusDialog } from './reading-status-dialog';
 
 export async function MyReading() {
   const items = await getCurrentlyReading();
@@ -91,9 +91,15 @@ export async function MyReading() {
                 ) : (
                   <div className='flex flex-col gap-1.5'>{content}</div>
                 )}
-                <FinishReadingButton
-                  clubId={item.clubId}
+                <ReadingStatusDialog
                   bookId={item.bookId}
+                  clubId={item.clubId}
+                  title={item.title}
+                  initialRating={item.rating}
+                  initialSpice={item.spice}
+                  initialStatus={item.status}
+                  initialStartedAt={item.startedAt}
+                  initialFinishedAt={item.finishedAt}
                 />
               </div>
             );

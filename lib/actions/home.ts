@@ -11,7 +11,7 @@ import {
   readingProgress,
   readingShelf,
 } from '@/lib/schema';
-import { and, count, desc, eq, gte, isNotNull, isNull } from 'drizzle-orm';
+import { and, count, desc, eq, gte, isNotNull, isNull, ne } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { bookBySlug } from '@/lib/hardcover';
 
@@ -54,7 +54,16 @@ export type ReadingItem = {
   // The club this read belongs to, or null for a personal-shelf book. Drives
   // which "mark finished" action to run.
   clubId: string | null;
+  // The viewer's existing review + reading metadata, so the status dialog can
+  // open pre-filled. Ratings are 1–5 or null; dates are ISO strings or null.
+  rating: number | null;
+  spice: number | null;
+  status: ReadStatus;
+  startedAt: string | null;
+  finishedAt: string | null;
 };
+
+export type ReadStatus = 'in progress' | 'completed' | 'dnf';
 
 // The viewer's notifications, newest first.
 export async function getNotifications(
@@ -132,6 +141,8 @@ async function booksReadThisYear(userId: string, year: number) {
       and(
         eq(readingShelf.userId, userId),
         isNotNull(readingShelf.finishedAt),
+        // A given-up book leaves the shelf but isn't a finished read.
+        ne(readingShelf.status, 'dnf'),
         gte(readingShelf.finishedAt, start)
       )
     );
@@ -170,6 +181,11 @@ export async function getCurrentlyReading(): Promise<ReadingItem[]> {
       author: clubs.currentBookAuthor,
       cover: clubs.currentBookCover,
       finished: readingProgress.finished,
+      status: readingProgress.status,
+      startedAt: readingProgress.startedAt,
+      finishedAt: readingProgress.finishedAt,
+      rating: bookReviews.rating,
+      spice: bookReviews.spiceRating,
     })
     .from(clubMembers)
     .innerJoin(clubs, eq(clubMembers.clubId, clubs.id))
@@ -181,12 +197,20 @@ export async function getCurrentlyReading(): Promise<ReadingItem[]> {
         eq(readingProgress.bookId, clubs.currentBookId)
       )
     )
+    .leftJoin(
+      bookReviews,
+      and(
+        eq(bookReviews.userId, userId),
+        eq(bookReviews.bookId, clubs.currentBookId)
+      )
+    )
     .where(and(eq(clubMembers.userId, userId), isNotNull(clubs.currentBookId)));
 
   const items: ReadingItem[] = [];
   const seen = new Set<string>();
   for (const r of clubRows) {
-    if (r.finished === true || !r.bookId) continue;
+    // A finished or given-up read drops off the currently-reading shelf.
+    if (r.finished === true || r.status === 'dnf' || !r.bookId) continue;
     seen.add(r.bookId);
     items.push({
       key: `club-${r.clubId}-${r.bookId}`,
@@ -197,6 +221,11 @@ export async function getCurrentlyReading(): Promise<ReadingItem[]> {
       subtitle: r.clubName,
       href: `/bookclubs/${r.clubId}`,
       clubId: r.clubId,
+      rating: r.rating,
+      spice: r.spice,
+      status: r.status ?? 'in progress',
+      startedAt: r.startedAt?.toISOString() ?? null,
+      finishedAt: r.finishedAt?.toISOString() ?? null,
     });
   }
 
@@ -206,8 +235,19 @@ export async function getCurrentlyReading(): Promise<ReadingItem[]> {
       title: readingShelf.bookTitle,
       author: readingShelf.bookAuthor,
       cover: readingShelf.bookCover,
+      status: readingShelf.status,
+      startedAt: readingShelf.startedAt,
+      rating: bookReviews.rating,
+      spice: bookReviews.spiceRating,
     })
     .from(readingShelf)
+    .leftJoin(
+      bookReviews,
+      and(
+        eq(bookReviews.userId, userId),
+        eq(bookReviews.bookId, readingShelf.bookId)
+      )
+    )
     .where(
       and(eq(readingShelf.userId, userId), isNull(readingShelf.finishedAt))
     )
@@ -225,6 +265,11 @@ export async function getCurrentlyReading(): Promise<ReadingItem[]> {
       subtitle: 'On your shelf',
       href: null,
       clubId: null,
+      rating: r.rating,
+      spice: r.spice,
+      status: r.status ?? 'in progress',
+      startedAt: r.startedAt?.toISOString() ?? null,
+      finishedAt: null,
     });
   }
 
@@ -328,7 +373,7 @@ export async function getReadingGoals(): Promise<ReadingGoalRow[]> {
   return result;
 }
 
-export type CompletedBook = {
+export type ShelfBook = {
   bookId: string;
   title: string;
   author: string | null;
@@ -338,14 +383,18 @@ export type CompletedBook = {
   userSpice: number | null;
   // No per-club spice rating exists yet — always null (rendered as n/a).
   clubSpice: number | null;
-  finishedAt: Date;
+  status: ReadStatus;
+  startedAt: Date | null;
+  // When the read ended (finished or given up); null while in progress.
+  finishedAt: Date | null;
   clubName: string | null;
 };
 
-// Every book the viewer has marked finished — club reads (with the club name)
-// and personal-shelf books (club = null → n/a) — joined to their own review and
-// to Hardcover for cover/title/author + the overall rating. Newest first.
-export async function getCompletedBooks(): Promise<CompletedBook[]> {
+// Every book on the viewer's shelf — personal-shelf books plus club reads they
+// have a progress record for — across all statuses (in progress / completed /
+// dnf), joined to their own review and to Hardcover for cover/title/author +
+// the overall rating. Most recently active first.
+export async function getReadingShelfBooks(): Promise<ShelfBook[]> {
   const session = await auth();
   const userId = session?.user?.id;
   if (!userId) return [];
@@ -354,13 +403,15 @@ export async function getCompletedBooks(): Promise<CompletedBook[]> {
     .select({
       bookId: readingProgress.bookId,
       clubName: clubs.name,
-      finishedAt: readingProgress.updatedAt,
+      finished: readingProgress.finished,
+      status: readingProgress.status,
+      startedAt: readingProgress.startedAt,
+      finishedAt: readingProgress.finishedAt,
+      updatedAt: readingProgress.updatedAt,
     })
     .from(readingProgress)
     .innerJoin(clubs, eq(readingProgress.clubId, clubs.id))
-    .where(
-      and(eq(readingProgress.userId, userId), eq(readingProgress.finished, true))
-    );
+    .where(eq(readingProgress.userId, userId));
 
   const shelfRows = await db
     .select({
@@ -368,12 +419,13 @@ export async function getCompletedBooks(): Promise<CompletedBook[]> {
       title: readingShelf.bookTitle,
       author: readingShelf.bookAuthor,
       cover: readingShelf.bookCover,
+      status: readingShelf.status,
+      startedAt: readingShelf.startedAt,
       finishedAt: readingShelf.finishedAt,
+      createdAt: readingShelf.createdAt,
     })
     .from(readingShelf)
-    .where(
-      and(eq(readingShelf.userId, userId), isNotNull(readingShelf.finishedAt))
-    );
+    .where(eq(readingShelf.userId, userId));
 
   const reviews = await db
     .select({
@@ -387,10 +439,14 @@ export async function getCompletedBooks(): Promise<CompletedBook[]> {
 
   // Merge by book; a club read wins over a personal-shelf entry for the same
   // book (keeps the club name), but we borrow the shelf's denormalized fields
-  // as a fallback if Hardcover can't resolve the slug.
+  // as a fallback if Hardcover can't resolve the slug. `recency` is a non-null
+  // date used purely for ordering and picking the latest of duplicate reads.
   type Merged = {
     bookId: string;
-    finishedAt: Date;
+    status: ReadStatus;
+    startedAt: Date | null;
+    finishedAt: Date | null;
+    recency: Date;
     clubName: string | null;
     title: string | null;
     author: string | null;
@@ -399,11 +455,20 @@ export async function getCompletedBooks(): Promise<CompletedBook[]> {
   const merged = new Map<string, Merged>();
   for (const r of clubRows) {
     if (!r.bookId) continue;
+    // Legacy rows finished before the status enum default to 'in progress', so
+    // `finished` stays the source of truth for completed. Those rows also lack
+    // a finishedAt, so fall back to updatedAt for the end date.
+    const status: ReadStatus = r.finished ? 'completed' : r.status;
+    const finishedAt = r.finishedAt ?? (r.finished ? r.updatedAt : null);
+    const recency = finishedAt ?? r.updatedAt;
     const prev = merged.get(r.bookId);
-    if (!prev || r.finishedAt > prev.finishedAt) {
+    if (!prev || recency > prev.recency) {
       merged.set(r.bookId, {
         bookId: r.bookId,
-        finishedAt: r.finishedAt,
+        status,
+        startedAt: r.startedAt,
+        finishedAt,
+        recency,
         clubName: r.clubName,
         title: prev?.title ?? null,
         author: prev?.author ?? null,
@@ -412,12 +477,19 @@ export async function getCompletedBooks(): Promise<CompletedBook[]> {
     }
   }
   for (const r of shelfRows) {
-    if (!r.bookId || !r.finishedAt) continue;
+    if (!r.bookId) continue;
     const prev = merged.get(r.bookId);
     if (!prev) {
+      // A dnf keeps its status; otherwise a set finishedAt means completed
+      // (covers legacy rows finished before the status enum existed).
+      const status: ReadStatus =
+        r.status === 'dnf' ? 'dnf' : r.finishedAt ? 'completed' : 'in progress';
       merged.set(r.bookId, {
         bookId: r.bookId,
+        status,
+        startedAt: r.startedAt,
         finishedAt: r.finishedAt,
+        recency: r.finishedAt ?? r.startedAt ?? r.createdAt,
         clubName: null,
         title: r.title,
         author: r.author,
@@ -430,8 +502,11 @@ export async function getCompletedBooks(): Promise<CompletedBook[]> {
     }
   }
 
-  const books = await Promise.all(
-    [...merged.values()].map(async (e): Promise<CompletedBook> => {
+  const entries = [...merged.values()].sort(
+    (a, b) => b.recency.getTime() - a.recency.getTime()
+  );
+  return Promise.all(
+    entries.map(async (e): Promise<ShelfBook> => {
       const meta = await bookBySlug(e.bookId);
       const review = reviewByBook.get(e.bookId);
       return {
@@ -443,14 +518,13 @@ export async function getCompletedBooks(): Promise<CompletedBook[]> {
         overallRating: meta?.rating ?? null,
         userSpice: review?.spiceRating ?? null,
         clubSpice: null,
+        status: e.status,
+        startedAt: e.startedAt,
         finishedAt: e.finishedAt,
         clubName: e.clubName,
       };
     })
   );
-
-  books.sort((a, b) => b.finishedAt.getTime() - a.finishedAt.getTime());
-  return books;
 }
 
 // Save (or update) the viewer's rating + spice rating + review for a book,
@@ -477,5 +551,86 @@ export async function saveBookReview(
       target: [bookReviews.userId, bookReviews.bookId],
       set: { ...row, updatedAt: new Date() },
     });
+  revalidatePath('/past-reads');
+}
+
+// Save a full reading update from the currently-reading dialog: the star +
+// spice review together with the read's status and start/end dates. Handles
+// both a club read (per-user progress) and a personal-shelf book. Ratings of 0
+// mean "not set" → stored as null.
+export async function saveReadingUpdate(input: {
+  bookId: string;
+  clubId: string | null;
+  status: ReadStatus;
+  rating: number;
+  spice: number;
+  startedAt: string | null;
+  endedAt: string | null;
+}): Promise<void> {
+  const userId = await requireAuth();
+  const { bookId, clubId, status } = input;
+
+  const clamp = (n: number) =>
+    n ? Math.min(5, Math.max(1, Math.trunc(n))) : null;
+  const startedAt = input.startedAt ? new Date(input.startedAt) : null;
+  // A completed or given-up read gets an end date; fall back to now if the
+  // user left it blank. An in-progress read has no end date.
+  const finishedAt =
+    status === 'in progress'
+      ? null
+      : input.endedAt
+        ? new Date(input.endedAt)
+        : new Date();
+
+  // The star + spice review is club-agnostic — one row per (user, book). The
+  // dialog pre-fills existing values, so re-saving here preserves them.
+  const review = { rating: clamp(input.rating), spiceRating: clamp(input.spice) };
+  await db
+    .insert(bookReviews)
+    .values({ userId, bookId, ...review })
+    .onConflictDoUpdate({
+      target: [bookReviews.userId, bookReviews.bookId],
+      set: { ...review, updatedAt: new Date() },
+    });
+
+  if (clubId) {
+    const [membership] = await db
+      .select({ userId: clubMembers.userId })
+      .from(clubMembers)
+      .where(
+        and(eq(clubMembers.clubId, clubId), eq(clubMembers.userId, userId))
+      )
+      .limit(1);
+    if (!membership) throw new Error('You are not a member of this club');
+
+    const progress = {
+      finished: status === 'completed',
+      status,
+      startedAt,
+      finishedAt,
+      updatedAt: new Date(),
+    };
+    await db
+      .insert(readingProgress)
+      .values({ userId, clubId, bookId, ...progress })
+      .onConflictDoUpdate({
+        target: [
+          readingProgress.userId,
+          readingProgress.clubId,
+          readingProgress.bookId,
+        ],
+        set: progress,
+      });
+    revalidatePath(`/bookclubs/${clubId}`);
+  } else {
+    await db
+      .update(readingShelf)
+      .set({ status, startedAt, finishedAt })
+      .where(
+        and(eq(readingShelf.userId, userId), eq(readingShelf.bookId, bookId))
+      );
+  }
+
+  revalidatePath('/home');
   revalidatePath('/past-reads');
 }

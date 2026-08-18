@@ -86,6 +86,15 @@ export const goalStatusEnum = pgEnum('goal_status', [
   'completed',
 ]);
 
+// How a user's read of a book turned out. 'in progress' keeps it on the
+// currently-reading shelf; 'completed' counts toward the reading goal; 'dnf'
+// (did not finish) leaves the shelf but is not counted as a finished book.
+export const readStatusEnum = pgEnum('read_status', [
+  'in progress',
+  'completed',
+  'dnf',
+]);
+
 // ─── Clubs ───────────────────────────────────────────────────────────────────
 
 export const clubs = pgTable('clubs', {
@@ -221,6 +230,13 @@ export const readingProgress = pgTable(
     unit: progressUnitEnum('unit').notNull().default('chapter'),
     value: integer('value').notNull().default(0),
     finished: boolean('finished').notNull().default(false),
+    // How this read turned out. `finished` stays the source of truth for
+    // "completed" (kept in sync); `status` additionally distinguishes a 'dnf'
+    // read from one that's still 'in progress'.
+    status: readStatusEnum('status').notNull().default('in progress'),
+    // When the user started/stopped this book, set from the review dialog.
+    startedAt: timestamp('started_at'),
+    finishedAt: timestamp('finished_at'),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.clubId, t.bookId] })]
@@ -416,8 +432,15 @@ export const readingShelf = pgTable(
     bookTitle: text('book_title').notNull(),
     bookCover: text('book_cover'),
     bookAuthor: text('book_author'),
-    // Set when the user marks the book finished — it then leaves the currently
-    // reading shelf but still counts toward the year's reading goal.
+    // How this read turned out. 'in progress' keeps the book on the shelf;
+    // 'completed'/'dnf' take it off. Completed books (finishedAt set and not a
+    // dnf) count toward the year's reading goal.
+    status: readStatusEnum('status').notNull().default('in progress'),
+    // When the user started reading, set from the review dialog.
+    startedAt: timestamp('started_at'),
+    // Set when the user finishes or gives up on the book — it then leaves the
+    // currently reading shelf. Only counts toward the goal when status isn't
+    // 'dnf'.
     finishedAt: timestamp('finished_at'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },

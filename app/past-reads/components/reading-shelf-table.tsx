@@ -1,15 +1,38 @@
 import { BookOpen, Star } from 'lucide-react';
 import { Pepper } from '@/components/icons/pepper';
 import { Rating } from '@/components/ui/rating';
+import { Chip, type ChipProps } from '@/components/app/chip';
 import Typography from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
-import type { CompletedBook } from '@/lib/actions/home';
+import type { ReadStatus, ShelfBook } from '@/lib/actions/home';
 
 const dateFmt = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
   year: 'numeric',
 });
+
+const STATUS_META: Record<
+  ReadStatus,
+  { label: string; colors: ChipProps['colors'] }
+> = {
+  'in progress': { label: 'In progress', colors: 'sapphire' },
+  completed: { label: 'Completed', colors: 'secondary' },
+  dnf: { label: 'DNF', colors: 'rust' },
+};
+
+function StatusChip({ status }: { status: ReadStatus }) {
+  const { label, colors } = STATUS_META[status];
+  return (
+    <Chip
+      variant='painted'
+      colors={colors}
+      size='small'
+      label={label}
+      className='whitespace-nowrap'
+    />
+  );
+}
 
 function SpiceMeter({ value }: { value: number }) {
   return (
@@ -36,6 +59,7 @@ const HEADERS = [
   'Cover',
   'Title',
   'Author',
+  'Status',
   'Your rating',
   'Overall',
   'Your spice',
@@ -44,7 +68,7 @@ const HEADERS = [
   'Club read',
 ];
 
-export function CompletedBooksTable({ books }: { books: CompletedBook[] }) {
+export function ReadingShelfTable({ books }: { books: ShelfBook[] }) {
   if (books.length === 0) {
     return (
       <Typography
@@ -52,7 +76,8 @@ export function CompletedBooksTable({ books }: { books: CompletedBook[] }) {
         color='muted'
         classNames='py-md'
       >
-        No completed books yet. Mark a book finished and it&apos;ll show up here.
+        Nothing on your shelf yet. Add a book or mark one you&apos;re reading and
+        it&apos;ll show up here.
       </Typography>
     );
   }
@@ -97,6 +122,9 @@ export function CompletedBooksTable({ books }: { books: CompletedBook[] }) {
                 {b.author ?? <Empty />}
               </td>
               <td className='px-3 py-2'>
+                <StatusChip status={b.status} />
+              </td>
+              <td className='px-3 py-2'>
                 {b.userRating ? (
                   <Rating
                     rate={b.userRating}
@@ -120,14 +148,10 @@ export function CompletedBooksTable({ books }: { books: CompletedBook[] }) {
                 {b.userSpice ? <SpiceMeter value={b.userSpice} /> : <Empty />}
               </td>
               <td className='px-3 py-2 whitespace-nowrap text-muted-foreground'>
-                {b.clubSpice ? (
-                  <SpiceMeter value={b.clubSpice} />
-                ) : (
-                  'n/a'
-                )}
+                {b.clubSpice ? <SpiceMeter value={b.clubSpice} /> : 'n/a'}
               </td>
               <td className='px-3 py-2 whitespace-nowrap text-muted-foreground'>
-                {dateFmt.format(b.finishedAt)}
+                {b.finishedAt ? dateFmt.format(b.finishedAt) : <Empty />}
               </td>
               <td className='px-3 py-2 whitespace-nowrap'>
                 {b.clubName ?? (

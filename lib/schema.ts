@@ -86,6 +86,9 @@ export const goalStatusEnum = pgEnum('goal_status', [
   'completed',
 ]);
 
+// The unit a custom goal is measured in — a target of books, pages, or hours.
+export const goalUnitEnum = pgEnum('goal_unit', ['books', 'pages', 'hours']);
+
 // How a user's read of a book turned out. 'in progress' keeps it on the
 // currently-reading shelf; 'completed' counts toward the reading goal; 'dnf'
 // (did not finish) leaves the shelf but is not counted as a finished book.
@@ -399,6 +402,21 @@ export const readingGoals = pgTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.year] })]
 );
+
+// A user's custom, self-tracked reading goal — a named target in books, pages,
+// or hours with a manually entered progress. Separate from `reading_goals`,
+// which are the auto-counted yearly book goals.
+export const customGoals = pgTable('custom_goals', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  unit: goalUnitEnum('unit').notNull(),
+  target: integer('target').notNull(),
+  progress: integer('progress').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
 
 // A user's private rating + spice rating (and optional written review) for a
 // book, keyed by Hardcover slug. One row per (user, book); saving again updates

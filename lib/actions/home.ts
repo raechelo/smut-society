@@ -6,6 +6,7 @@ import {
   bookReviews,
   clubs,
   clubMembers,
+  customGoals,
   notifications,
   readingGoals,
   readingProgress,
@@ -371,6 +372,64 @@ export async function getReadingGoals(): Promise<ReadingGoalRow[]> {
     result.push({ year: g.year, target: g.target, read, status });
   }
   return result;
+}
+
+export type GoalUnit = 'books' | 'pages' | 'hours';
+
+export type CustomGoal = {
+  id: string;
+  name: string;
+  unit: GoalUnit;
+  target: number;
+  progress: number;
+};
+
+// The viewer's custom self-tracked goals, newest first.
+export async function getCustomGoals(): Promise<CustomGoal[]> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return [];
+
+  return db
+    .select({
+      id: customGoals.id,
+      name: customGoals.name,
+      unit: customGoals.unit,
+      target: customGoals.target,
+      progress: customGoals.progress,
+    })
+    .from(customGoals)
+    .where(eq(customGoals.userId, userId))
+    .orderBy(desc(customGoals.createdAt));
+}
+
+// Create a custom goal — a named target in books/pages/hours with an optional
+// starting progress.
+export async function createCustomGoal(input: {
+  name: string;
+  unit: GoalUnit;
+  target: number;
+  progress: number;
+}): Promise<void> {
+  const userId = await requireAuth();
+
+  const name = input.name.trim();
+  if (!name) throw new Error('Give your goal a name');
+
+  const unit: GoalUnit = (['books', 'pages', 'hours'] as const).includes(
+    input.unit
+  )
+    ? input.unit
+    : 'books';
+  const target = Math.max(1, Math.trunc(input.target) || 0);
+  const progress = Math.min(
+    target,
+    Math.max(0, Math.trunc(input.progress) || 0)
+  );
+
+  await db.insert(customGoals).values({ userId, name, unit, target, progress });
+  revalidatePath('/past-reads');
+  revalidatePath('/home');
 }
 
 export type ShelfBook = {

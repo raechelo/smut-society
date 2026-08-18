@@ -12,7 +12,7 @@ function StatBlock({
   return (
     <div className='flex flex-1 flex-col gap-3'>
       <Typography
-        variant='h4'
+        variant='h3'
         display
         classNames='!mb-0 text-primary'
       >

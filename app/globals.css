@@ -132,6 +132,11 @@
   --parchment: #f4e8d3;
   --ink: #1c0f0f;
 
+  /* Secondary text/icons and a subtle fill (bg-muted). Warm neutrals to sit on
+     the parchment surface. */
+  --muted: #e6d7bc;
+  --muted-foreground: #6b5f52;
+
   --rust: #c05228;
   --rust-light: #d97040;
   --rust-dark: #8c3a18;
@@ -187,6 +192,10 @@
 
   --parchment: #131a24;
   --ink: #d9dee8;
+
+  /* Cool-gray counterparts for the dark surface. */
+  --muted: #212b3a;
+  --muted-foreground: #9aa3b2;
 
   --sapphire: #4a8fd4;
   --sapphire-light: #6aaff0;

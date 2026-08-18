@@ -14,6 +14,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import Typography from '@/components/ui/typography';
+import { Pepper } from '@/components/icons/pepper';
+import { saveBookReview } from '@/lib/actions/home';
 import { cn } from '@/lib/utils';
 
 
@@ -54,6 +56,38 @@ function StarPicker({
   );
 }
 
+function SpicePicker({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  const [hover, setHover] = useState(0);
+  const active = hover || value;
+
+  return (
+    <div className='flex items-center gap-1'>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Button
+          key={n}
+          type='button'
+          variant='ghost'
+          size='icon-sm'
+          aria-label={`${n} pepper${n > 1 ? 's' : ''}`}
+          onClick={() => onChange(n)}
+          onMouseEnter={() => setHover(n)}
+          onMouseLeave={() => setHover(0)}
+        >
+          <Pepper
+            className={cn('size-6', n <= active ? 'text-rust' : 'text-foreground/25')}
+          />
+        </Button>
+      ))}
+    </div>
+  );
+}
+
 export function ReviewBookDialog({
   bookId,
   title,
@@ -63,14 +97,21 @@ export function ReviewBookDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(0);
+  const [spice, setSpice] = useState(0);
   const [text, setText] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
-    // TODO: persist the review — no reviews backend yet. bookId is captured so
-    // it can be wired up once the model exists.
-    void bookId;
-    toast.success('Review saved');
-    setOpen(false);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveBookReview(bookId, rating, spice, text);
+      toast.success('Review saved');
+      setOpen(false);
+    } catch {
+      toast.error('Could not save your review. Try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -113,6 +154,20 @@ export function ReviewBookDialog({
             />
           </div>
 
+          <div className='flex flex-col gap-1.5'>
+            <Typography
+              variant='caption'
+              color='muted'
+              classNames='text-xs font-medium'
+            >
+              Spice
+            </Typography>
+            <SpicePicker
+              value={spice}
+              onChange={setSpice}
+            />
+          </div>
+
           <label className='flex flex-col gap-1.5'>
             <Typography
               variant='caption'
@@ -130,7 +185,12 @@ export function ReviewBookDialog({
           </label>
         </div>
 
-        <Button onClick={handleSave}>Save review</Button>
+        <Button
+          onClick={handleSave}
+          disabled={saving}
+        >
+          {saving ? 'Saving…' : 'Save review'}
+        </Button>
       </DialogContent>
     </Dialog>
   );

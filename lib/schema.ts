@@ -81,6 +81,23 @@ export const rsvpStatusEnum = pgEnum('rsvp_status', ['going', 'not_going']);
 
 export const progressUnitEnum = pgEnum('progress_unit', ['chapter', 'page']);
 
+export const goalStatusEnum = pgEnum('goal_status', [
+  'in progress',
+  'completed',
+]);
+
+// The unit a custom goal is measured in — a target of books, pages, or hours.
+export const goalUnitEnum = pgEnum('goal_unit', ['books', 'pages', 'hours']);
+
+// How a user's read of a book turned out. 'in progress' keeps it on the
+// currently-reading shelf; 'completed' counts toward the reading goal; 'dnf'
+// (did not finish) leaves the shelf but is not counted as a finished book.
+export const readStatusEnum = pgEnum('read_status', [
+  'in progress',
+  'completed',
+  'dnf',
+]);
+
 // ─── Clubs ───────────────────────────────────────────────────────────────────
 
 export const clubs = pgTable('clubs', {
@@ -216,6 +233,13 @@ export const readingProgress = pgTable(
     unit: progressUnitEnum('unit').notNull().default('chapter'),
     value: integer('value').notNull().default(0),
     finished: boolean('finished').notNull().default(false),
+    // How this read turned out. `finished` stays the source of truth for
+    // "completed" (kept in sync); `status` additionally distinguishes a 'dnf'
+    // read from one that's still 'in progress'.
+    status: readStatusEnum('status').notNull().default('in progress'),
+    // When the user started/stopped this book, set from the review dialog.
+    startedAt: timestamp('started_at'),
+    finishedAt: timestamp('finished_at'),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.clubId, t.bookId] })]
@@ -364,6 +388,8 @@ export const notifications = pgTable('notifications', {
 });
 
 // A user's yearly reading goal (books to finish this year). One row per year.
+// status flips to 'completed' once the target is met or the year has passed, so
+// past goals can be browsed under a "Completed" tab.
 export const readingGoals = pgTable(
   'reading_goals',
   {
@@ -372,8 +398,44 @@ export const readingGoals = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     year: integer('year').notNull(),
     target: integer('target').notNull(),
+    status: goalStatusEnum('status').notNull().default('in progress'),
   },
   (t) => [primaryKey({ columns: [t.userId, t.year] })]
+);
+
+// A user's custom, self-tracked reading goal — a named target in books, pages,
+// or hours with a manually entered progress. Separate from `reading_goals`,
+// which are the auto-counted yearly book goals.
+export const customGoals = pgTable('custom_goals', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  unit: goalUnitEnum('unit').notNull(),
+  target: integer('target').notNull(),
+  progress: integer('progress').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// A user's private rating + spice rating (and optional written review) for a
+// book, keyed by Hardcover slug. One row per (user, book); saving again updates
+// it. Powers the "completed books" table on the past-reads page.
+export const bookReviews = pgTable(
+  'book_reviews',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    bookId: text('book_id').notNull(),
+    // 1–5; nullable so a review can set spice without stars or vice versa.
+    rating: integer('rating'),
+    spiceRating: integer('spice_rating'),
+    reviewText: text('review_text'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.bookId] })]
 );
 
 // A user's personal "currently reading" shelf — books they've added from the
@@ -388,8 +450,15 @@ export const readingShelf = pgTable(
     bookTitle: text('book_title').notNull(),
     bookCover: text('book_cover'),
     bookAuthor: text('book_author'),
-    // Set when the user marks the book finished — it then leaves the currently
-    // reading shelf but still counts toward the year's reading goal.
+    // How this read turned out. 'in progress' keeps the book on the shelf;
+    // 'completed'/'dnf' take it off. Completed books (finishedAt set and not a
+    // dnf) count toward the year's reading goal.
+    status: readStatusEnum('status').notNull().default('in progress'),
+    // When the user started reading, set from the review dialog.
+    startedAt: timestamp('started_at'),
+    // Set when the user finishes or gives up on the book — it then leaves the
+    // currently reading shelf. Only counts toward the goal when status isn't
+    // 'dnf'.
     finishedAt: timestamp('finished_at'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },

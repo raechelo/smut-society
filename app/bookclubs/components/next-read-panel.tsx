@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/card';
+import Typography from '@/components/ui/typography';
 import type { ClubNomination } from '@/lib/actions/clubs';
 import { NextReadSection } from './next-read-section';
 
@@ -18,11 +19,18 @@ export function NextReadPanel({
   hasCurrentBook,
 }: NextReadPanelProps) {
   return (
-    <div className='flex flex-col gap-2'>
+    <div className='flex h-full flex-col gap-2'>
       <Card
         shadow
-        className='gap-sm border-accent/40'
+        className='h-full gap-sm border-accent/40'
       >
+        <Typography
+          variant='h4'
+          display
+          classNames='!mb-0 text-primary'
+        >
+          Next reads
+        </Typography>
         <NextReadSection
           compact
           clubId={clubId}

@@ -51,7 +51,7 @@ export default async function ClubPage({
           isMember={club.isMember}
         />
 
-        <div className='grid grid-cols-1 gap-md lg:grid-cols-10'>
+        <div className='grid shrink-0 grid-cols-1 gap-md lg:grid-cols-10 lg:min-h-[33%] lg:[grid-auto-rows:1fr]'>
           <div className='lg:col-span-4'>
             <Discussion clubId={club.id} />
           </div>

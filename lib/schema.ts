@@ -81,6 +81,15 @@ export const rsvpStatusEnum = pgEnum('rsvp_status', ['going', 'not_going']);
 
 export const progressUnitEnum = pgEnum('progress_unit', ['chapter', 'page']);
 
+// The period half of a club's reading pace. Paired with a book count, it reads
+// as "{count} books / {period}" (e.g. 2 books a month). Optional on the club:
+// when unset we infer a period from the gaps between finished books.
+export const clubCadencePeriodEnum = pgEnum('club_cadence_period', [
+  'weekly',
+  'biweekly',
+  'monthly',
+]);
+
 export const goalStatusEnum = pgEnum('goal_status', [
   'in progress',
   'completed',
@@ -107,6 +116,14 @@ export const clubs = pgTable('clubs', {
   // Public clubs appear in Explore and can be joined by anyone. The DB default
   // only backfills existing rows; the create form requires an explicit choice.
   isPublic: boolean('is_public').notNull().default(false),
+  // The club's declared reading pace, as a book count over a period (e.g. 2
+  // books / month). Both null when the club hasn't stated one, in which case
+  // Explore infers a period from the club's finished-book history.
+  cadenceCount: integer('cadence_count'),
+  cadencePeriod: clubCadencePeriodEnum('cadence_period'),
+  // Free-form, club-authored tags (e.g. 'lgbt', 'romance', 'fantasy'). Not a
+  // fixed vocabulary; stored lowercased so Explore can aggregate and filter.
+  tags: text('tags').array().notNull().default([]),
   // The book the club is currently reading. Denormalized from Google Books
   // (like nominations) so we can render it without re-fetching. Null until an
   // admin promotes a nomination to the club's next read.

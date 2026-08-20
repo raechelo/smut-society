@@ -28,7 +28,8 @@ export const metadata: Metadata = {
   title: 'Smut Society',
   description:
     'Your cozy corner for romance reads, book clubs, and spicy challenges.',
-  icons: { icon: '/favicon.png' },
+  // Favicon comes from the app/icon.svg file convention (the book-heart glyph
+  // in the sidebar red), so no explicit icons entry is needed here.
 };
 
 export default function RootLayout({

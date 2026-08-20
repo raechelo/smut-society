@@ -70,13 +70,69 @@ export type MyClub = {
   upcomingEventCount: number;
 };
 
+export type ClubCadencePeriod = 'weekly' | 'biweekly' | 'monthly';
+
+// A reading pace: `count` books per `period` (e.g. { count: 2, period:
+// 'monthly' } reads as "2 books / month").
+export type ClubCadence = {
+  count: number;
+  period: ClubCadencePeriod;
+};
+
 export type PublicClub = {
   id: string;
   name: string;
   description: string | null;
   memberCount: number;
   isMember: boolean;
+  // The club's pace: its declared cadence, or one inferred from finished-book
+  // gaps, or null when neither is available.
+  cadence: ClubCadence | null;
+  // Free-form, club-authored tags, lowercased.
+  tags: string[];
 };
+
+const MAX_CADENCE_COUNT = 99;
+
+const MAX_TAGS = 10;
+const MAX_TAG_LENGTH = 30;
+
+// Clean up user-entered tags: trim, collapse inner whitespace, lowercase, drop
+// blanks/overlong entries, and dedupe — capped at MAX_TAGS.
+function normalizeTags(tags: string[] | undefined): string[] {
+  if (!tags) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of tags) {
+    const tag = raw.trim().replace(/\s+/g, ' ').toLowerCase();
+    if (!tag || tag.length > MAX_TAG_LENGTH || seen.has(tag)) continue;
+    seen.add(tag);
+    out.push(tag);
+    if (out.length >= MAX_TAGS) break;
+  }
+  return out;
+}
+
+// Map an average gap (in days) between finished books to the nearest period.
+// Inferred cadences are always expressed as one book per period.
+function periodForGapDays(avgDays: number): ClubCadencePeriod {
+  if (avgDays <= 10) return 'weekly';
+  if (avgDays <= 21) return 'biweekly';
+  return 'monthly';
+}
+
+// Infer a club's cadence from the dates it finished books. Needs at least two
+// finished books (one gap) to say anything; returns null otherwise.
+function inferCadence(finishedAt: Date[]): ClubCadence | null {
+  if (finishedAt.length < 2) return null;
+  const sorted = [...finishedAt].sort((a, b) => a.getTime() - b.getTime());
+  let totalMs = 0;
+  for (let i = 1; i < sorted.length; i++) {
+    totalMs += sorted[i].getTime() - sorted[i - 1].getTime();
+  }
+  const avgDays = totalMs / (sorted.length - 1) / 86_400_000;
+  return { count: 1, period: periodForGapDays(avgDays) };
+}
 
 export type ClubMember = {
   id: string;
@@ -260,6 +316,9 @@ export async function getPublicClubs(): Promise<PublicClub[]> {
       id: clubs.id,
       name: clubs.name,
       description: clubs.description,
+      cadenceCount: clubs.cadenceCount,
+      cadencePeriod: clubs.cadencePeriod,
+      tags: clubs.tags,
       memberCount: count(clubMembers.userId),
     })
     .from(clubs)
@@ -276,7 +335,46 @@ export async function getPublicClubs(): Promise<PublicClub[]> {
     myClubIds = new Set(mine.map((m) => m.clubId));
   }
 
-  return rows.map((r) => ({ ...r, isMember: myClubIds.has(r.id) }));
+  // For clubs that haven't declared a cadence, infer one from the gaps between
+  // their finished books. Gather all finished-book dates in one query, then
+  // bucket them per club.
+  const finishedByClub = new Map<string, Date[]>();
+  if (rows.length > 0) {
+    const finishedRows = await db
+      .select({
+        clubId: clubFinishedBooks.clubId,
+        finishedAt: clubFinishedBooks.finishedAt,
+      })
+      .from(clubFinishedBooks)
+      .where(
+        inArray(
+          clubFinishedBooks.clubId,
+          rows.map((r) => r.id)
+        )
+      );
+    for (const row of finishedRows) {
+      const dates = finishedByClub.get(row.clubId);
+      if (dates) dates.push(row.finishedAt);
+      else finishedByClub.set(row.clubId, [row.finishedAt]);
+    }
+  }
+
+  return rows.map((r) => {
+    // A declared cadence needs both halves; otherwise fall back to inference.
+    const declared: ClubCadence | null =
+      r.cadenceCount != null && r.cadencePeriod != null
+        ? { count: r.cadenceCount, period: r.cadencePeriod }
+        : null;
+    return {
+      id: r.id,
+      name: r.name,
+      description: r.description,
+      memberCount: r.memberCount,
+      isMember: myClubIds.has(r.id),
+      cadence: declared ?? inferCadence(finishedByClub.get(r.id) ?? []),
+      tags: r.tags,
+    };
+  });
 }
 
 // Full club detail. Returns null when the club doesn't exist, or when it's
@@ -724,6 +822,8 @@ export async function createClub(input: {
   name: string;
   description?: string;
   isPublic: boolean;
+  cadence?: ClubCadence | null;
+  tags?: string[];
 }): Promise<{ id: string }> {
   const userId = await requireAuth();
 
@@ -731,9 +831,24 @@ export async function createClub(input: {
   if (!name) throw new Error('A club name is required');
   const description = input.description?.trim() || null;
 
+  // Store cadence only when a period is set; clamp the count to a sane range.
+  const cadence = input.cadence ?? null;
+  const cadenceCount = cadence
+    ? Math.min(MAX_CADENCE_COUNT, Math.max(1, Math.trunc(cadence.count) || 1))
+    : null;
+  const cadencePeriod = cadence ? cadence.period : null;
+
   const [club] = await db
     .insert(clubs)
-    .values({ name, description, isPublic: input.isPublic, createdBy: userId })
+    .values({
+      name,
+      description,
+      isPublic: input.isPublic,
+      cadenceCount,
+      cadencePeriod,
+      tags: normalizeTags(input.tags),
+      createdBy: userId,
+    })
     .returning({ id: clubs.id });
 
   await db

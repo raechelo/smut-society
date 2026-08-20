@@ -1,0 +1,1 @@
+ALTER TABLE "clubs" ADD COLUMN "tags" text[] DEFAULT '{}' NOT NULL;

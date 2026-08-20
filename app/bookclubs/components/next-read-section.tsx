@@ -88,8 +88,6 @@ export function NextReadSection({
     startTransition(async () => {
       try {
         await setCurrentBook(clubId, id);
-        // Drop it from the pool locally; revalidatePath refreshes the
-        // "Currently reading" section on the server.
         setItems((prev) => prev.filter((n) => n.id !== id));
         setSelectingId(null);
         toast.success('Set as the current read');
@@ -149,7 +147,11 @@ export function NextReadSection({
                 active={n.hasVoted}
                 onClick={() => handleVote(n.id)}
               />
-              <BookThumb cover={n.cover} title={n.title} size='sm' />
+              <BookThumb
+                cover={n.cover}
+                title={n.title}
+                size='sm'
+              />
               <div className='min-w-0 flex-1'>
                 <Typography
                   variant='p2'

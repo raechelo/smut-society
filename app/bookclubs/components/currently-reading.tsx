@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { ReviewBookDialog } from './review-book-dialog';
 import { FinishBookButton } from './finish-book-button';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
   Tooltip,
   TooltipContent,
@@ -139,24 +140,73 @@ export async function CurrentlyReading({
   )}`;
 
   return (
-    <div className='card-gradient card-shadow relative flex w-full gap-lg rounded-md border border-accent/40 bg-card/40 p-md'>
-      {isAdmin && (
-        <div className='absolute right-md top-md'>
-          <FinishBookButton clubId={clubId} />
+    <Card
+      shadow
+      className='w-full flex-row gap-lg bg-card'
+    >
+      <div className='flex shrink-0 flex-col items-center gap-3 self-center'>
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={cover}
+            alt={book.title}
+            className='h-[330px] w-[220px] rounded-md object-cover shadow-sm'
+          />
+        ) : (
+          <div className='flex h-[330px] w-[220px] items-center justify-center rounded-md bg-muted text-muted-foreground'>
+            <BookOpen className='size-10' />
+          </div>
+        )}
+
+        {/* Compact icon actions live under the cover to save horizontal room. */}
+        <div className='flex items-center gap-2'>
+          <ReviewBookDialog
+            bookId={book.bookId}
+            title={book.title}
+          />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                asChild
+                size='icon-sm'
+                variant='outline'
+                color='secondary'
+              >
+                <a
+                  href={hardcoverUrl}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  aria-label='View on Hardcover'
+                >
+                  <Hardcover className='size-4' />
+                </a>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>View on Hardcover</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                asChild
+                size='icon-sm'
+                variant='outline'
+                color='secondary'
+              >
+                <a
+                  href={amazonUrl}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  aria-label='Find on Amazon'
+                >
+                  <ShoppingCart className='size-4' />
+                </a>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Find on Amazon</TooltipContent>
+          </Tooltip>
+          {isAdmin && <FinishBookButton clubId={clubId} />}
         </div>
-      )}
-      {cover ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={cover}
-          alt={book.title}
-          className='h-[330px] w-[220px] shrink-0 self-center rounded-md object-cover shadow-sm'
-        />
-      ) : (
-        <div className='flex h-[330px] w-[220px] shrink-0 self-center items-center justify-center rounded-md bg-muted text-muted-foreground'>
-          <BookOpen className='size-10' />
-        </div>
-      )}
+      </div>
 
       <div className='flex min-w-0 flex-1 flex-col gap-3'>
         <div className='flex flex-col gap-1'>
@@ -183,7 +233,7 @@ export async function CurrentlyReading({
           )}
         </div>
 
-        <Divider classNames='my-md' />
+        <Divider classNames='my-sm' />
 
         <div className='flex flex-wrap items-end gap-8'>
           <StatBlock label='Spice'>
@@ -240,7 +290,7 @@ export async function CurrentlyReading({
 
         {(tropes.length > 0 || contentWarnings.length > 0) && (
           <>
-            <Divider classNames='my-md' />
+            <Divider classNames='my-sm' />
             <div className='flex flex-col gap-4'>
               {tropes.length > 0 && (
                 <StatBlock label='Themes'>
@@ -276,54 +326,7 @@ export async function CurrentlyReading({
             </div>
           </>
         )}
-
-        <div className='mt-auto flex flex-wrap items-center gap-3'>
-          <ReviewBookDialog
-            bookId={book.bookId}
-            title={book.title}
-          />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                asChild
-                size='icon-sm'
-                variant='outline'
-                color='secondary'
-              >
-                <a
-                  href={hardcoverUrl}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  aria-label='View on Hardcover'
-                >
-                  <Hardcover className='size-4' />
-                </a>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>View on Hardcover</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                asChild
-                size='icon-sm'
-                variant='outline'
-                color='secondary'
-              >
-                <a
-                  href={amazonUrl}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  aria-label='Find on Amazon'
-                >
-                  <ShoppingCart className='size-4' />
-                </a>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Find on Amazon</TooltipContent>
-          </Tooltip>
-        </div>
       </div>
-    </div>
+    </Card>
   );
 }

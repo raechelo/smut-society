@@ -12,12 +12,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Textarea } from '@/components/ui/textarea';
 import Typography from '@/components/ui/typography';
 import { Pepper } from '@/components/icons/pepper';
 import { saveBookReview } from '@/lib/actions/home';
 import { cn } from '@/lib/utils';
-
 
 function StarPicker({
   value,
@@ -80,7 +84,10 @@ function SpicePicker({
           onMouseLeave={() => setHover(0)}
         >
           <Pepper
-            className={cn('size-6', n <= active ? 'text-rust' : 'text-foreground/25')}
+            className={cn(
+              'size-6',
+              n <= active ? 'text-rust' : 'text-foreground/25'
+            )}
           />
         </Button>
       ))}
@@ -119,15 +126,21 @@ export function ReviewBookDialog({
       open={open}
       onOpenChange={setOpen}
     >
-      <DialogTrigger asChild>
-        <Button
-          size='sm'
-          color='accent'
-          className='mt-1 w-fit'
-        >
-          <PenLine className='size-4' /> Review this book
-        </Button>
-      </DialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
+            <Button
+              size='icon-sm'
+              variant='outline'
+              color='secondary'
+              aria-label='Review this book'
+            >
+              <PenLine className='size-4' />
+            </Button>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Review this book</TooltipContent>
+      </Tooltip>
 
       {/* Only the X and Save close this: block outside-click and Escape. */}
       <DialogContent

@@ -237,6 +237,9 @@ export type ClubDetail = {
   memberCount: number;
   isMember: boolean;
   isAdmin: boolean;
+  // The club's share/invite token — only exposed to members, who can hand out
+  // the invite link. Null for non-members.
+  inviteToken: string | null;
   currentBook: ClubBook | null;
   // The viewer's own progress on the current book (null if none yet).
   myProgress: ReadingProgress | null;
@@ -564,6 +567,7 @@ export async function getClub(clubId: string): Promise<ClubDetail | null> {
     memberCount: members.length,
     isMember,
     isAdmin,
+    inviteToken: isMember ? club.inviteToken : null,
     currentBook,
     myProgress,
     nominations: nominationRows.map((n) => ({
@@ -858,7 +862,8 @@ export async function createClub(input: {
   return { id: club.id };
 }
 
-// Join a public club. Private clubs can't be joined without an invite (later).
+// Join a public club. Private clubs can't be joined this way — they need an
+// invite link (see joinClubByToken).
 export async function joinClub(clubId: string): Promise<void> {
   const userId = await requireAuth();
 
@@ -874,6 +879,92 @@ export async function joinClub(clubId: string): Promise<void> {
     .insert(clubMembers)
     .values({ clubId, userId })
     .onConflictDoNothing();
+}
+
+export type ClubInvite = {
+  clubId: string;
+  name: string;
+  description: string | null;
+  isPublic: boolean;
+  memberCount: number;
+  // Whether the signed-in viewer already belongs to the club.
+  isMember: boolean;
+};
+
+// Resolve an invite link's token to the club it points at, for the invite
+// landing page. Returns null when the token doesn't match any club (so the
+// page can render not-found for a bad or revoked link). Archived clubs are not
+// joinable, so they resolve to null too.
+export async function getClubByInviteToken(
+  token: string
+): Promise<ClubInvite | null> {
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+
+  const [club] = await db
+    .select({
+      id: clubs.id,
+      name: clubs.name,
+      description: clubs.description,
+      isPublic: clubs.isPublic,
+      archivedAt: clubs.archivedAt,
+    })
+    .from(clubs)
+    .where(eq(clubs.inviteToken, token))
+    .limit(1);
+  if (!club || club.archivedAt) return null;
+
+  const [{ memberCount }] = await db
+    .select({ memberCount: count() })
+    .from(clubMembers)
+    .where(eq(clubMembers.clubId, club.id));
+
+  let isMember = false;
+  if (userId) {
+    const [membership] = await db
+      .select({ userId: clubMembers.userId })
+      .from(clubMembers)
+      .where(
+        and(eq(clubMembers.clubId, club.id), eq(clubMembers.userId, userId))
+      )
+      .limit(1);
+    isMember = !!membership;
+  }
+
+  return {
+    clubId: club.id,
+    name: club.name,
+    description: club.description,
+    isPublic: club.isPublic,
+    memberCount: Number(memberCount),
+    isMember,
+  };
+}
+
+// Accept a club invite: add the signed-in user to the club the token points at,
+// public or private. Idempotent — re-accepting an existing membership is a
+// no-op. Returns the club id so the caller can route to it.
+export async function joinClubByToken(
+  token: string
+): Promise<{ clubId: string }> {
+  const userId = await requireAuth();
+
+  const [club] = await db
+    .select({ id: clubs.id, archivedAt: clubs.archivedAt })
+    .from(clubs)
+    .where(eq(clubs.inviteToken, token))
+    .limit(1);
+  if (!club || club.archivedAt) throw new Error('This invite link is invalid');
+
+  await db
+    .insert(clubMembers)
+    .values({ clubId: club.id, userId })
+    .onConflictDoNothing();
+
+  revalidatePath('/bookclubs');
+  revalidatePath(`/bookclubs/${club.id}`);
+
+  return { clubId: club.id };
 }
 
 export async function leaveClub(clubId: string): Promise<void> {

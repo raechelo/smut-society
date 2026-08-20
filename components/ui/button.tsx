@@ -19,6 +19,7 @@ const buttonVariants = cva(
         primary: '',
         accent: '',
         secondary: '',
+        warning: '',
         error: '',
       },
       size: {
@@ -54,6 +55,11 @@ const buttonVariants = cva(
       },
       {
         variant: 'solid',
+        color: 'warning',
+        class: 'bg-warning text-parchment hover:bg-warning/90',
+      },
+      {
+        variant: 'solid',
         color: 'error',
         class: 'bg-error text-parchment hover:bg-error/90',
       },
@@ -74,6 +80,11 @@ const buttonVariants = cva(
         color: 'secondary',
         class:
           'border-secondary text-secondary hover:bg-secondary/10 dark:text-secondary-foreground',
+      },
+      {
+        variant: 'outline',
+        color: 'warning',
+        class: 'border-warning text-warning hover:bg-warning/10',
       },
       {
         variant: 'outline',
@@ -99,6 +110,11 @@ const buttonVariants = cva(
       },
       {
         variant: 'ghost',
+        color: 'warning',
+        class: 'text-warning hover:bg-warning/10',
+      },
+      {
+        variant: 'ghost',
         color: 'error',
         class: 'text-error hover:bg-error/10',
       },
@@ -116,6 +132,11 @@ const buttonVariants = cva(
         variant: 'link',
         color: 'secondary',
         class: 'text-secondary hover:text-secondary-light',
+      },
+      {
+        variant: 'link',
+        color: 'warning',
+        class: 'text-warning hover:text-warning/80',
       },
       {
         variant: 'link',

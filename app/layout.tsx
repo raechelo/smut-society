@@ -54,12 +54,12 @@ export default function RootLayout({
         <Providers>
           <SidebarProvider>
             <Sidebar />
-            <main className='relative flex-1 min-h-0 h-full px-lg py-xl overflow-hidden'>
+            <main className='relative isolate flex-1 min-h-0 h-full px-lg py-xl overflow-hidden'>
               <img
                 src='/big-corner.png'
                 alt=''
                 role='presentation'
-                className='pointer-events-none absolute top-[10] right-[10px] w-[250px] rotate-[180deg] -scale-x-100 select-none opacity-20 mix-blend-multiply dark:mix-blend-screen corner-filter'
+                className='pointer-events-none absolute -z-10 top-[10px] right-[10px] w-[250px] rotate-[180deg] -scale-x-100 select-none opacity-20 mix-blend-multiply dark:mix-blend-screen corner-filter'
               />
               {children}
             </main>

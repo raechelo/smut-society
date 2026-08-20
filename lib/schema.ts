@@ -11,6 +11,7 @@ import {
   unique,
   uuid,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import type { AdapterAccountType } from 'next-auth/adapters';
 
 // ─── NextAuth required tables ────────────────────────────────────────────────
@@ -116,6 +117,14 @@ export const clubs = pgTable('clubs', {
   // Public clubs appear in Explore and can be joined by anyone. The DB default
   // only backfills existing rows; the create form requires an explicit choice.
   isPublic: boolean('is_public').notNull().default(false),
+  // A stable, unguessable share token. Anyone who visits the club's invite link
+  // (…/bookclubs/join/<token>) can join, even a private club — think of a
+  // Google Docs "anyone with the link" share. Defaulted in the DB so every
+  // existing and future club gets one automatically.
+  inviteToken: text('invite_token')
+    .notNull()
+    .unique()
+    .default(sql`gen_random_uuid()`),
   // The club's declared reading pace, as a book count over a period (e.g. 2
   // books / month). Both null when the club hasn't stated one, in which case
   // Explore infers a period from the club's finished-book history.

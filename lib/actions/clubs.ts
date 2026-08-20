@@ -3,6 +3,7 @@
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import {
+  bookReviews,
   clubs,
   clubMembers,
   clubNominations,
@@ -16,6 +17,7 @@ import {
 import {
   and,
   asc,
+  avg,
   count,
   desc,
   eq,
@@ -96,6 +98,45 @@ export type ClubBook = {
 export type FinishedBook = ClubBook & {
   finishedAt: Date;
 };
+
+export type ClubBookAverages = {
+  // Averages of this club's members' own reviews of the book, or null if none.
+  rating: number | null;
+  spice: number | null;
+  ratingCount: number;
+  spiceCount: number;
+};
+
+// Average star + spice ratings for a book across a club's members — from their
+// private book reviews, restricted to people currently in the club.
+export async function getClubBookAverages(
+  clubId: string,
+  bookId: string
+): Promise<ClubBookAverages> {
+  const [row] = await db
+    .select({
+      ratingAvg: avg(bookReviews.rating),
+      spiceAvg: avg(bookReviews.spiceRating),
+      ratingCount: count(bookReviews.rating),
+      spiceCount: count(bookReviews.spiceRating),
+    })
+    .from(bookReviews)
+    .innerJoin(
+      clubMembers,
+      and(
+        eq(clubMembers.userId, bookReviews.userId),
+        eq(clubMembers.clubId, clubId)
+      )
+    )
+    .where(eq(bookReviews.bookId, bookId));
+
+  return {
+    rating: row?.ratingAvg != null ? Number(row.ratingAvg) : null,
+    spice: row?.spiceAvg != null ? Number(row.spiceAvg) : null,
+    ratingCount: Number(row?.ratingCount ?? 0),
+    spiceCount: Number(row?.spiceCount ?? 0),
+  };
+}
 
 export type RsvpStatus = 'going' | 'not_going';
 

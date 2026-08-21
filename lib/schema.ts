@@ -514,6 +514,8 @@ export const quizOutcomes = pgTable('quiz_outcomes', {
     .references(() => quizzes.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   description: text('description'),
+  // Optional picture for the outcome, hosted in the GitHub assets repo.
+  imageUrl: text('image_url'),
   position: integer('position').notNull().default(0),
 });
 
@@ -539,3 +541,20 @@ export const quizAnswers = pgTable('quiz_answers', {
   }),
   position: integer('position').notNull().default(0),
 });
+
+// One rating (1–5 stars) per user per quiz. Upserted, so re-rating overwrites.
+export const quizRatings = pgTable(
+  'quiz_ratings',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    quizId: uuid('quiz_id')
+      .notNull()
+      .references(() => quizzes.id, { onDelete: 'cascade' }),
+    rating: integer('rating').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.quizId] })]
+);

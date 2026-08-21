@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -11,9 +11,16 @@ import { deleteQuiz } from '@/lib/actions/quizzes';
 export function DeleteQuizButton({
   quizId,
   title,
+  redirectTo,
+  trigger,
 }: {
   quizId: string;
   title: string;
+  // Where to go after deleting. Defaults to refreshing the current page (right
+  // for a list); pass a path (e.g. the quiz detail page passes '/quizzes').
+  redirectTo?: string;
+  // Override the default icon-only trigger (e.g. a labeled button).
+  trigger?: ReactNode;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -25,7 +32,8 @@ export function DeleteQuizButton({
         await deleteQuiz(quizId);
         toast.success('Quiz deleted');
         setOpen(false);
-        router.refresh();
+        if (redirectTo) router.push(redirectTo);
+        else router.refresh();
       } catch (err) {
         toast.error(
           err instanceof Error ? err.message : 'Could not delete the quiz'
@@ -39,16 +47,18 @@ export function DeleteQuizButton({
       open={open}
       onOpenChange={setOpen}
       trigger={
-        <Button
-          type='button'
-          variant='ghost'
-          color='error'
-          size='icon-sm'
-          aria-label={`Delete ${title}`}
-          className='shrink-0'
-        >
-          <Trash2 className='size-4' />
-        </Button>
+        trigger ?? (
+          <Button
+            type='button'
+            variant='ghost'
+            color='error'
+            size='icon-sm'
+            aria-label={`Delete ${title}`}
+            className='shrink-0'
+          >
+            <Trash2 className='size-4' />
+          </Button>
+        )
       }
       title='Delete quiz?'
       description={`This permanently deletes “${title}” along with its questions and outcomes. This cannot be undone.`}

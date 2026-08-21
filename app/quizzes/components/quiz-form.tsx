@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, X } from 'lucide-react';
+import { ImagePlus, Loader2, Plus, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/select';
 import { TagInput } from '@/components/app/tag-input';
 import Typography from '@/components/ui/typography';
-import { createQuiz } from '@/lib/actions/quizzes';
+import { createQuiz, updateQuiz } from '@/lib/actions/quizzes';
+import { uploadQuizAsset } from '@/lib/actions/quiz-assets';
 
 const MAX_ANSWERS = 10;
 
@@ -25,7 +26,12 @@ const MAX_ANSWERS = 10;
 // author picks one).
 type Answer = { id: string; text: string; outcomeId: string | null };
 type Question = { id: string; text: string; answers: Answer[] };
-type Outcome = { id: string; title: string; description: string };
+type Outcome = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string | null;
+};
 
 const newAnswer = (): Answer => ({
   id: crypto.randomUUID(),
@@ -41,6 +47,7 @@ const newOutcome = (): Outcome => ({
   id: crypto.randomUUID(),
   title: '',
   description: '',
+  imageUrl: null,
 });
 
 function FieldLabel({ children }: { children: ReactNode }) {
@@ -55,13 +62,32 @@ function FieldLabel({ children }: { children: ReactNode }) {
   );
 }
 
-export function QuizForm() {
+export function QuizForm({
+  quizId,
+  initial,
+}: {
+  // When provided, the form edits an existing quiz instead of creating one.
+  quizId?: string;
+  initial?: {
+    title: string;
+    description: string;
+    tags: string[];
+    outcomes: Outcome[];
+    questions: Question[];
+  };
+}) {
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [questions, setQuestions] = useState<Question[]>(() => [newQuestion()]);
-  const [outcomes, setOutcomes] = useState<Outcome[]>(() => [newOutcome()]);
+  const isEdit = !!quizId;
+  const [title, setTitle] = useState(initial?.title ?? '');
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
+  const [questions, setQuestions] = useState<Question[]>(() =>
+    initial?.questions?.length ? initial.questions : [newQuestion()]
+  );
+  const [outcomes, setOutcomes] = useState<Outcome[]>(() =>
+    initial?.outcomes?.length ? initial.outcomes : [newOutcome()]
+  );
+  const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
 
   const canSubmit = title.trim().length > 0 && !submitting;
@@ -139,6 +165,29 @@ export function QuizForm() {
     setOutcomes((os) =>
       os.map((o) => (o.id === oId ? { ...o, [field]: value } : o))
     );
+  const setOutcomeImage = (oId: string, imageUrl: string | null) =>
+    setOutcomes((os) =>
+      os.map((o) => (o.id === oId ? { ...o, imageUrl } : o))
+    );
+
+  // Upload the picked image to the assets repo, then store its URL on the
+  // outcome. Runs as soon as a file is chosen so the author sees a preview.
+  const handleOutcomeImage = async (oId: string, file: File | null) => {
+    if (!file) return;
+    setUploading((u) => ({ ...u, [oId]: true }));
+    try {
+      const data = new FormData();
+      data.append('file', file);
+      const { url } = await uploadQuizAsset(data);
+      setOutcomeImage(oId, url);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'Could not upload the image'
+      );
+    } finally {
+      setUploading((u) => ({ ...u, [oId]: false }));
+    }
+  };
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -164,6 +213,7 @@ export function QuizForm() {
         id: o.id,
         title: o.title.trim(),
         description: o.description.trim(),
+        imageUrl: o.imageUrl,
       }))
       .filter((o) => o.title);
 
@@ -172,20 +222,28 @@ export function QuizForm() {
       return;
     }
 
+    const payload = {
+      title: title.trim(),
+      description: description.trim() || null,
+      tags,
+      questions: cleanedQuestions,
+      outcomes: cleanedOutcomes,
+    };
+
     setSubmitting(true);
     try {
-      await createQuiz({
-        title: title.trim(),
-        description: description.trim() || null,
-        tags,
-        questions: cleanedQuestions,
-        outcomes: cleanedOutcomes,
-      });
-      toast.success('Quiz created');
-      router.push('/quizzes');
+      if (isEdit && quizId) {
+        await updateQuiz(quizId, payload);
+        toast.success('Quiz updated');
+        router.push(`/quizzes/${quizId}`);
+      } else {
+        await createQuiz(payload);
+        toast.success('Quiz created');
+        router.push('/quizzes');
+      }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Could not create the quiz';
-      toast.error(msg === 'Unauthorized' ? 'Sign in to create a quiz' : msg);
+      const msg = err instanceof Error ? err.message : 'Could not save the quiz';
+      toast.error(msg === 'Unauthorized' ? 'Sign in to save a quiz' : msg);
       setSubmitting(false);
     }
   };
@@ -204,13 +262,15 @@ export function QuizForm() {
           display
           classNames='!mb-0'
         >
-          Create a quiz
+          {isEdit ? 'Edit quiz' : 'Create a quiz'}
         </Typography>
         <Typography
           variant='p2'
           color='muted'
         >
-          Build a quiz for the community to play.
+          {isEdit
+            ? 'Update your quiz — changes go live right away.'
+            : 'Build a quiz for the community to play.'}
         </Typography>
       </div>
 
@@ -317,6 +377,58 @@ export function QuizForm() {
                 placeholder='Describe this result…'
               />
             </label>
+
+            <div className='flex flex-col gap-1.5'>
+              <FieldLabel>
+                Image <span className='font-normal'>(optional)</span>
+              </FieldLabel>
+              {o.imageUrl ? (
+                <div className='relative w-fit'>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={o.imageUrl}
+                    alt=''
+                    className='h-28 w-28 rounded-md object-cover shadow-sm'
+                  />
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    size='icon-sm'
+                    aria-label='Remove image'
+                    onClick={() => setOutcomeImage(o.id, null)}
+                    className='absolute right-1 top-1 bg-card/85 backdrop-blur'
+                  >
+                    <X className='size-4' />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  asChild
+                  variant='outline'
+                  size='sm'
+                  className='w-fit cursor-pointer'
+                >
+                  <label>
+                    {uploading[o.id] ? (
+                      <Loader2 className='size-4 animate-spin' />
+                    ) : (
+                      <ImagePlus className='size-4' />
+                    )}
+                    {uploading[o.id] ? 'Uploading…' : 'Add image'}
+                    <input
+                      type='file'
+                      accept='image/png,image/jpeg,image/gif,image/webp'
+                      className='hidden'
+                      disabled={!!uploading[o.id]}
+                      onChange={(e) => {
+                        handleOutcomeImage(o.id, e.target.files?.[0] ?? null);
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                </Button>
+              )}
+            </div>
           </Card>
         ))}
 
@@ -458,7 +570,7 @@ export function QuizForm() {
           type='submit'
           disabled={!canSubmit}
         >
-          Create quiz
+          {isEdit ? 'Save changes' : 'Create quiz'}
         </Button>
       </div>
     </form>

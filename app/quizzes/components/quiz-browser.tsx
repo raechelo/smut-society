@@ -5,13 +5,25 @@ import Link from 'next/link';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/app/chip';
+import { Rating } from '@/components/ui/rating';
 import Typography from '@/components/ui/typography';
 import type { QuizListItem } from '@/lib/actions/quizzes';
+
+// Minimum-average-rating filter buckets. 0 means "no minimum".
+const RATING_OPTIONS = [
+  { value: 0, label: 'Any' },
+  { value: 4, label: '4★+' },
+  { value: 3, label: '3★+' },
+  { value: 2, label: '2★+' },
+  { value: 1, label: '1★+' },
+];
 
 export function QuizBrowser({ quizzes }: { quizzes: QuizListItem[] }) {
   const [query, setQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [minRating, setMinRating] = useState(0);
 
   const allTags = Array.from(new Set(quizzes.flatMap((q) => q.tags))).sort();
 
@@ -29,7 +41,11 @@ export function QuizBrowser({ quizzes }: { quizzes: QuizListItem[] }) {
     const matchesTags =
       selectedTags.length === 0 ||
       selectedTags.some((tag) => quiz.tags.includes(tag));
-    return matchesQuery && matchesTags;
+    // Unrated quizzes drop out once a minimum is set.
+    const matchesRating =
+      minRating === 0 ||
+      (quiz.avgRating != null && quiz.avgRating >= minRating);
+    return matchesQuery && matchesTags && matchesRating;
   });
 
   return (
@@ -101,6 +117,28 @@ export function QuizBrowser({ quizzes }: { quizzes: QuizListItem[] }) {
                       ))}
                     </div>
                   )}
+                  {quiz.ratingCount > 0 ? (
+                    <div className='mt-auto flex items-center gap-2'>
+                      <Rating
+                        rate={quiz.avgRating ?? 0}
+                        showScore
+                      />
+                      <Typography
+                        variant='span'
+                        color='muted'
+                      >
+                        ({quiz.ratingCount})
+                      </Typography>
+                    </div>
+                  ) : (
+                    <Typography
+                      variant='span'
+                      color='muted'
+                      classNames='mt-auto'
+                    >
+                      No ratings yet
+                    </Typography>
+                  )}
                 </Card>
               </Link>
             ))}
@@ -165,6 +203,29 @@ export function QuizBrowser({ quizzes }: { quizzes: QuizListItem[] }) {
               </div>
             </div>
           )}
+
+          <div className='flex flex-col gap-1.5'>
+            <Typography
+              variant='caption'
+              color='muted'
+              classNames='text-xs font-medium'
+            >
+              Minimum rating
+            </Typography>
+            <div className='flex flex-wrap gap-1.5'>
+              {RATING_OPTIONS.map((option) => (
+                <Button
+                  key={option.value}
+                  type='button'
+                  size='xs'
+                  variant={minRating === option.value ? 'solid' : 'outline'}
+                  onClick={() => setMinRating(option.value)}
+                >
+                  {option.label}
+                </Button>
+              ))}
+            </div>
+          </div>
         </Card>
       </div>
     </div>

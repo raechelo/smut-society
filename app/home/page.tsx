@@ -4,6 +4,7 @@ import Typography from '@/components/ui/typography';
 import { Notifications } from './components/notifications';
 import { ReadingGoal } from './components/reading-goal';
 import { MyReading } from './components/my-reading';
+import { YourQuizzes } from './components/your-quizzes';
 
 export default async function HomePage() {
   const session = await auth();
@@ -42,6 +43,7 @@ export default async function HomePage() {
           </div>
           <div className='flex flex-col gap-md'>
             <ReadingGoal />
+            <YourQuizzes />
           </div>
         </div>
       </div>

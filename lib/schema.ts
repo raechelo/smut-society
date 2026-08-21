@@ -490,3 +490,52 @@ export const readingShelf = pgTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.bookId] })]
 );
+
+// ─── Quizzes ─────────────────────────────────────────────────────────────────
+
+// A community-authored quiz: some questions with answers, plus a set of
+// outcomes (personality-style results) that answers map to.
+export const quizzes = pgTable('quizzes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull(),
+  description: text('description'),
+  tags: text('tags').array().notNull().default([]),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// The possible results of a quiz. `position` preserves author ordering.
+export const quizOutcomes = pgTable('quiz_outcomes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  quizId: uuid('quiz_id')
+    .notNull()
+    .references(() => quizzes.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description'),
+  position: integer('position').notNull().default(0),
+});
+
+export const quizQuestions = pgTable('quiz_questions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  quizId: uuid('quiz_id')
+    .notNull()
+    .references(() => quizzes.id, { onDelete: 'cascade' }),
+  text: text('text').notNull(),
+  position: integer('position').notNull().default(0),
+});
+
+// An answer choice. `outcomeId` is the outcome this answer counts toward; it's
+// nullable and set null if that outcome is later removed.
+export const quizAnswers = pgTable('quiz_answers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  questionId: uuid('question_id')
+    .notNull()
+    .references(() => quizQuestions.id, { onDelete: 'cascade' }),
+  text: text('text').notNull(),
+  outcomeId: uuid('outcome_id').references(() => quizOutcomes.id, {
+    onDelete: 'set null',
+  }),
+  position: integer('position').notNull().default(0),
+});

@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { MessageCircleQuestionMark, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Typography from '@/components/ui/typography';
+import { Quizzes as QuizzesIcon } from '@/components/icons/quizzes';
 import { getMyQuizzes } from '@/lib/actions/quizzes';
 import { DeleteQuizButton } from './delete-quiz-button';
 
@@ -16,7 +17,7 @@ export async function YourQuizzes() {
     >
       <div className='flex items-center justify-between gap-2'>
         <div className='flex items-center gap-2'>
-          <MessageCircleQuestionMark className='size-5 text-primary' />
+          <QuizzesIcon className='size-5 text-primary' />
           <Typography
             variant='h4'
             display

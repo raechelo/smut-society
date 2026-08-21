@@ -1,12 +1,13 @@
 import React from 'react';
 
-export const Quizzes = () => {
+export const Quizzes = ({ className }: { className?: string }) => {
   return (
     <svg
       xmlns='http://www.w3.org/2000/svg'
       width='1em'
       height='1em'
       viewBox='0 0 24 24'
+      className={className}
     >
       <path
         d='M0 0h24v24H0z'

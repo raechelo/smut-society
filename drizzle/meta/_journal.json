@@ -148,6 +148,13 @@
       "when": 1787259322574,
       "tag": "0020_nebulous_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1787327619723,
+      "tag": "0021_graceful_wildside",
+      "breakpoints": true
     }
   ]
 }

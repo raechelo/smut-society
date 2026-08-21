@@ -20,6 +20,7 @@ const chipVariants = cva(
         sapphire: '',
         sienna: '',
         rust: '',
+        warning: '',
       },
       size: {
         default: 'px-3 py-1 text-sm',
@@ -51,6 +52,9 @@ const chipVariants = cva(
       { variant: 'outline', colors: 'rust', class: 'border-rust text-rust' },
       { variant: 'filled', colors: 'rust', class: 'bg-rust text-parchment' },
       { variant: 'painted', colors: 'rust', class: 'bg-rust/15 border-rust text-rust' },
+      { variant: 'outline', colors: 'warning', class: 'border-warning text-warning' },
+      { variant: 'filled', colors: 'warning', class: 'bg-warning text-parchment' },
+      { variant: 'painted', colors: 'warning', class: 'bg-warning/15 border-warning text-warning' },
     ],
     defaultVariants: {
       variant: 'outline',

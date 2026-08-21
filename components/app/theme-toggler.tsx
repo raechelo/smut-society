@@ -1,15 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { Switch } from '../ui/switch';
 import { useTheme } from 'next-themes';
 import { Moon, Sun } from 'lucide-react';
 
+// Never changes after mount, so subscribing is a no-op.
+const emptySubscribe = () => () => {};
+
 export const ThemeToggler = () => {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  // Avoid a hydration mismatch: the server (and first client paint) sees
+  // `false`, then this flips to `true` on the client — without a
+  // setState-in-effect.
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   return (
     <Switch

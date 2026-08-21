@@ -1,28 +1,23 @@
-import { BookOpen, Sparkles } from 'lucide-react';
+import { BookOpen, ShoppingCart, Sparkles } from 'lucide-react';
 import type { ClubBook } from '@/lib/actions/clubs';
-import { searchBookMeta } from '@/lib/hardcover';
+import { getClubBookAverages } from '@/lib/actions/clubs';
+import { searchBookMeta, bookBySlug } from '@/lib/hardcover';
 import { cn } from '@/lib/utils';
 import { ReviewBookDialog } from './review-book-dialog';
 import { FinishBookButton } from './finish-book-button';
-import { ContentWarnings } from './content-warnings';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import Typography from '@/components/ui/typography';
 import { Rating } from '@/components/ui/rating';
 import { Chip } from '@/components/app/chip';
 import { Pepper } from '@/components/icons/pepper';
+import { Hardcover } from '@/components/icons/hardcover';
 import { Divider } from '@/components/app/divider';
-
-// TODO: spice, series, club rating, and tropes have no data source yet — these
-// are placeholders. Genre / page count / global rating come from Google Books.
-const PLACEHOLDER_SPICE = 4;
-const PLACEHOLDER_SERIES = 'Series #1';
-const PLACEHOLDER_CLUB_RATING = 4.5;
-const PLACEHOLDER_TROPES = [
-  'Enemies to Lovers',
-  'Fae',
-  'Slow Burn',
-  'Forced Proximity',
-];
 
 function SpiceMeter({ value }: { value: number }) {
   return (
@@ -95,39 +90,108 @@ export async function CurrentlyReading({
   }
 
   const meta = await searchBookMeta(book.title, book.author);
-  const cover = meta?.cover || book.cover || null;
+  const detail = meta?.slug ? await bookBySlug(meta.slug) : null;
+
+  const cover = meta?.cover || detail?.cover || book.cover || null;
+  const genre = meta?.genre || detail?.genres?.[0] || null;
+  const pageCount = meta?.pageCount || detail?.pages || null;
+  const globalRating = detail?.rating ?? meta?.averageRating ?? null;
+
+  const seriesName = detail?.series ?? meta?.series ?? null;
+  const seriesLabel = seriesName
+    ? detail?.seriesPosition
+      ? `${seriesName} #${detail.seriesPosition}`
+      : seriesName
+    : null;
 
   const subline = [
     book.author,
-    meta?.genre,
-    meta?.series ?? PLACEHOLDER_SERIES,
-    meta?.pageCount ? `${meta.pageCount} pages` : null,
+    genre,
+    seriesLabel,
+    pageCount ? `${pageCount} pages` : null,
   ]
     .filter(Boolean)
     .join(' · ');
 
-  // Real "tropes" from Hardcover moods/genres; fall back to placeholders.
-  const tropeSource = meta?.moods.length ? meta.moods : meta?.genres ?? [];
-  const tropes = tropeSource.length
-    ? tropeSource.slice(0, 5)
-    : PLACEHOLDER_TROPES;
+  // "Tropes" from Hardcover moods (evocative vibes), falling back to genres.
+  const moods = detail?.moods?.length ? detail.moods : meta?.moods ?? [];
+  const genres = detail?.genres?.length ? detail.genres : meta?.genres ?? [];
+  const tropes = (moods.length ? moods : genres).slice(0, 5);
+
+  const contentWarnings =
+    detail?.contentWarnings ?? meta?.contentWarnings ?? [];
+
+  const clubAverages = await getClubBookAverages(clubId, book.bookId);
+
+  const hardcoverUrl = meta?.slug
+    ? `https://hardcover.app/books/${meta.slug}`
+    : `https://hardcover.app/search?q=${encodeURIComponent(book.title)}`;
+  const amazonUrl = `https://www.amazon.com/s?k=${encodeURIComponent(
+    [book.title, book.author].filter(Boolean).join(' ')
+  )}`;
 
   return (
-    <div className='card-gradient card-shadow relative flex w-full gap-lg rounded-md border border-accent/40 bg-card/40 p-md'>
-      {isAdmin && (
-        <div className='absolute right-md top-md'>
-          <FinishBookButton clubId={clubId} />
-        </div>
-      )}
+    <Card
+      shadow
+      className='w-full shrink-0 flex-row gap-lg bg-card'
+    >
+      <div className='absolute right-md top-md z-10 flex items-center gap-1.5'>
+        <ReviewBookDialog
+          bookId={book.bookId}
+          title={book.title}
+        />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              asChild
+              size='icon-sm'
+              variant='outline'
+              color='secondary'
+            >
+              <a
+                href={hardcoverUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                aria-label='View on Hardcover'
+              >
+                <Hardcover className='size-4' />
+              </a>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>View on Hardcover</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              asChild
+              size='icon-sm'
+              variant='outline'
+              color='secondary'
+            >
+              <a
+                href={amazonUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                aria-label='Find on Amazon'
+              >
+                <ShoppingCart className='size-4' />
+              </a>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Find on Amazon</TooltipContent>
+        </Tooltip>
+        {isAdmin && <FinishBookButton clubId={clubId} />}
+      </div>
+
       {cover ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={cover}
           alt={book.title}
-          className='h-[300px] w-[200px] shrink-0 rounded-md object-cover shadow-sm'
+          className='h-[330px] w-[220px] shrink-0 self-center rounded-md object-cover shadow-sm'
         />
       ) : (
-        <div className='flex h-[300px] w-[200px] shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground'>
+        <div className='flex h-[330px] w-[220px] shrink-0 self-center items-center justify-center rounded-md bg-muted text-muted-foreground'>
           <BookOpen className='size-10' />
         </div>
       )}
@@ -161,18 +225,44 @@ export async function CurrentlyReading({
 
         <div className='flex flex-wrap items-end gap-8'>
           <StatBlock label='Spice'>
-            <SpiceMeter value={PLACEHOLDER_SPICE} />
+            {clubAverages.spice != null ? (
+              <div className='flex items-center gap-2'>
+                <SpiceMeter value={Math.round(clubAverages.spice)} />
+                <Typography
+                  variant='p2'
+                  classNames='text-muted-foreground'
+                >
+                  {clubAverages.spice.toFixed(1)}
+                </Typography>
+              </div>
+            ) : (
+              <Typography
+                variant='p2'
+                classNames='text-muted-foreground'
+              >
+                Not rated
+              </Typography>
+            )}
           </StatBlock>
           <StatBlock label='Club rating'>
-            <Rating
-              rate={PLACEHOLDER_CLUB_RATING}
-              showScore
-            />
+            {clubAverages.rating != null ? (
+              <Rating
+                rate={clubAverages.rating}
+                showScore
+              />
+            ) : (
+              <Typography
+                variant='p2'
+                classNames='text-muted-foreground'
+              >
+                Not rated
+              </Typography>
+            )}
           </StatBlock>
           <StatBlock label='Global rating'>
-            {meta?.averageRating ? (
+            {globalRating ? (
               <Rating
-                rate={meta.averageRating}
+                rate={globalRating}
                 showScore
               />
             ) : (
@@ -186,44 +276,36 @@ export async function CurrentlyReading({
           </StatBlock>
         </div>
 
-        <Divider classNames='my-md' />
+        {(tropes.length > 0 || contentWarnings.length > 0) && (
+          <>
+            <Divider classNames='my-md' />
+            <div className='flex flex-wrap gap-1.5'>
+              {tropes.map((trope) => (
+                <Chip
+                  key={trope}
+                  label={trope}
+                  size='small'
+                  variant='painted'
+                  colors='wine'
+                />
+              ))}
+            </div>
 
-        <div className='flex flex-wrap gap-1.5'>
-          {tropes.map((trope) => (
-            <Chip
-              key={trope}
-              label={trope}
-              size='small'
-              variant='painted'
-              colors='wine'
-            />
-          ))}
-        </div>
-
-        <div className='mt-auto flex items-center gap-3'>
-          <Button
-            asChild
-            size='sm'
-          >
-            <a
-              href={
-                meta?.slug
-                  ? `https://hardcover.app/books/${meta.slug}`
-                  : `https://hardcover.app/search?q=${encodeURIComponent(book.title)}`
-              }
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              <BookOpen className='size-4' /> Get a copy
-            </a>
-          </Button>
-          <ReviewBookDialog
-            bookId={book.bookId}
-            title={book.title}
-          />
-          <ContentWarnings warnings={meta?.contentWarnings ?? []} />
-        </div>
+            <div className='flex flex-wrap gap-1.5'>
+              {contentWarnings.map((warning) => (
+                <Chip
+                  key={warning}
+                  label={warning}
+                  size='small'
+                  variant='painted'
+                  colors='warning'
+                  className='capitalize'
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    </Card>
   );
 }

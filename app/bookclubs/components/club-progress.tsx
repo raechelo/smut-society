@@ -137,7 +137,7 @@ export async function ClubProgress({
   return (
     <Card
       shadow
-      className='w-full gap-4'
+      className='w-full shrink-0 gap-4'
     >
       <div className='flex items-center justify-between gap-md'>
         <Typography

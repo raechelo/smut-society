@@ -7,6 +7,7 @@ import { Discussion } from '../components/discussion';
 import { Challenge } from '../components/challenge';
 import { NextReadPanel } from '../components/next-read-panel';
 import { NextEvent } from '../components/next-event';
+import { ShareClubButton } from '../components/share-club-button';
 
 export default async function ClubPage({
   params,
@@ -23,6 +24,14 @@ export default async function ClubPage({
         { label: 'Bookclubs', link: '/bookclubs' },
         { label: club.name },
       ]}
+      cta={
+        club.isMember && club.inviteToken ? (
+          <ShareClubButton
+            token={club.inviteToken}
+            isPublic={club.isPublic}
+          />
+        ) : undefined
+      }
     >
       <div className='flex size-full flex-col gap-md overflow-y-auto pr-xs'>
         <NextEvent
@@ -42,7 +51,7 @@ export default async function ClubPage({
           isMember={club.isMember}
         />
 
-        <div className='grid grid-cols-1 gap-md lg:grid-cols-10'>
+        <div className='grid shrink-0 grid-cols-1 gap-md lg:grid-cols-10 lg:min-h-[33%] lg:[grid-auto-rows:1fr]'>
           <div className='lg:col-span-4'>
             <Discussion clubId={club.id} />
           </div>

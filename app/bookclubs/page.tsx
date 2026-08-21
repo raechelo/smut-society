@@ -4,17 +4,40 @@ import { PageLayout } from '@/components/app/page-layout';
 import { Button } from '@/components/ui/button';
 import Typography from '@/components/ui/typography';
 import { Chip } from '@/components/app/chip';
-import { getMyClubs } from '@/lib/actions/clubs';
+import { getMyClubs, getPublicClubs } from '@/lib/actions/clubs';
 import { MyClubCard } from './components/my-club-card';
 import { CreateClubDialog } from './components/create-club-dialog';
+import { ExploreClubsBrowser } from './components/explore-clubs-browser';
 
 export default async function BookclubsPage() {
-  const clubs = await getMyClubs();
+  const [clubs, publicClubs] = await Promise.all([
+    getMyClubs(),
+    getPublicClubs(),
+  ]);
 
   return (
-    <PageLayout>
-      <div className='flex h-full flex-col gap-md'>
-        <div className='min-h-0 overflow-y-auto pr-xs pt-1'>
+    <PageLayout
+      crumbs={[{ label: 'Bookclubs' }]}
+      cta={
+        <div className='flex items-center gap-xs'>
+          <Link href='/bookclubs/explore'>
+            <Button variant='outline'>
+              <Compass /> Explore
+            </Button>
+          </Link>
+          <CreateClubDialog />
+        </div>
+      }
+    >
+      {/* The page scrolls as a whole; each section flows at natural height. */}
+      <div className='flex h-full flex-col gap-xl overflow-y-auto pr-xs'>
+        <section className='flex flex-col gap-md'>
+          <Typography
+            variant='h4'
+            display
+          >
+            Your clubs
+          </Typography>
           {clubs.length > 0 ? (
             <div className='flex flex-col gap-md'>
               {clubs.map((club) => (
@@ -47,33 +70,28 @@ export default async function BookclubsPage() {
               ))}
             </div>
           ) : (
-            <div className='mt-xl flex flex-col items-center gap-sm text-center'>
-              <Typography
-                variant='p2'
-                color='muted'
-              >
-                You have not joined any book clubs yet.
-              </Typography>
-              <div className='flex gap-xs'>
-                <Link href='/bookclubs/explore'>
-                  <Button variant='outline'>
-                    <Compass /> Explore clubs
-                  </Button>
-                </Link>
-                <CreateClubDialog />
-              </div>
-            </div>
+            <Typography
+              variant='p2'
+              color='muted'
+            >
+              You have not joined any book clubs yet. Browse the clubs below, or
+              start your own.
+            </Typography>
           )}
-        </div>
+        </section>
 
-        <div className='flex items-center gap-xs w-full justify-center'>
-          <Link href='/bookclubs/explore'>
-            <Button variant='outline'>
-              <Compass /> Explore
-            </Button>
-          </Link>
-          <CreateClubDialog />
-        </div>
+        <section className='flex flex-col gap-md'>
+          <Typography
+            variant='h4'
+            display
+          >
+            Explore
+          </Typography>
+          <ExploreClubsBrowser
+            clubs={publicClubs}
+            fillHeight={false}
+          />
+        </section>
       </div>
     </PageLayout>
   );

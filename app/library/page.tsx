@@ -4,9 +4,10 @@ import { LibrariansPick } from './components/librarians-pick';
 import { LibraryClient } from './components/library-client';
 
 const Library = async () => {
-  // The hero highlight is drawn from trending too, so drop it from the Trending
-  // grid to avoid showing the same book twice.
-  const [pick, trending] = await Promise.all([librariansPick(), trendingBooks()]);
+  const [pick, trending] = await Promise.all([
+    librariansPick(),
+    trendingBooks(),
+  ]);
   const trendingRest = pick
     ? trending.filter((b) => b.slug !== pick.slug)
     : trending;

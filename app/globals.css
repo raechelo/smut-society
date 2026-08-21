@@ -108,7 +108,7 @@
   --border: #c9922a;
 
   /* CARD */
-  --card: oklch(1 0 0);
+  --card: #f8f2e9;
   --card-foreground: oklch(0.147 0.004 49.3);
   --card-border: #c9922a;
   --popover: oklch(1 0 0);

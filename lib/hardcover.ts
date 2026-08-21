@@ -32,12 +32,21 @@ export type HardcoverBook = {
   authors: string[];
   cover: string | null;
   genres: string[];
+  // Extra Hardcover tag categories (populated from the books table's
+  // cached_tags; empty on search-hit results). `tropes` is Hardcover's "Tag"
+  // category — reading-experience descriptors, the closest thing to tropes.
+  moods: string[];
+  tropes: string[];
+  contentWarnings: string[];
   pages: number | null;
   releaseYear: number | null;
   rating: number | null;
   ratingsCount: number | null;
   description: string | null;
   series: string | null;
+  // The book's position within its series (from the books table); null when
+  // standalone or unknown.
+  seriesPosition: number | null;
 };
 
 function authHeader(token: string) {
@@ -102,19 +111,28 @@ function toBook(d: any): HardcoverBook {
     authors: Array.isArray(d.author_names) ? d.author_names : [],
     cover: d.image?.url ?? null,
     genres: Array.isArray(d.genres) ? d.genres : [],
+    moods: Array.isArray(d.moods) ? d.moods : [],
+    tropes: Array.isArray(d.tags) ? d.tags : [],
+    contentWarnings: Array.isArray(d.content_warnings) ? d.content_warnings : [],
     pages: typeof d.pages === 'number' ? d.pages : null,
     releaseYear: typeof d.release_year === 'number' ? d.release_year : null,
     rating: typeof d.rating === 'number' ? d.rating : null,
     ratingsCount: typeof d.ratings_count === 'number' ? d.ratings_count : null,
     description: d.description ?? null,
     series: d.series_names?.[0] ?? null,
+    seriesPosition: null,
   };
 }
 
 // Maps a row from the `books` table (contributions/cached_tags shape) rather
 // than a search hit document.
 function toBookFromTable(b: any): HardcoverBook {
-  const genreTags: any[] = b.cached_tags?.Genre ?? [];
+  const ct = b.cached_tags ?? {};
+  const tagList = (category: string): string[] =>
+    Array.isArray(ct[category])
+      ? ct[category].map((t: any) => t.tag).filter(Boolean)
+      : [];
+  const seriesEntry = Array.isArray(b.book_series) ? b.book_series[0] : null;
   return {
     id: Number(b.id),
     slug: b.slug,
@@ -123,13 +141,18 @@ function toBookFromTable(b: any): HardcoverBook {
       .map((c: any) => c.author?.name)
       .filter(Boolean),
     cover: b.image?.url ?? null,
-    genres: genreTags.map((t) => t.tag),
+    genres: tagList('Genre'),
+    moods: tagList('Mood'),
+    tropes: tagList('Tag'),
+    contentWarnings: tagList('Content Warning'),
     pages: typeof b.pages === 'number' ? b.pages : null,
     releaseYear: typeof b.release_year === 'number' ? b.release_year : null,
     rating: typeof b.rating === 'number' ? b.rating : null,
     ratingsCount: typeof b.ratings_count === 'number' ? b.ratings_count : null,
     description: b.description ?? null,
-    series: null,
+    series: seriesEntry?.series?.name ?? null,
+    seriesPosition:
+      typeof seriesEntry?.position === 'number' ? seriesEntry.position : null,
   };
 }
 
@@ -266,6 +289,7 @@ const BOOK_TABLE_FIELDS = `
   image { url }
   cached_tags
   contributions { author { name } }
+  book_series { position series { name } }
 `;
 
 // Trending romance in Hardcover's trending order. `books_trending` is global
@@ -330,7 +354,8 @@ const cachedBookBySlug = unstable_cache(
     const b = data?.books?.[0];
     return b ? toBookFromTable(b) : null;
   },
-  ['hardcover-book-by-slug'],
+  // v2: cached shape gained moods/tropes/contentWarnings/series fields.
+  ['hardcover-book-by-slug-v2'],
   { revalidate: DAY }
 );
 

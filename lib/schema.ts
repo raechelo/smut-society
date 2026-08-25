@@ -605,3 +605,42 @@ export const pollVotes = pgTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.pollId] })]
 );
+
+// ─── Bingo cards ─────────────────────────────────────────────────────────────
+
+// A user's personal book-bingo card: 25 prediction squares they fill in and
+// "daub" (mark) as each prediction comes true while reading. `cells` is a
+// row-major array of 25 { text: string; marked: boolean } objects.
+export const bingoCards = pgTable('bingo_cards', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  title: text('title').notNull().default(''),
+  cells: jsonb('cells').notNull(),
+  // Once locked ("Done editing"), predictions and title are frozen — only the
+  // marked flags can change. One-way, so cards can't be edited after play.
+  locked: boolean('locked').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// A bingo card shared into a book club, so members can see each other's cards.
+// Unique on (cardId, clubId) so the same card can't be shared to a club twice.
+export const bingoCardShares = pgTable(
+  'bingo_card_shares',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    cardId: uuid('card_id')
+      .notNull()
+      .references(() => bingoCards.id, { onDelete: 'cascade' }),
+    clubId: uuid('club_id')
+      .notNull()
+      .references(() => clubs.id, { onDelete: 'cascade' }),
+    sharedBy: text('shared_by')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.cardId, t.clubId)]
+);

@@ -107,7 +107,7 @@ export const Sidebar = () => {
           </Link>
           <Link href='/challenges'>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={activePath.includes('challenges')}>
+              <SidebarMenuButton isActive={activePath.startsWith('/challenges')}>
                 <ChessQueen />
                 Challenges
               </SidebarMenuButton>

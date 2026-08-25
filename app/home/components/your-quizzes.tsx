@@ -29,7 +29,7 @@ export async function YourQuizzes() {
           {quizzes.map((quiz) => (
             <li key={quiz.id}>
               <Link
-                href={`/quizzes/${quiz.id}`}
+                href={`/challenges/quizzes/${quiz.id}`}
                 className='group/quiz flex flex-col gap-1 py-2'
               >
                 <Typography

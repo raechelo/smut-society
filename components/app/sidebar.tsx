@@ -11,7 +11,6 @@ import {
   MessageCircle,
   UsersRound,
 } from 'lucide-react';
-import { Quizzes as QuizzesIcon } from '@/components/icons/quizzes';
 import {
   Sidebar as RawSidebar,
   SidebarHeader,
@@ -111,14 +110,6 @@ export const Sidebar = () => {
               <SidebarMenuButton isActive={activePath.includes('challenges')}>
                 <ChessQueen />
                 Challenges
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </Link>
-          <Link href='/quizzes'>
-            <SidebarMenuItem>
-              <SidebarMenuButton isActive={activePath.includes('quizzes')}>
-                <QuizzesIcon />
-                Quizzes
               </SidebarMenuButton>
             </SidebarMenuItem>
           </Link>

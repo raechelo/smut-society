@@ -235,11 +235,11 @@ export function QuizForm({
       if (isEdit && quizId) {
         await updateQuiz(quizId, payload);
         toast.success('Quiz updated');
-        router.push(`/quizzes/${quizId}`);
+        router.push(`/challenges/quizzes/${quizId}`);
       } else {
         await createQuiz(payload);
         toast.success('Quiz created');
-        router.push('/quizzes');
+        router.push('/challenges/quizzes');
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Could not save the quiz';

@@ -20,10 +20,13 @@ const colorStyles: Record<ColorOption, string> = {
 
 export const Stamp = ({
   label,
+  topLabel,
   color,
   className,
 }: {
   label: string;
+  // Optional extra-small line printed above the main label (e.g. "Updated").
+  topLabel?: string;
   color: ColorOption;
   className?: string;
 }) => {
@@ -62,7 +65,16 @@ export const Stamp = ({
             colorStyles[color]
           )}
         >
-          {label}
+          {topLabel ? (
+            <span className='flex flex-col items-center leading-none'>
+              <span className='text-[0.5rem] font-bold tracking-[0.15em]'>
+                {topLabel}
+              </span>
+              <span>{label}</span>
+            </span>
+          ) : (
+            label
+          )}
         </div>
       </div>
     </>

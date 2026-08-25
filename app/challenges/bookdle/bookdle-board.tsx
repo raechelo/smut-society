@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Delete, CornerDownLeft } from 'lucide-react';
+import { Delete, CornerDownLeft, Lightbulb } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import Typography from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
 import {
   submitBookdleGuess,
+  getBookdleHint,
   type BookdleState,
   type BookdleReveal,
   type BookdleStatus,
@@ -61,6 +62,21 @@ export function BookdleBoard({ initial }: { initial: BookdleState }) {
   const [reveal, setReveal] = useState<BookdleReveal | null>(initial.reveal);
   const [current, setCurrent] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [hint, setHint] = useState<string | null>(null);
+  const [hintLoading, setHintLoading] = useState(false);
+
+  const revealHint = useCallback(async () => {
+    if (hint || hintLoading) return;
+    setHintLoading(true);
+    try {
+      const { hint: h } = await getBookdleHint();
+      setHint(h ?? "No hint available for today's word.");
+    } catch {
+      toast.error('Could not load a hint');
+    } finally {
+      setHintLoading(false);
+    }
+  }, [hint, hintLoading]);
 
   // Best-known status per letter, for keyboard coloring.
   const letterStatus = new Map<string, LetterStatus>();
@@ -173,6 +189,40 @@ export function BookdleBoard({ initial }: { initial: BookdleState }) {
           );
         })}
       </div>
+
+      {/* Hint */}
+      {status === 'playing' && signedIn && (
+        <div className='flex flex-col items-center gap-2'>
+          {hint ? (
+            <div className='max-w-[420px] rounded-md border border-border bg-foreground/5 px-4 py-3 text-center'>
+              <Typography
+                variant='span'
+                color='muted'
+                classNames='text-xs font-semibold uppercase tracking-widest'
+              >
+                Hint
+              </Typography>
+              <Typography
+                variant='p2'
+                classNames='mt-1 italic leading-snug'
+              >
+                &ldquo;{hint}&rdquo;
+              </Typography>
+            </div>
+          ) : (
+            <Button
+              variant='outline'
+              color='primary'
+              size='sm'
+              onClick={revealHint}
+              disabled={hintLoading}
+            >
+              <Lightbulb className='size-4' />
+              {hintLoading ? 'Loading…' : 'Need a hint?'}
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Result / reveal */}
       {status !== 'playing' && reveal && (

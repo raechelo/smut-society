@@ -99,6 +99,31 @@ async function ensureTodayGame(): Promise<{
   return { id: row.id, answer: generated.word, bookId: generated.bookId };
 }
 
+// Build a spoiler-safe "quote" hint: a sentence from the book's blurb with the
+// answer masked out. Prefers a sentence that mentions the answer (so the mask
+// gives real context), and falls back to the opening line otherwise.
+function buildHint(description: string, answer: string): string | null {
+  const text = description.replace(/\s+/g, ' ').trim();
+  if (!text) return null;
+  const sentences = text.match(/[^.!?]+[.!?]*/g)?.map((s) => s.trim()) ?? [text];
+  const whole = new RegExp(`\\b${answer}\\b`, 'i');
+  const chosen = sentences.find((s) => whole.test(s)) ?? sentences[0];
+  const mask = Array(answer.length).fill('_').join(' ');
+  return chosen.replace(new RegExp(`\\b${answer}\\b`, 'gi'), mask);
+}
+
+// Reveal a hint on demand (only when the user asks) so we don't fetch the book
+// blurb on every page load. Never leaks the answer — it's masked in the text.
+export async function getBookdleHint(): Promise<{ hint: string | null }> {
+  const game = await ensureTodayGame();
+  if (!game) return { hint: null };
+  const book = await bookBySlug(game.bookId);
+  const hint = book?.description
+    ? buildHint(book.description, game.answer)
+    : null;
+  return { hint };
+}
+
 // Rebuild the "which book was it" reveal from the stored slug.
 async function buildReveal(
   bookId: string,

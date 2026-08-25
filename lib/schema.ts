@@ -558,3 +558,50 @@ export const quizRatings = pgTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.quizId] })]
 );
+
+// ─── Polls ───────────────────────────────────────────────────────────────────
+
+// A community-authored, opinion-based poll: a single question (the `title`) with
+// as many answer options as the creator wants. Unlike quizzes there's no
+// "correct" answer or outcome — every vote is tallied and shown back as results.
+export const polls = pgTable('polls', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  // The question being asked; doubles as the poll's title.
+  title: text('title').notNull(),
+  description: text('description'),
+  tags: text('tags').array().notNull().default([]),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// A choosable answer for a poll. `position` preserves author ordering.
+export const pollOptions = pgTable('poll_options', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  pollId: uuid('poll_id')
+    .notNull()
+    .references(() => polls.id, { onDelete: 'cascade' }),
+  text: text('text').notNull(),
+  position: integer('position').notNull().default(0),
+});
+
+// One vote per user per poll. Upserted, so a member can change their pick; the
+// tally over `optionId` drives the result visuals.
+export const pollVotes = pgTable(
+  'poll_votes',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    pollId: uuid('poll_id')
+      .notNull()
+      .references(() => polls.id, { onDelete: 'cascade' }),
+    optionId: uuid('option_id')
+      .notNull()
+      .references(() => pollOptions.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.pollId] })]
+);

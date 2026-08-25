@@ -141,7 +141,7 @@ export async function createQuiz(
     db.insert(quizAnswers).values(graph.answerValues),
   ]);
 
-  revalidatePath('/quizzes');
+  revalidatePath('/challenges/quizzes');
   return { id: quizId };
 }
 
@@ -206,8 +206,8 @@ export async function updateQuiz(
       .map((url) => deleteAssetByUrl(url))
   );
 
-  revalidatePath(`/quizzes/${quizId}`);
-  revalidatePath('/quizzes');
+  revalidatePath(`/challenges/quizzes/${quizId}`);
+  revalidatePath('/challenges/quizzes');
   revalidatePath('/home');
   return { id: quizId };
 }
@@ -552,7 +552,7 @@ export async function rateQuiz(quizId: string, rating: number): Promise<void> {
       set: { rating: value, updatedAt: new Date() },
     });
 
-  revalidatePath(`/quizzes/${quizId}`);
+  revalidatePath(`/challenges/quizzes/${quizId}`);
 }
 
 // The signed-in user's own quizzes, newest first.
@@ -598,6 +598,6 @@ export async function deleteQuiz(quizId: string): Promise<void> {
       .map((url) => deleteAssetByUrl(url))
   );
 
-  revalidatePath('/quizzes');
+  revalidatePath('/challenges/quizzes');
   revalidatePath('/home');
 }

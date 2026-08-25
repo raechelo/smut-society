@@ -169,6 +169,13 @@
       "when": 1787337143134,
       "tag": "0023_amused_frightful_four",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1787617793953,
+      "tag": "0024_strong_marvel_zombies",
+      "breakpoints": true
     }
   ]
 }

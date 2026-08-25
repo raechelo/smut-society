@@ -56,7 +56,7 @@ export default async function ClubPage({
             <Discussion clubId={club.id} />
           </div>
           <div className='lg:col-span-3'>
-            <Challenge />
+            <Challenge clubId={club.id} />
           </div>
           <div className='lg:col-span-3'>
             <NextReadPanel

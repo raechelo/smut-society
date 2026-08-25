@@ -5,7 +5,8 @@ export default function CreateQuizPage() {
   return (
     <PageLayout
       crumbs={[
-        { label: 'Quizzes', link: '/quizzes' },
+        { label: 'Challenges', link: '/challenges' },
+        { label: 'Quizzes', link: '/challenges/quizzes' },
         { label: 'Create' },
       ]}
     >

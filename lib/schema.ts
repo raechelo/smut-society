@@ -558,3 +558,89 @@ export const quizRatings = pgTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.quizId] })]
 );
+
+// ─── Polls ───────────────────────────────────────────────────────────────────
+
+// A community-authored, opinion-based poll: a single question (the `title`) with
+// as many answer options as the creator wants. Unlike quizzes there's no
+// "correct" answer or outcome — every vote is tallied and shown back as results.
+export const polls = pgTable('polls', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  // The question being asked; doubles as the poll's title.
+  title: text('title').notNull(),
+  description: text('description'),
+  tags: text('tags').array().notNull().default([]),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// A choosable answer for a poll. `position` preserves author ordering.
+export const pollOptions = pgTable('poll_options', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  pollId: uuid('poll_id')
+    .notNull()
+    .references(() => polls.id, { onDelete: 'cascade' }),
+  text: text('text').notNull(),
+  position: integer('position').notNull().default(0),
+});
+
+// One vote per user per poll. Upserted, so a member can change their pick; the
+// tally over `optionId` drives the result visuals.
+export const pollVotes = pgTable(
+  'poll_votes',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    pollId: uuid('poll_id')
+      .notNull()
+      .references(() => polls.id, { onDelete: 'cascade' }),
+    optionId: uuid('option_id')
+      .notNull()
+      .references(() => pollOptions.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.pollId] })]
+);
+
+// ─── Bingo cards ─────────────────────────────────────────────────────────────
+
+// A user's personal book-bingo card: 25 prediction squares they fill in and
+// "daub" (mark) as each prediction comes true while reading. `cells` is a
+// row-major array of 25 { text: string; marked: boolean } objects.
+export const bingoCards = pgTable('bingo_cards', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  title: text('title').notNull().default(''),
+  cells: jsonb('cells').notNull(),
+  // Once locked ("Done editing"), predictions and title are frozen — only the
+  // marked flags can change. One-way, so cards can't be edited after play.
+  locked: boolean('locked').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// A bingo card shared into a book club, so members can see each other's cards.
+// Unique on (cardId, clubId) so the same card can't be shared to a club twice.
+export const bingoCardShares = pgTable(
+  'bingo_card_shares',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    cardId: uuid('card_id')
+      .notNull()
+      .references(() => bingoCards.id, { onDelete: 'cascade' }),
+    clubId: uuid('club_id')
+      .notNull()
+      .references(() => clubs.id, { onDelete: 'cascade' }),
+    sharedBy: text('shared_by')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [unique().on(t.cardId, t.clubId)]
+);

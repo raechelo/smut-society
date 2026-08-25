@@ -28,7 +28,8 @@ export default async function QuizPage({
   return (
     <PageLayout
       crumbs={[
-        { label: 'Quizzes', link: '/quizzes' },
+        { label: 'Challenges', link: '/challenges' },
+        { label: 'Quizzes', link: '/challenges/quizzes' },
         { label: quiz.title },
       ]}
       cta={
@@ -37,14 +38,14 @@ export default async function QuizPage({
             <DeleteQuizButton
               quizId={quiz.id}
               title={quiz.title}
-              redirectTo='/quizzes'
+              redirectTo='/challenges/quizzes'
               trigger={
                 <Button color='error'>
                   <Trash2 /> Delete
                 </Button>
               }
             />
-            <Link href={`/quizzes/edit/${quiz.id}`}>
+            <Link href={`/challenges/quizzes/edit/${quiz.id}`}>
               <Button>
                 <Pencil /> Edit
               </Button>

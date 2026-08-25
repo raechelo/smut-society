@@ -1,11 +1,20 @@
 import { PageLayout } from '@/components/app/page-layout';
-import { Hero } from './components/hero';
 import { LibraryCard } from '@/components/app/library-card';
-import { CaseUpper, Feather, Vote } from 'lucide-react';
+import { CaseUpper, LayoutGrid, Vote } from 'lucide-react';
 import Typography from '@/components/ui/typography';
-import { Pepper } from '@/components/icons/pepper';
+import { Quizzes as QuizzesIcon } from '@/components/icons/quizzes';
 
 const challenges = [
+  {
+    title: 'Bingo',
+    subtitle: 'Make Your Predictions',
+    cadence: 'Book' as const,
+    description:
+      'Build a bingo card of predictions for your next read and share it with the community.',
+    Icon: LayoutGrid,
+    color: 'rust' as const,
+    href: '/challenges/bingo',
+  },
   {
     title: 'Bookdle',
     subtitle: 'Daily Word Puzzle',
@@ -15,16 +24,6 @@ const challenges = [
     Icon: CaseUpper,
     color: 'sienna' as const,
     href: '/challenges/bookdle',
-  },
-  {
-    title: 'Quote',
-    subtitle: 'Look into the Past',
-    cadence: 'Book' as const,
-    description:
-      'What was your favorite quote from the book? Share it with the community!',
-    Icon: Feather,
-    color: 'sapphire' as const,
-    href: '/challenges/quote',
   },
   {
     title: 'Polls',
@@ -37,48 +36,41 @@ const challenges = [
     href: '/challenges/polls',
   },
   {
-    title: 'Spice',
-    subtitle: 'Too Hot to Handle',
-    cadence: 'Book' as const,
+    title: 'Quizzes',
+    subtitle: 'Which One Are You?',
+    cadence: 'Series' as const,
     description:
-      'How spicy was this read? And how spicy did you want it to be? Give us your thoughts and see what others think!',
-    Icon: Pepper,
-    color: 'accent' as const,
-    href: '/challenges/spice-factor',
+      'Take a community-made quiz to find out which character, trope, or troublemaker you are.',
+    Icon: QuizzesIcon,
+    color: 'sapphire' as const,
+    href: '/challenges/quizzes',
   },
 ];
 
 const Challenges = () => {
   return (
     <PageLayout>
-      <div className='flex flex-col h-full'>
-        <div className='flex h-[40%] flex-col gap-sm'>
-          <div className='min-h-0 flex-1'>
-            <Hero />
-          </div>
-        </div>
-        <div className='flex min-h-0 flex-1 flex-col gap-sm pt-md'>
-          <Typography
-            variant='h3'
-            classNames='font-serif uppercase mb-2 text-md'
-          >
-            Explore all challenges
-          </Typography>
+      <div className='flex h-full flex-col gap-sm'>
+        <Typography
+          variant='h3'
+          classNames='font-serif uppercase mb-2 text-md'
+        >
+          Explore all challenges
+        </Typography>
 
-          <div className='grid flex-1 grid-cols-2 grid-rows-2 gap-md'>
-            {challenges.map((challenge, i) => (
-              <LibraryCard
-                key={i}
-                variant='default'
-                cadence={challenge.cadence}
-                title={challenge.title}
-                subtitle={challenge.subtitle}
-                description={challenge.description}
-                Icon={challenge.Icon}
-                color={challenge.color}
-              />
-            ))}
-          </div>
+        <div className='grid grid-cols-2 gap-md'>
+          {challenges.map((challenge, i) => (
+            <LibraryCard
+              key={i}
+              variant='default'
+              cadence={challenge.cadence}
+              title={challenge.title}
+              subtitle={challenge.subtitle}
+              description={challenge.description}
+              Icon={challenge.Icon}
+              color={challenge.color}
+            />
+          ))}
         </div>
       </div>
     </PageLayout>

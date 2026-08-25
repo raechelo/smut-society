@@ -12,7 +12,7 @@ export default async function QuizzesPage() {
     <PageLayout
       crumbs={[{ label: 'Quizzes' }]}
       cta={
-        <Link href='/quizzes/create'>
+        <Link href='/challenges/quizzes/create'>
           <Button>
             <Plus /> Create quiz
           </Button>

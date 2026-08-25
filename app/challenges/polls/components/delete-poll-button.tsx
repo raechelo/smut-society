@@ -6,18 +6,18 @@ import { Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog } from '@/components/app/dialog';
 import { Button } from '@/components/ui/button';
-import { deleteQuiz } from '@/lib/actions/quizzes';
+import { deletePoll } from '@/lib/actions/polls';
 
-export function DeleteQuizButton({
-  quizId,
+export function DeletePollButton({
+  pollId,
   title,
   redirectTo,
   trigger,
 }: {
-  quizId: string;
+  pollId: string;
   title: string;
   // Where to go after deleting. Defaults to refreshing the current page (right
-  // for a list); the quiz detail page passes '/challenges/quizzes'.
+  // for a list); the detail page passes '/challenges/polls'.
   redirectTo?: string;
   // Override the default icon-only trigger (e.g. a labeled button).
   trigger?: ReactNode;
@@ -29,14 +29,14 @@ export function DeleteQuizButton({
   const handleDelete = () => {
     startTransition(async () => {
       try {
-        await deleteQuiz(quizId);
-        toast.success('Quiz deleted');
+        await deletePoll(pollId);
+        toast.success('Poll deleted');
         setOpen(false);
         if (redirectTo) router.push(redirectTo);
         else router.refresh();
       } catch (err) {
         toast.error(
-          err instanceof Error ? err.message : 'Could not delete the quiz'
+          err instanceof Error ? err.message : 'Could not delete the poll'
         );
       }
     });
@@ -60,8 +60,8 @@ export function DeleteQuizButton({
           </Button>
         )
       }
-      title='Delete quiz?'
-      description={`This permanently deletes “${title}” along with its questions and outcomes. This cannot be undone.`}
+      title='Delete poll?'
+      description={`This permanently deletes “${title}” along with its questions and votes. This cannot be undone.`}
       footer={
         <div className='flex justify-end gap-2'>
           <Button

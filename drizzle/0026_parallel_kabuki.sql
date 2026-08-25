@@ -1,0 +1,1 @@
+ALTER TABLE "bingo_cards" ADD COLUMN "locked" boolean DEFAULT false NOT NULL;

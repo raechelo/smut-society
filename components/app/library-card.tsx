@@ -40,9 +40,8 @@ const COLOR_ICON: Record<LibraryCardProps['color'], string> = {
 const links = {
   Bingo: '/challenges/bingo',
   Bookdle: '/challenges/bookdle',
-  Quote: '/challenges/quote',
   Polls: '/challenges/polls',
-  Spice: '/challenges/spice',
+  Quizzes: '/challenges/quizzes',
 };
 
 export const LibraryCard = ({
@@ -116,11 +115,14 @@ export const LibraryCard = ({
             </>
           )}
         </div>
-        <Stamp
-          color={color}
-          label={cadence}
-          className='top-4 right-4 z-10 absolute'
-        />
+        {cadence === 'Daily' && (
+          <Stamp
+            color={color}
+            topLabel='Updated'
+            label={cadence}
+            className='top-4 right-4 z-10 absolute'
+          />
+        )}
       </CardContent>
       <CardFooter className='justify-end'>
         <Link href={links[title as keyof typeof links]}>

@@ -38,8 +38,9 @@ export default async function EditQuizPage({
   return (
     <PageLayout
       crumbs={[
-        { label: 'Quizzes', link: '/quizzes' },
-        { label: quiz.title, link: `/quizzes/${quiz.id}` },
+        { label: 'Challenges', link: '/challenges' },
+        { label: 'Quizzes', link: '/challenges/quizzes' },
+        { label: quiz.title, link: `/challenges/quizzes/${quiz.id}` },
         { label: 'Edit' },
       ]}
     >

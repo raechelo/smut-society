@@ -80,7 +80,7 @@ export function QuizBrowser({ quizzes }: { quizzes: QuizListItem[] }) {
             {filtered.map((quiz) => (
               <Link
                 key={quiz.id}
-                href={`/quizzes/${quiz.id}`}
+                href={`/challenges/quizzes/${quiz.id}`}
                 className='transition-transform hover:-translate-y-0.5'
               >
                 <Card
